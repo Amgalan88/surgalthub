@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Course, Enrollment, Profile, QuizQuestion } from "@/lib/types";
+import type { Course, Enrollment, Profile } from "@/lib/types";
 
 export interface AdminStats {
   totalUsers: number;
@@ -8,7 +8,6 @@ export interface AdminStats {
   totalEnrollments: number;
   completedEnrollments: number;
   completionRate: number;
-  quizPassRate: number;
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -20,7 +19,6 @@ export async function getAdminStats(): Promise<AdminStats> {
     { count: publishedCourses },
     { count: totalEnrollments },
     { count: completedEnrollments },
-    { data: attempts },
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("courses").select("*", { count: "exact", head: true }),
@@ -33,14 +31,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       .from("enrollments")
       .select("*", { count: "exact", head: true })
       .not("completed_at", "is", null),
-    supabase.from("quiz_attempts").select("passed"),
   ]);
-
-  const passCount = (attempts ?? []).filter((a) => a.passed).length;
-  const quizPassRate =
-    (attempts ?? []).length > 0
-      ? Math.round((passCount / (attempts ?? []).length) * 100)
-      : 0;
 
   return {
     totalUsers: totalUsers ?? 0,
@@ -52,7 +43,6 @@ export async function getAdminStats(): Promise<AdminStats> {
       (totalEnrollments ?? 0) > 0
         ? Math.round(((completedEnrollments ?? 0) / (totalEnrollments ?? 1)) * 100)
         : 0,
-    quizPassRate,
   };
 }
 
@@ -97,16 +87,6 @@ export async function getCourseByIdAdmin(id: string): Promise<Course | null> {
   const supabase = await createClient();
   const { data } = await supabase.from("courses").select("*").eq("id", id).single();
   return data;
-}
-
-export async function getQuizQuestionsAdmin(courseId: string): Promise<QuizQuestion[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("quiz_questions")
-    .select("*")
-    .eq("course_id", courseId)
-    .order("order_index", { ascending: true });
-  return data ?? [];
 }
 
 export interface CourseEnrollmentRow {

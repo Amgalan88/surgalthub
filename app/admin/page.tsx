@@ -52,15 +52,6 @@ export default async function AdminDashboardPage() {
           </Card>
         ))}
       </div>
-
-      <Card className="mt-8">
-        <CardBody>
-          <h2 className="font-semibold text-navy-900">Шалгалтын мэдээлэл</h2>
-          <p className="mt-2 text-sm text-slate-500">
-            Хэрэглэгчид шалгалт өгсний {stats.quizPassRate}%-д нь тэнцсэн байна.
-          </p>
-        </CardBody>
-      </Card>
     </div>
   );
 }

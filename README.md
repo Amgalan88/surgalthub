@@ -3,10 +3,9 @@
 Карго бизнес нээх, ажиллуулах, вэбсайт ашиглах чиглэлээр сургалт явуулах
 платформ. Next.js (App Router) + Supabase (Postgres/Auth) дээр суурилсан.
 
-- **Хэрэглэгчийн тал**: сургалтын каталог, бүртгэл, хичээл үзэх, явцын хяналт,
-  төгсөлтийн шалгалт, PDF гэрчилгээ.
-- **Админ тал** (`/admin`): курс/хичээл/шалгалтын асуулт удирдах, хэрэглэгчийн
-  эрх солих, ерөнхий статистик.
+- **Хэрэглэгчийн тал**: сургалтын каталог, бүртгэл, хичээл үзэх, явцын хяналт.
+- **Админ тал** (`/admin`): курс/хичээл удирдах, төлбөр баталгаажуулах,
+  хэрэглэгчийн эрх солих, ерөнхий статистик.
 
 ## Суурилуулах
 
@@ -28,8 +27,10 @@
 
 4. Supabase SQL Editor дээр дараах файлуудыг дараалалаар нь ажиллуул:
    - `supabase/migrations/0001_init.sql` — хүснэгт, RLS, бүртгэлийн trigger
-   - `supabase/migrations/0002_seed.sql` — жишээ 3 курс, хичээл, шалгалт (заавал биш)
+   - `supabase/migrations/0002_seed.sql` — жишээ 3 курс, хичээл (заавал биш)
    - `supabase/migrations/0003_lesson_media.sql` — хичээлийн медиа талбарууд
+   - `supabase/migrations/0004_paywall.sql` — төлбөрт курс, үнэгүй үзэх хичээл
+   - `supabase/migrations/0005_drop_quiz_certificates.sql` — шалгалт/гэрчилгээний хүснэгтүүдийг устгах
 
 5. [cloudinary.com](https://cloudinary.com) дээр үнэгүй акаунт үүсгэ (админ
    панелаас зураг/видео/аудио/PDF байршуулахад хэрэгтэй). Dashboard-ын нүүр
@@ -76,7 +77,6 @@ select id, email from auth.users;
 - **Next.js 16** (App Router, Server Actions, `proxy.ts` route protection)
 - **Supabase**: Postgres + Auth + Row Level Security
 - **Tailwind CSS v4** — брэндийн өнгө (`app/globals.css`)
-- **pdf-lib** — гэрчилгээний PDF үүсгэлт (`app/api/certificates/[id]/route.ts`)
 - **react-markdown** — хичээлийн агуулга
 - **Cloudinary** — хичээлийн зураг/видео/аудио/слайд байршуулалт (клиент →
   Cloudinary шууд, signed upload; `lib/actions/admin/cloudinary.ts`)
@@ -86,7 +86,6 @@ select id, email from auth.users;
 ```
 app/(site)/        Нийтийн болон хэрэглэгчийн хуудсууд (landing, courses, dashboard)
 app/admin/          Админ панел (role-guarded)
-app/api/             Route handlers (гэрчилгээ PDF)
 components/          UI, layout, course, auth, admin компонентууд
 lib/actions/         Server actions (мутаци)
 lib/data/            Уншилтын query функцууд

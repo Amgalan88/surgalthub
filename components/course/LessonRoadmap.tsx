@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, Lock, Award, Crown } from "lucide-react";
+import { Check, Lock, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccessLesson } from "@/lib/access";
 import type { Course, Enrollment, Lesson, Profile } from "@/lib/types";
@@ -29,9 +29,6 @@ export function LessonRoadmap({
   enrollment,
   profile,
   currentLessonId,
-  hasQuiz,
-  allLessonsDone,
-  quizPassed,
 }: {
   courseSlug: string;
   lessons: Lesson[];
@@ -40,9 +37,6 @@ export function LessonRoadmap({
   enrollment: Enrollment | null;
   profile: Profile | null;
   currentLessonId?: string;
-  hasQuiz: boolean;
-  allLessonsDone: boolean;
-  quizPassed: boolean;
 }) {
   const enrolled = !!enrollment;
 
@@ -57,12 +51,6 @@ export function LessonRoadmap({
     else state = "available";
     return { lesson, i, done, state, canOpen: enrolled && accessible };
   });
-
-  const quizState: NodeState = quizPassed
-    ? "done"
-    : enrolled && allLessonsDone
-      ? "current"
-      : "locked";
 
   return (
     <ol className="mt-4">
@@ -124,57 +112,6 @@ export function LessonRoadmap({
           </li>
         );
       })}
-
-      {hasQuiz && (
-        <li className="relative">
-          <div className="group relative flex items-start gap-4">
-            <span
-              className={cn(
-                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-8",
-                nodeCircleClasses(quizState)
-              )}
-            >
-              {quizState === "done" ? (
-                <Award size={16} />
-              ) : quizState === "locked" ? (
-                <Lock size={13} />
-              ) : (
-                <Award size={16} />
-              )}
-            </span>
-            <div className="min-w-0 flex-1 pt-1">
-              <p
-                className={cn(
-                  "text-sm font-medium",
-                  quizState === "locked" ? "text-slate-400" : "text-navy-900",
-                  quizState === "current" && "text-brand-700"
-                )}
-              >
-                Төгсөлтийн шалгалт
-              </p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {quizState === "done"
-                  ? "Гэрчилгээ авсан"
-                  : quizState === "current"
-                    ? "Одоо өгөх боломжтой"
-                    : "Бүх хичээлийг дуусгасны дараа нээгдэнэ"}
-              </p>
-            </div>
-            {(quizState === "current" || quizState === "done") && (
-              <Link
-                href={
-                  quizState === "done"
-                    ? `/dashboard/certificates`
-                    : `/courses/${courseSlug}/quiz`
-                }
-                className="shrink-0 self-center text-sm font-medium text-brand-600"
-              >
-                {quizState === "done" ? "Гэрчилгээ" : "Эхлэх"}
-              </Link>
-            )}
-          </div>
-        </li>
-      )}
     </ol>
   );
 }

@@ -1,16 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Crown } from "lucide-react";
+import { Crown, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LessonRoadmap } from "@/components/course/LessonRoadmap";
 import { getCourseBySlug, getLessonsForCourse } from "@/lib/data/courses";
-import {
-  getCertificate,
-  getCompletedLessonIds,
-  getEnrollment,
-} from "@/lib/data/progress";
+import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
 import { enrollInCourse } from "@/lib/actions/learning";
 import { canAccessLesson, formatMNT } from "@/lib/access";
@@ -38,13 +34,10 @@ export default async function CourseDetailPage({
         lessons.map((l) => l.id)
       )
     : new Set<string>();
-  const certificate =
-    profile && enrollment ? await getCertificate(profile.id, course.id) : null;
 
   const total = lessons.length;
   const completedCount = lessons.filter((l) => completedIds.has(l.id)).length;
   const progressPct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
-  const allLessonsDone = total > 0 && completedCount === total;
   const firstUnfinished = lessons.find((l) => !completedIds.has(l.id)) ?? lessons[0];
   const firstAccessibleUnfinished = lessons.find(
     (l) => !completedIds.has(l.id) && canAccessLesson(l, course, enrollment, profile)
@@ -56,12 +49,13 @@ export default async function CourseDetailPage({
 
   return (
     <div>
-      <section className="bg-navy-900">
-        <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
+      <section className="relative overflow-hidden bg-navy-950">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.18),transparent_55%)]" />
+        <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6">
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="brand">{TRACK_LABELS[course.track]}</Badge>
             {isPaid && (
-              <Badge tone="slate">
+              <Badge tone="slate" className="bg-white/10 text-brand-200 ring-white/20">
                 <Crown size={12} /> {formatMNT(course.price)}
               </Badge>
             )}
@@ -69,7 +63,7 @@ export default async function CourseDetailPage({
           <h1 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
             {course.title}
           </h1>
-          <p className="mt-3 max-w-2xl text-slate-300">{course.description}</p>
+          <p className="mt-3 max-w-2xl leading-relaxed text-slate-300">{course.description}</p>
           <p className="mt-4 text-sm text-slate-400">{total} хичээл</p>
         </div>
       </section>
@@ -91,15 +85,12 @@ export default async function CourseDetailPage({
                 enrollment={enrollment}
                 profile={profile}
                 currentLessonId={firstUnfinished?.id}
-                hasQuiz={total > 0}
-                allLessonsDone={allLessonsDone}
-                quizPassed={!!certificate}
               />
             )}
           </div>
 
           <aside className="lg:col-span-1">
-            <div className="sticky top-24 rounded-xl border border-slate-200 p-6">
+            <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               {!profile ? (
                 <>
                   <p className="text-sm text-slate-500">
@@ -140,20 +131,18 @@ export default async function CourseDetailPage({
                   </div>
                   <ProgressBar value={progressPct} className="mt-2" />
 
-                  {certificate ? (
-                    <Link
-                      href={`/api/certificates/${certificate.id}`}
-                      className="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
-                    >
-                      Гэрчилгээ татах
-                    </Link>
-                  ) : firstAccessibleUnfinished ? (
+                  {firstAccessibleUnfinished ? (
                     <Link
                       href={`/courses/${course.slug}/learn/${firstAccessibleUnfinished.id}`}
                       className="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
                     >
                       {completedCount === 0 ? "Эхлэх" : "Үргэлжлүүлэх"}
                     </Link>
+                  ) : total > 0 && completedCount === total ? (
+                    <div className="mt-5 flex items-center gap-2.5 rounded-xl bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                      <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+                      Та энэ сургалтыг амжилттай дуусгалаа!
+                    </div>
                   ) : firstUnfinished && !hasFullAccess ? (
                     <div className="mt-5 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">
                       <p className="flex items-center gap-1.5 font-semibold">

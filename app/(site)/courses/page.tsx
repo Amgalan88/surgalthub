@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CourseCard } from "@/components/course/CourseCard";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { getPublishedCourses } from "@/lib/data/courses";
 import { TRACK_LABELS, type CourseTrack } from "@/lib/types";
 
@@ -29,40 +30,46 @@ export default async function CoursesPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-      <div className="max-w-2xl">
+      <Reveal className="max-w-2xl">
         <h1 className="text-3xl font-bold text-navy-900">Сургалтууд</h1>
         <p className="mt-2 text-slate-500">
           Карго бизнесийн чиглэлээр бэлтгэсэн бүх курсын жагсаалт.
         </p>
-      </div>
+      </Reveal>
 
-      <div className="mt-8 flex flex-wrap gap-2">
+      <Reveal delay={0.1} className="mt-8 flex flex-wrap gap-2">
         {filters.map((f) => (
           <Link
             key={f.key}
             href={f.key === "all" ? "/courses" : `/courses?track=${f.key}`}
             className={cn(
-              "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+              "rounded-full px-4 py-2 text-sm font-medium transition-all duration-150",
               activeTrack === f.key
-                ? "bg-navy-900 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-navy-900 text-white shadow-sm"
+                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300"
             )}
           >
             {f.label}
           </Link>
         ))}
-      </div>
+      </Reveal>
 
       {courses.length === 0 ? (
-        <div className="mt-16 rounded-xl border border-dashed border-slate-300 py-16 text-center text-slate-400">
+        <div className="mt-16 rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center text-slate-400">
           Одоогоор энэ чиглэлд нийтлэгдсэн сургалт алга байна.
         </div>
       ) : (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger
+          key={activeTrack}
+          className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          staggerGap={0.08}
+        >
           {courses.map((course) => (
-            <CourseCard key={course.id} course={course} />
+            <StaggerItem key={course.id}>
+              <CourseCard course={course} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
     </div>
   );

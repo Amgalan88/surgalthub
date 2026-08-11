@@ -16,26 +16,31 @@ export default async function LoginPage({
   const { next } = await searchParams;
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-md flex-col justify-center px-4 py-16">
-      <h1 className="text-center text-2xl font-bold text-navy-900">
-        Нэвтрэх
-      </h1>
-      <p className="mt-2 text-center text-sm text-slate-500">
-        Хяналтын самбартаа нэвтэрч, сургалтаа үргэлжлүүлээрэй.
-      </p>
+    <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden px-4 py-16">
+      {/* Decorative background */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_55%)]" />
 
-      <Card className="mt-8">
-        <CardBody>
-          <AuthForm mode="login" action={signIn} next={next ?? "/dashboard"} />
-        </CardBody>
-      </Card>
+      <div className="relative w-full max-w-md fade-up">
+        <h1 className="text-center text-2xl font-bold text-navy-900">
+          Тавтай морил
+        </h1>
+        <p className="mt-2 text-center text-sm text-slate-500">
+          Хяналтын самбартаа нэвтэрч, сургалтаа үргэлжлүүлээрэй.
+        </p>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
-        Бүртгэлгүй юу?{" "}
-        <Link href="/register" className="font-medium text-brand-600">
-          Бүртгүүлэх
-        </Link>
-      </p>
+        <Card className="mt-8 shadow-md">
+          <CardBody className="p-6 sm:p-7">
+            <AuthForm mode="login" action={signIn} next={next ?? "/dashboard"} />
+          </CardBody>
+        </Card>
+
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Бүртгэлгүй юу?{" "}
+          <Link href="/register" className="font-medium text-brand-600 hover:text-brand-700">
+            Бүртгүүлэх
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 
 const tabs = [
   { href: "/dashboard", label: "Курсууд" },
-  { href: "/dashboard/certificates", label: "Гэрчилгээ" },
   { href: "/dashboard/profile", label: "Профайл" },
 ];
 

@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { Logo } from "./Logo";
+import { LogoWordmark } from "./Logo";
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t border-white/10 bg-navy-900 text-slate-300">
+    <footer className="mt-auto border-t border-white/10 bg-navy-950 text-slate-300">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex flex-col gap-8 md:flex-row md:justify-between">
           <div>
-            <Logo size="sm" />
+            <LogoWordmark size="sm" />
             <p className="mt-3 max-w-xs text-sm text-slate-400">
               Карго бизнес нээх, ажиллуулах, вэбсайт ашиглах чиглэлээр
               практик мэдлэг олгох онлайн сургалтын платформ.

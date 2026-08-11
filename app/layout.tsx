@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Cargo Hub — Карго бизнесийн сургалтын платформ",
   description:
-    "Карго нээх, ажиллуулах, вэбсайт ашиглах чиглэлээр практик онлайн сургалт. Курс дуусгаад гэрчилгээ аваарай.",
+    "Карго нээх, ажиллуулах, вэбсайт ашиглах чиглэлээр практик онлайн сургалт. Өөрийн хэмнэлээр, хаанаас ч суралцаарай.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

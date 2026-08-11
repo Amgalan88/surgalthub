@@ -1,10 +1,6 @@
 export type UserRole = "user" | "admin";
 export type CourseTrack = "opening" | "operating" | "platform";
 
-export interface QuizOption {
-  text: string;
-}
-
 type Table<Row, Insert, Update> = {
   Row: Row;
   Insert: Insert;
@@ -163,81 +159,6 @@ export interface Database {
           completed_at?: string;
         }
       >;
-      quiz_questions: Table<
-        {
-          id: string;
-          course_id: string;
-          question: string;
-          options: QuizOption[];
-          correct_index: number;
-          order_index: number;
-        },
-        {
-          id?: string;
-          course_id: string;
-          question: string;
-          options: QuizOption[];
-          correct_index: number;
-          order_index?: number;
-        },
-        {
-          id?: string;
-          course_id?: string;
-          question?: string;
-          options?: QuizOption[];
-          correct_index?: number;
-          order_index?: number;
-        }
-      >;
-      quiz_attempts: Table<
-        {
-          id: string;
-          user_id: string;
-          course_id: string;
-          score: number;
-          passed: boolean;
-          attempted_at: string;
-        },
-        {
-          id?: string;
-          user_id: string;
-          course_id: string;
-          score: number;
-          passed: boolean;
-          attempted_at?: string;
-        },
-        {
-          id?: string;
-          user_id?: string;
-          course_id?: string;
-          score?: number;
-          passed?: boolean;
-          attempted_at?: string;
-        }
-      >;
-      certificates: Table<
-        {
-          id: string;
-          user_id: string;
-          course_id: string;
-          certificate_no: string;
-          issued_at: string;
-        },
-        {
-          id?: string;
-          user_id: string;
-          course_id: string;
-          certificate_no: string;
-          issued_at?: string;
-        },
-        {
-          id?: string;
-          user_id?: string;
-          course_id?: string;
-          certificate_no?: string;
-          issued_at?: string;
-        }
-      >;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -250,11 +171,6 @@ export type Lesson = Database["public"]["Tables"]["lessons"]["Row"];
 export type Enrollment = Database["public"]["Tables"]["enrollments"]["Row"];
 export type LessonProgress =
   Database["public"]["Tables"]["lesson_progress"]["Row"];
-export type QuizQuestion =
-  Database["public"]["Tables"]["quiz_questions"]["Row"];
-export type QuizAttempt =
-  Database["public"]["Tables"]["quiz_attempts"]["Row"];
-export type Certificate = Database["public"]["Tables"]["certificates"]["Row"];
 
 export const TRACK_LABELS: Record<CourseTrack, string> = {
   opening: "Карго нээх",

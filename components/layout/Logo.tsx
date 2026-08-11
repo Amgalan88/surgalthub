@@ -27,3 +27,32 @@ export function Logo({
     />
   );
 }
+
+/** Header/footer зэрэг navy дэвсгэр дээр: лого + бичвэр */
+export function LogoWordmark({
+  size = "sm",
+  className,
+}: {
+  size?: "sm" | "md";
+  className?: string;
+}) {
+  const heightPx = size === "md" ? 34 : 26;
+  const widthPx = Math.round(heightPx * ASPECT);
+
+  return (
+    <span className={cn("flex items-center gap-2.5", className)}>
+      <Image
+        src="/logo-mark.jpg"
+        alt="Cargo Hub"
+        width={widthPx}
+        height={heightPx}
+        priority
+        className="h-auto rounded-md object-contain ring-1 ring-white/20"
+        style={{ height: heightPx, width: "auto" }}
+      />
+      <span className="text-base font-bold tracking-tight text-white">
+        Cargo Hub
+      </span>
+    </span>
+  );
+}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Award, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -38,7 +38,7 @@ export default async function DashboardPage() {
         </Card>
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map(({ course, totalLessons, completedLessons, certificate }) => {
+          {courses.map(({ course, totalLessons, completedLessons }) => {
             const pct =
               totalLessons > 0
                 ? Math.round((completedLessons / totalLessons) * 100)
@@ -58,22 +58,13 @@ export default async function DashboardPage() {
                   </div>
                   <ProgressBar value={pct} className="mt-1.5" />
 
-                  <div className="mt-4 flex items-center gap-2">
+                  <div className="mt-4">
                     <Link
                       href={`/courses/${course.slug}`}
-                      className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-brand-700"
+                      className="block flex-1 rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-brand-700"
                     >
                       {pct === 100 ? "Дахин үзэх" : "Үргэлжлүүлэх"}
                     </Link>
-                    {certificate && (
-                      <Link
-                        href={`/api/certificates/${certificate.id}`}
-                        className="flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-emerald-700"
-                        title="Гэрчилгээ татах"
-                      >
-                        <Award size={18} />
-                      </Link>
-                    )}
                   </div>
                 </CardBody>
               </Card>
