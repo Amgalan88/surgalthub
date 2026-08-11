@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, FileText } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, FileText, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { getCourseBySlug, getLessonsForCourse } from "@/lib/data/courses";
@@ -9,6 +9,7 @@ import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
 import { markLessonComplete } from "@/lib/actions/learning";
 import { isYoutubeUrl, toYoutubeEmbedUrl } from "@/lib/video";
+import { canAccessLesson } from "@/lib/access";
 
 export default async function LessonPage({
   params,
@@ -32,6 +33,10 @@ export default async function LessonPage({
   if (index === -1) notFound();
 
   const lesson = lessons[index];
+  if (!canAccessLesson(lesson, course, enrollment, profile)) {
+    redirect(`/courses/${slug}`);
+  }
+
   const prevLesson = lessons[index - 1];
   const nextLesson = lessons[index + 1];
   const completedIds = await getCompletedLessonIds(
@@ -56,28 +61,41 @@ export default async function LessonPage({
               ← {course.title}
             </Link>
             <ol className="mt-4 space-y-1">
-              {lessons.map((l, i) => (
-                <li key={l.id}>
-                  <Link
-                    href={`/courses/${slug}/learn/${l.id}`}
+              {lessons.map((l, i) => {
+                const accessible = canAccessLesson(l, course, enrollment, profile);
+                const content = (
+                  <div
                     className={cn(
                       "flex items-center gap-2 rounded-lg px-3 py-2 text-sm",
                       l.id === lesson.id
                         ? "bg-brand-50 font-medium text-brand-700"
-                        : "text-slate-600 hover:bg-slate-50"
+                        : accessible
+                          ? "text-slate-600 hover:bg-slate-50"
+                          : "text-slate-400"
                     )}
                   >
                     {completedIds.has(l.id) ? (
                       <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+                    ) : !accessible ? (
+                      <Lock size={16} className="shrink-0 text-slate-300" />
                     ) : (
                       <PlayCircle size={16} className="shrink-0 text-slate-300" />
                     )}
                     <span className="line-clamp-1">
                       {i + 1}. {l.title}
                     </span>
-                  </Link>
-                </li>
-              ))}
+                  </div>
+                );
+                return (
+                  <li key={l.id}>
+                    {accessible ? (
+                      <Link href={`/courses/${slug}/learn/${l.id}`}>{content}</Link>
+                    ) : (
+                      content
+                    )}
+                  </li>
+                );
+              })}
             </ol>
           </div>
         </aside>

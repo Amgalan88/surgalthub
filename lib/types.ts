@@ -47,6 +47,7 @@ export interface Database {
           track: CourseTrack;
           cover_image: string | null;
           published: boolean;
+          price: number;
           created_by: string | null;
           created_at: string;
         },
@@ -58,6 +59,7 @@ export interface Database {
           track: CourseTrack;
           cover_image?: string | null;
           published?: boolean;
+          price?: number;
           created_by?: string | null;
           created_at?: string;
         },
@@ -69,6 +71,7 @@ export interface Database {
           track?: CourseTrack;
           cover_image?: string | null;
           published?: boolean;
+          price?: number;
           created_by?: string | null;
           created_at?: string;
         }
@@ -83,6 +86,7 @@ export interface Database {
           cover_image_url: string | null;
           audio_url: string | null;
           slides_url: string | null;
+          is_free_preview: boolean;
           order_index: number;
           created_at: string;
         },
@@ -95,6 +99,7 @@ export interface Database {
           cover_image_url?: string | null;
           audio_url?: string | null;
           slides_url?: string | null;
+          is_free_preview?: boolean;
           order_index?: number;
           created_at?: string;
         },
@@ -107,6 +112,7 @@ export interface Database {
           cover_image_url?: string | null;
           audio_url?: string | null;
           slides_url?: string | null;
+          is_free_preview?: boolean;
           order_index?: number;
           created_at?: string;
         }
@@ -118,6 +124,7 @@ export interface Database {
           course_id: string;
           enrolled_at: string;
           completed_at: string | null;
+          has_paid: boolean;
         },
         {
           id?: string;
@@ -125,6 +132,7 @@ export interface Database {
           course_id: string;
           enrolled_at?: string;
           completed_at?: string | null;
+          has_paid?: boolean;
         },
         {
           id?: string;
@@ -132,6 +140,7 @@ export interface Database {
           course_id?: string;
           enrolled_at?: string;
           completed_at?: string | null;
+          has_paid?: boolean;
         }
       >;
       lesson_progress: Table<

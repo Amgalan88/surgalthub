@@ -46,6 +46,22 @@ export function LessonForm({
         />
       </div>
 
+      <label className="flex items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          name="is_free_preview"
+          defaultChecked={lesson?.is_free_preview ?? nextOrderIndex === 0}
+          className="mt-0.5 h-4 w-4 accent-brand-600"
+        />
+        <span>
+          Үнэгүй үзэх боломжтой (preview)
+          <span className="mt-0.5 block text-xs text-slate-500">
+            Төлбөртэй курсын хувьд ч гэсэн энэ хичээлийг бүх бүртгүүлсэн
+            хэрэглэгч үзэх боломжтой байна.
+          </span>
+        </span>
+      </label>
+
       <div className="rounded-xl border border-slate-200 p-4">
         <h3 className="text-sm font-semibold text-navy-900">Медиа</h3>
         <p className="mt-0.5 text-xs text-slate-500">

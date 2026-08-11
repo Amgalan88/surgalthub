@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Course, Profile, QuizQuestion } from "@/lib/types";
+import type { Course, Enrollment, Profile, QuizQuestion } from "@/lib/types";
 
 export interface AdminStats {
   totalUsers: number;
@@ -107,6 +107,37 @@ export async function getQuizQuestionsAdmin(courseId: string): Promise<QuizQuest
     .eq("course_id", courseId)
     .order("order_index", { ascending: true });
   return data ?? [];
+}
+
+export interface CourseEnrollmentRow {
+  enrollment: Enrollment;
+  profile: { id: string; full_name: string | null } | null;
+}
+
+export async function getCourseEnrollments(
+  courseId: string
+): Promise<CourseEnrollmentRow[]> {
+  const supabase = await createClient();
+  const { data: enrollments } = await supabase
+    .from("enrollments")
+    .select("*")
+    .eq("course_id", courseId)
+    .order("enrolled_at", { ascending: false });
+
+  if (!enrollments || enrollments.length === 0) return [];
+
+  const userIds = enrollments.map((e) => e.user_id);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", userIds);
+
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+  return enrollments.map((enrollment) => ({
+    enrollment,
+    profile: profileById.get(enrollment.user_id) ?? null,
+  }));
 }
 
 export async function getAllUsers(): Promise<Profile[]> {

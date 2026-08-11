@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Check, Lock, Award } from "lucide-react";
+import { Check, Lock, Award, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Lesson } from "@/lib/types";
+import { canAccessLesson } from "@/lib/access";
+import type { Course, Enrollment, Lesson, Profile } from "@/lib/types";
 
-type NodeState = "done" | "current" | "available" | "locked";
+type NodeState = "done" | "current" | "available" | "premium" | "locked";
 
 function nodeCircleClasses(state: NodeState) {
   switch (state) {
@@ -13,6 +14,8 @@ function nodeCircleClasses(state: NodeState) {
       return "bg-brand-600 text-white ring-white ring-offset-2 ring-offset-white outline outline-2 outline-brand-200";
     case "available":
       return "bg-white text-navy-900 ring-white border-2 border-slate-300";
+    case "premium":
+      return "bg-brand-50 text-brand-600 ring-white border-2 border-brand-200";
     case "locked":
       return "bg-slate-100 text-slate-400 ring-white";
   }
@@ -22,7 +25,9 @@ export function LessonRoadmap({
   courseSlug,
   lessons,
   completedIds,
-  canOpen,
+  course,
+  enrollment,
+  profile,
   currentLessonId,
   hasQuiz,
   allLessonsDone,
@@ -31,33 +36,37 @@ export function LessonRoadmap({
   courseSlug: string;
   lessons: Lesson[];
   completedIds: Set<string>;
-  canOpen: boolean;
+  course: Course;
+  enrollment: Enrollment | null;
+  profile: Profile | null;
   currentLessonId?: string;
   hasQuiz: boolean;
   allLessonsDone: boolean;
   quizPassed: boolean;
 }) {
+  const enrolled = !!enrollment;
+
   const items = lessons.map((lesson, i) => {
     const done = completedIds.has(lesson.id);
-    const state: NodeState = done
-      ? "done"
-      : !canOpen
-        ? "locked"
-        : lesson.id === currentLessonId
-          ? "current"
-          : "available";
-    return { lesson, i, done, state };
+    const accessible = canAccessLesson(lesson, course, enrollment, profile);
+    let state: NodeState;
+    if (done) state = "done";
+    else if (!enrolled) state = "locked";
+    else if (!accessible) state = "premium";
+    else if (lesson.id === currentLessonId) state = "current";
+    else state = "available";
+    return { lesson, i, done, state, canOpen: enrolled && accessible };
   });
 
   const quizState: NodeState = quizPassed
     ? "done"
-    : canOpen && allLessonsDone
+    : enrolled && allLessonsDone
       ? "current"
       : "locked";
 
   return (
     <ol className="mt-4">
-      {items.map(({ lesson, i, done, state }) => {
+      {items.map(({ lesson, i, done, state, canOpen }) => {
         const node = (
           <div className="group relative flex items-start gap-4">
             <span
@@ -70,6 +79,8 @@ export function LessonRoadmap({
                 <Check size={16} />
               ) : state === "locked" ? (
                 <Lock size={13} />
+              ) : state === "premium" ? (
+                <Crown size={14} />
               ) : (
                 i + 1
               )}
@@ -86,6 +97,11 @@ export function LessonRoadmap({
               </p>
               {state === "current" && (
                 <p className="mt-0.5 text-xs font-medium text-brand-600">Дараах хичээл</p>
+              )}
+              {state === "premium" && (
+                <p className="mt-0.5 text-xs font-medium text-brand-600">
+                  Premium — төлбөр төлсний дараа нээгдэнэ
+                </p>
               )}
             </div>
           </div>

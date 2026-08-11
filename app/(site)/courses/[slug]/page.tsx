@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Crown } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
 import { enrollInCourse } from "@/lib/actions/learning";
+import { canAccessLesson, formatMNT } from "@/lib/access";
 import { TRACK_LABELS } from "@/lib/types";
 
 export default async function CourseDetailPage({
@@ -44,6 +46,11 @@ export default async function CourseDetailPage({
   const progressPct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
   const allLessonsDone = total > 0 && completedCount === total;
   const firstUnfinished = lessons.find((l) => !completedIds.has(l.id)) ?? lessons[0];
+  const firstAccessibleUnfinished = lessons.find(
+    (l) => !completedIds.has(l.id) && canAccessLesson(l, course, enrollment, profile)
+  );
+  const isPaid = course.price > 0;
+  const hasFullAccess = !isPaid || !!enrollment?.has_paid || profile?.role === "admin";
 
   const enrollAction = enrollInCourse.bind(null, course.slug, course.id);
 
@@ -51,7 +58,14 @@ export default async function CourseDetailPage({
     <div>
       <section className="bg-navy-900">
         <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
-          <Badge tone="brand">{TRACK_LABELS[course.track]}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="brand">{TRACK_LABELS[course.track]}</Badge>
+            {isPaid && (
+              <Badge tone="slate">
+                <Crown size={12} /> {formatMNT(course.price)}
+              </Badge>
+            )}
+          </div>
           <h1 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
             {course.title}
           </h1>
@@ -73,7 +87,9 @@ export default async function CourseDetailPage({
                 courseSlug={course.slug}
                 lessons={lessons}
                 completedIds={completedIds}
-                canOpen={!!enrollment}
+                course={course}
+                enrollment={enrollment}
+                profile={profile}
                 currentLessonId={firstUnfinished?.id}
                 hasQuiz={total > 0}
                 allLessonsDone={allLessonsDone}
@@ -98,8 +114,15 @@ export default async function CourseDetailPage({
                 </>
               ) : !enrollment ? (
                 <>
+                  {isPaid && (
+                    <p className="mb-3 flex items-center gap-1.5 text-lg font-bold text-navy-900">
+                      <Crown size={18} className="text-brand-600" /> {formatMNT(course.price)}
+                    </p>
+                  )}
                   <p className="text-sm text-slate-500">
-                    Энэ сургалтад бүртгүүлж, хичээлээ эхлүүлээрэй.
+                    {isPaid
+                      ? "Үнэгүй бүртгүүлээд эхний хичээлүүдийг үзээрэй. Бүрэн эрх нээлгэхийн тулд төлбөр төлнө үү."
+                      : "Энэ сургалтад бүртгүүлж, хичээлээ эхлүүлээрэй."}
                   </p>
                   <form action={enrollAction} className="mt-4">
                     <Button type="submit" className="w-full" size="lg">
@@ -124,13 +147,24 @@ export default async function CourseDetailPage({
                     >
                       Гэрчилгээ татах
                     </Link>
-                  ) : firstUnfinished ? (
+                  ) : firstAccessibleUnfinished ? (
                     <Link
-                      href={`/courses/${course.slug}/learn/${firstUnfinished.id}`}
+                      href={`/courses/${course.slug}/learn/${firstAccessibleUnfinished.id}`}
                       className="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
                     >
                       {completedCount === 0 ? "Эхлэх" : "Үргэлжлүүлэх"}
                     </Link>
+                  ) : firstUnfinished && !hasFullAccess ? (
+                    <div className="mt-5 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">
+                      <p className="flex items-center gap-1.5 font-semibold">
+                        <Crown size={15} /> Premium хичээлүүд
+                      </p>
+                      <p className="mt-1 text-brand-700/80">
+                        Үлдсэн хичээлүүдийг үзэхийн тулд {formatMNT(course.price)}{" "}
+                        төлбөр төлнө үү. Төлбөрөө шилжүүлээд, бидэнтэй холбогдож
+                        эрхээ нээлгээрэй.
+                      </p>
+                    </div>
                   ) : null}
                 </>
               )}

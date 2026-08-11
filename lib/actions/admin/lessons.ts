@@ -34,6 +34,7 @@ export async function createLesson(
   const title = String(formData.get("title") ?? "").trim();
   const contentMd = String(formData.get("content_md") ?? "").trim();
   const orderIndex = Number(formData.get("order_index") ?? 0);
+  const isFreePreview = formData.get("is_free_preview") === "on";
 
   if (!courseId || !title) {
     return { error: "Гарчиг заавал шаардлагатай." };
@@ -45,6 +46,7 @@ export async function createLesson(
     title,
     content_md: contentMd,
     order_index: orderIndex,
+    is_free_preview: isFreePreview,
     ...readMediaFields(formData),
   });
 
@@ -66,6 +68,7 @@ export async function updateLesson(
   const title = String(formData.get("title") ?? "").trim();
   const contentMd = String(formData.get("content_md") ?? "").trim();
   const orderIndex = Number(formData.get("order_index") ?? 0);
+  const isFreePreview = formData.get("is_free_preview") === "on";
 
   if (!id || !title) {
     return { error: "Гарчиг заавал шаардлагатай." };
@@ -78,6 +81,7 @@ export async function updateLesson(
       title,
       content_md: contentMd,
       order_index: orderIndex,
+      is_free_preview: isFreePreview,
       ...readMediaFields(formData),
     })
     .eq("id", id);
