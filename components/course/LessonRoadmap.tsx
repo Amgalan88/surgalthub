@@ -40,7 +40,7 @@ export function LessonRoadmap({
 
   const items = lessons.map((lesson, i) => {
     const done = completedIds.has(lesson.id);
-    const accessible = canAccessLesson(lesson, profile);
+    const accessible = canAccessLesson(lesson, profile, done);
     let state: NodeState;
     if (!enrolled) state = "locked";
     else if (!accessible) state = "premium";

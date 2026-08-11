@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Crown, CheckCircle2, Landmark } from "lucide-react";
+import { Crown, CheckCircle2, Landmark, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -21,11 +21,14 @@ import { TRACK_LABELS } from "@/lib/types";
 
 export default async function CourseDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ locked?: string }>;
 }) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
+  const { locked } = await searchParams;
   const course = await getCourseBySlug(slug);
   if (!course) notFound();
 
@@ -51,7 +54,9 @@ export default async function CourseDetailPage({
   );
   const hasPremium = isPremiumActive(profile) || profile?.role === "admin";
   const hasPremiumLessons = lessons.some((l) => !l.is_free_preview);
-  const allLessonsAccessible = lessons.every((l) => canAccessLesson(l, profile));
+  const allLessonsAccessible = lessons.every((l) =>
+    canAccessLesson(l, profile, completedIds.has(l.id))
+  );
 
   const enrollAction = enrollInCourse.bind(null, course.slug, course.id);
 
@@ -77,6 +82,16 @@ export default async function CourseDetailPage({
       </section>
 
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+        {locked === "1" && (
+          <div className="mb-6 flex items-start gap-2.5 rounded-xl bg-amber-50 px-4 py-3.5 text-sm text-amber-800 ring-1 ring-inset ring-amber-600/20">
+            <Lock size={18} className="mt-0.5 shrink-0 text-amber-600" />
+            <p>
+              Тухайн хичээл нээгдээгүй байна — энэ нь Premium эрх шаарддаг бөгөөд
+              танд одоогоор идэвхтэй Premium байхгүй тул үзэх боломжгүй. Доорх
+              зааврын дагуу төлбөрөө шилжүүлээд админтай холбогдоорой.
+            </p>
+          </div>
+        )}
         <div className="grid gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <h2 className="text-xl font-semibold text-navy-900">Сургалтын зам</h2>

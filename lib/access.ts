@@ -14,9 +14,14 @@ export function isPremiumActive(profile: Profile | null): boolean {
   return new Date(profile.premium_until).getTime() > Date.now();
 }
 
-export function canAccessLesson(lesson: Lesson, profile: Profile | null): boolean {
+export function canAccessLesson(
+  lesson: Lesson,
+  profile: Profile | null,
+  alreadyCompleted = false
+): boolean {
   if (profile?.role === "admin") return true;
   if (lesson.is_free_preview) return true;
+  if (alreadyCompleted) return true;
   return isPremiumActive(profile);
 }
 

@@ -33,17 +33,17 @@ export default async function LessonPage({
   if (index === -1) notFound();
 
   const lesson = lessons[index];
-  if (!canAccessLesson(lesson, profile)) {
-    redirect(`/courses/${slug}`);
-  }
-
-  const prevLesson = lessons[index - 1];
-  const nextLesson = lessons[index + 1];
   const completedIds = await getCompletedLessonIds(
     profile.id,
     lessons.map((l) => l.id)
   );
   const isDone = completedIds.has(lesson.id);
+  if (!canAccessLesson(lesson, profile, isDone)) {
+    redirect(`/courses/${slug}?locked=1`);
+  }
+
+  const prevLesson = lessons[index - 1];
+  const nextLesson = lessons[index + 1];
   const isYoutube = lesson.video_url ? isYoutubeUrl(lesson.video_url) : false;
   const embedUrl = isYoutube && lesson.video_url ? toYoutubeEmbedUrl(lesson.video_url) : null;
 
@@ -62,7 +62,7 @@ export default async function LessonPage({
             </Link>
             <ol className="mt-4 space-y-1" data-tour="lesson-sidebar">
               {lessons.map((l, i) => {
-                const accessible = canAccessLesson(l, profile);
+                const accessible = canAccessLesson(l, profile, completedIds.has(l.id));
                 const content = (
                   <div
                     className={cn(
