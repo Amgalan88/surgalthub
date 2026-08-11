@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ListChecks, Users } from "lucide-react";
+import { ListChecks } from "lucide-react";
 import { Card, CardBody } from "@/components/ui/Card";
 import { CourseForm } from "@/components/admin/CourseForm";
 import { getCourseByIdAdmin } from "@/lib/data/admin";
@@ -25,12 +25,6 @@ export default async function EditCoursePage({
           className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
           <ListChecks size={16} /> Хичээл удирдах
-        </Link>
-        <Link
-          href={`/admin/courses/${course.id}/enrollments`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          <Users size={16} /> Төлбөр удирдах
         </Link>
       </div>
 

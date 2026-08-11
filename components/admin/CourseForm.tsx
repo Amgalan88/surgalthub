@@ -62,23 +62,6 @@ export function CourseForm({
         />
       </div>
 
-      <div data-tour="course-price-field">
-        <Label htmlFor="price">Үнэ (₮, 0 = үнэгүй курс)</Label>
-        <Input
-          id="price"
-          name="price"
-          type="number"
-          min={0}
-          step={1000}
-          defaultValue={course?.price ?? 0}
-        />
-        <p className="mt-1 text-xs text-slate-500">
-          0-с их бол курс төлбөртэй болно — зөвхөн &quot;Үнэгүй үзэх&quot; гэж
-          тэмдэглэсэн хичээлүүд болон төлбөр төлсөн хэрэглэгчид бүрэн эрхтэй
-          болно.
-        </p>
-      </div>
-
       <label
         className="flex items-center gap-2 text-sm text-slate-700"
         data-tour="course-published-field"

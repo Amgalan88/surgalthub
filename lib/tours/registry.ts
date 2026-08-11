@@ -158,7 +158,7 @@ const adminCoursesTour: Tour = {
       target: sel("admin-courses-table"),
       title: "Курс удирдах",
       content:
-        "Курс бүрийг эндээс нийтлэх/нуух, засах, устгах боломжтой. Курс дээр дарж хичээл, төлбөр удирдана.",
+        "Курс бүрийг эндээс нийтлэх/нуух, засах, устгах боломжтой. Курс дээр дарж хичээлийг нь удирдана.",
       placement: "top",
     },
   ],
@@ -167,13 +167,6 @@ const adminCoursesTour: Tour = {
 const adminCourseFormTour: Tour = {
   id: "admin-course-form",
   steps: [
-    {
-      target: sel("course-price-field"),
-      title: "Үнэ",
-      content:
-        "0 бол курс бүрэн үнэгүй. Тоо оруулбал төлбөртэй болж, зөвхөн 'үнэгүй үзэх' гэж тэмдэглэсэн хичээлүүд нээлттэй байна.",
-      placement: "top",
-    },
     {
       target: sel("course-published-field"),
       title: "Нийтлэх",
@@ -216,27 +209,14 @@ const adminLessonFormTour: Tour = {
   ],
 };
 
-const adminEnrollmentsTour: Tour = {
-  id: "admin-enrollments",
-  steps: [
-    {
-      target: sel("admin-enrollments-table"),
-      title: "Төлбөр баталгаажуулах",
-      content:
-        "Хэрэглэгч шилжүүлгээр төлбөрөө хийсний дараа энд түүний мөрөн дээр 'Төлбөр төлсөн' гэж тэмдэглэнэ — тэр даруй бүх хичээл нээгдэнэ.",
-      placement: "top",
-    },
-  ],
-};
-
 const adminUsersTour: Tour = {
   id: "admin-users",
   steps: [
     {
       target: sel("admin-users-table"),
-      title: "Хэрэглэгчийн эрх",
+      title: "Хэрэглэгч хайх, удирдах",
       content:
-        "Хэрэглэгчийг эндээс админ болгох эсвэл админ эрхийг нь хасах боломжтой.",
+        "Имэйл, утас, нэрээр хэрэглэгчээ хайж олоорой. Хэрэглэгч шилжүүлгээр төлбөрөө хийсний дараа энд 'Идэвхжүүлэх' дараад 6 сарын Premium эрх нээж өгнө. Мөн нууц үгээ мартсан хэрэглэгчид шинэ нууц үг үүсгэж өгч болно.",
       placement: "top",
     },
   ],
@@ -261,10 +241,6 @@ const matchers: { test: RegExp; tour: Tour }[] = [
     tour: adminLessonFormTour,
   },
   { test: /^\/admin\/courses\/[^/]+\/lessons\/?$/, tour: adminLessonsTour },
-  {
-    test: /^\/admin\/courses\/[^/]+\/enrollments\/?$/,
-    tour: adminEnrollmentsTour,
-  },
   { test: /^\/admin\/users\/?$/, tour: adminUsersTour },
 ];
 

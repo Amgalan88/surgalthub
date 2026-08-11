@@ -4,8 +4,26 @@
 платформ. Next.js (App Router) + Supabase (Postgres/Auth) дээр суурилсан.
 
 - **Хэрэглэгчийн тал**: сургалтын каталог, бүртгэл, хичээл үзэх, явцын хяналт.
-- **Админ тал** (`/admin`): курс/хичээл удирдах, төлбөр баталгаажуулах,
-  хэрэглэгчийн эрх солих, ерөнхий статистик.
+- **Админ тал** (`/admin`): курс/хичээл удирдах, имэйл/утсаар хэрэглэгч хайж
+  нууц үг үүсгэх, Premium эрх идэвхжүүлэх, ерөнхий статистик.
+
+## Төлбөрийн загвар
+
+Курс тус бүрд үнэ байхгүй — платформ **нэг л удаагийн 120,000₮ Premium
+багц** зардаг (`lib/access.ts`):
+
+1. Хэрэглэгч бүртгүүлээд `is_free_preview = true` гэж тэмдэглэсэн
+   хичээлүүдийг үнэ төлбөргүй үзнэ.
+2. Бусад (premium) хичээлийг үзэхийн тулд хэрэглэгч Хаан банк 5119007473
+   (Энхамгалан) руу 120,000₮ шилжүүлээд, админтай холбогддог.
+3. Админ `/admin/users` дээр имэйл/утсаар хайгаад **"Идэвхжүүлэх (6 сар)"**
+   дарна — энэ нь `profiles.premium_until`-г 6 сарын дараах огноогоор
+   тохируулна.
+4. 6 сар дуустал тухайн хэрэглэгч бүх premium хичээлийг чөлөөтэй үзнэ,
+   дараа нь автоматаар зөвхөн үнэгүй хичээлүүдэд буцна (админ хүссэн үедээ
+   дахин идэвхжүүлж/цуцалж болно).
+
+Банкны мэдээлэл, үнэ, хугацааг `lib/access.ts`-д өөрчлөх боломжтой.
 
 ## Суурилуулах
 
@@ -17,20 +35,30 @@
 
 2. [supabase.com](https://supabase.com) дээр үнэгүй төсөл үүсгэ.
 
-3. Project Settings → API хэсгээс `Project URL` болон `anon public` түлхүүрийг
-   аваад `.env.local` файлд бич (`.env.local.example`-г хуулж эхэл):
+3. Project Settings → API хэсгээс `Project URL`, `anon public` болон
+   `service_role` (secret) түлхүүрүүдийг аваад `.env.local` файлд бич
+   (`.env.local.example`-г хуулж эхэл):
 
    ```bash
    NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxxx
+   SUPABASE_SERVICE_ROLE_KEY=xxxxx
    ```
+
+   `SUPABASE_SERVICE_ROLE_KEY` нь RLS-ийг тойрч бүх өгөгдөлд хандах маш нууц
+   түлхүүр — зөвхөн серверт (админ хэрэглэгчийн нууц үг үүсгэх, имэйл харах)
+   ашиглагдана. `NEXT_PUBLIC_` угтваргүй тул клиент рүү хэзээ ч илгээгдэхгүй,
+   гэхдээ `.env.local`-аас бусад хэнтэй ч бүү хуваалцаарай.
 
 4. Supabase SQL Editor дээр дараах файлуудыг дараалалаар нь ажиллуул:
    - `supabase/migrations/0001_init.sql` — хүснэгт, RLS, бүртгэлийн trigger
    - `supabase/migrations/0002_seed.sql` — жишээ 3 курс, хичээл (заавал биш)
    - `supabase/migrations/0003_lesson_media.sql` — хичээлийн медиа талбарууд
-   - `supabase/migrations/0004_paywall.sql` — төлбөрт курс, үнэгүй үзэх хичээл
+   - `supabase/migrations/0004_paywall.sql` — курс/хичээлийн `price`/`has_paid`
+     багана (одоо ашиглагдахгүй, дараагийн migration-аар орлуулагдсан)
    - `supabase/migrations/0005_drop_quiz_certificates.sql` — шалгалт/гэрчилгээний хүснэгтүүдийг устгах
+   - `supabase/migrations/0006_platform_premium.sql` — `profiles.premium_until`
+     (платформ даяарх Premium эрх) + бүртгэлийн үед утас хадгалах
 
 5. [cloudinary.com](https://cloudinary.com) дээр үнэгүй акаунт үүсгэ (админ
    панелаас зураг/видео/аудио/PDF байршуулахад хэрэгтэй). Dashboard-ын нүүр

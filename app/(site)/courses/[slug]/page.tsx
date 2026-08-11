@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Crown, CheckCircle2 } from "lucide-react";
+import { Crown, CheckCircle2, Landmark } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -9,7 +9,14 @@ import { getCourseBySlug, getLessonsForCourse } from "@/lib/data/courses";
 import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
 import { enrollInCourse } from "@/lib/actions/learning";
-import { canAccessLesson, formatMNT } from "@/lib/access";
+import {
+  canAccessLesson,
+  formatMNT,
+  isPremiumActive,
+  PAYMENT_INFO,
+  PREMIUM_DURATION_MONTHS,
+  PREMIUM_PRICE_MNT,
+} from "@/lib/access";
 import { TRACK_LABELS } from "@/lib/types";
 
 export default async function CourseDetailPage({
@@ -40,10 +47,10 @@ export default async function CourseDetailPage({
   const progressPct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
   const firstUnfinished = lessons.find((l) => !completedIds.has(l.id)) ?? lessons[0];
   const firstAccessibleUnfinished = lessons.find(
-    (l) => !completedIds.has(l.id) && canAccessLesson(l, course, enrollment, profile)
+    (l) => !completedIds.has(l.id) && canAccessLesson(l, profile)
   );
-  const isPaid = course.price > 0;
-  const hasFullAccess = !isPaid || !!enrollment?.has_paid || profile?.role === "admin";
+  const hasPremium = isPremiumActive(profile) || profile?.role === "admin";
+  const hasPremiumLessons = lessons.some((l) => !l.is_free_preview);
 
   const enrollAction = enrollInCourse.bind(null, course.slug, course.id);
 
@@ -54,9 +61,9 @@ export default async function CourseDetailPage({
         <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6">
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="brand">{TRACK_LABELS[course.track]}</Badge>
-            {isPaid && (
+            {hasPremiumLessons && (
               <Badge tone="slate" className="bg-white/10 text-brand-200 ring-white/20">
-                <Crown size={12} /> {formatMNT(course.price)}
+                <Crown size={12} /> Premium хичээлтэй
               </Badge>
             )}
           </div>
@@ -81,7 +88,6 @@ export default async function CourseDetailPage({
                 courseSlug={course.slug}
                 lessons={lessons}
                 completedIds={completedIds}
-                course={course}
                 enrollment={enrollment}
                 profile={profile}
                 currentLessonId={firstUnfinished?.id}
@@ -106,15 +112,8 @@ export default async function CourseDetailPage({
                 </>
               ) : !enrollment ? (
                 <>
-                  {isPaid && (
-                    <p className="mb-3 flex items-center gap-1.5 text-lg font-bold text-navy-900">
-                      <Crown size={18} className="text-brand-600" /> {formatMNT(course.price)}
-                    </p>
-                  )}
                   <p className="text-sm text-slate-500">
-                    {isPaid
-                      ? "Үнэгүй бүртгүүлээд эхний хичээлүүдийг үзээрэй. Бүрэн эрх нээлгэхийн тулд төлбөр төлнө үү."
-                      : "Энэ сургалтад бүртгүүлж, хичээлээ эхлүүлээрэй."}
+                    Энэ сургалтад бүртгүүлж, хичээлээ эхлүүлээрэй.
                   </p>
                   <form action={enrollAction} className="mt-4">
                     <Button
@@ -150,16 +149,25 @@ export default async function CourseDetailPage({
                       <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
                       Та энэ сургалтыг амжилттай дуусгалаа!
                     </div>
-                  ) : firstUnfinished && !hasFullAccess ? (
-                    <div className="mt-5 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">
+                  ) : firstUnfinished && !hasPremium ? (
+                    <div className="mt-5 rounded-lg bg-brand-50 p-4 text-sm text-brand-700">
                       <p className="flex items-center gap-1.5 font-semibold">
                         <Crown size={15} /> Premium хичээлүүд
                       </p>
                       <p className="mt-1 text-brand-700/80">
-                        Үлдсэн хичээлүүдийг үзэхийн тулд {formatMNT(course.price)}{" "}
-                        төлбөр төлнө үү. Төлбөрөө шилжүүлээд, бидэнтэй холбогдож
-                        эрхээ нээлгээрэй.
+                        Үлдсэн хичээлүүдийг {PREMIUM_DURATION_MONTHS} сарын турш
+                        хүссэн үедээ үзэхийн тулд {formatMNT(PREMIUM_PRICE_MNT)}
+                        -г доорх дансанд шилжүүлээд, баримтаа админд
+                        (нэр/утас/имэйлээ дурдаж) илгээгээрэй.
                       </p>
+                      <div className="mt-3 flex items-center gap-2 rounded-lg bg-white px-3 py-2.5 ring-1 ring-inset ring-brand-200">
+                        <Landmark size={16} className="shrink-0 text-brand-600" />
+                        <p className="text-xs text-navy-900">
+                          <span className="font-semibold">{PAYMENT_INFO.bank}</span>{" "}
+                          — {PAYMENT_INFO.account} (
+                          {PAYMENT_INFO.accountHolder})
+                        </p>
+                      </div>
                     </div>
                   ) : null}
                 </>

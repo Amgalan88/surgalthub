@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Check, Lock, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccessLesson } from "@/lib/access";
-import type { Course, Enrollment, Lesson, Profile } from "@/lib/types";
+import type { Enrollment, Lesson, Profile } from "@/lib/types";
 
 type NodeState = "done" | "current" | "available" | "premium" | "locked";
 
@@ -25,7 +25,6 @@ export function LessonRoadmap({
   courseSlug,
   lessons,
   completedIds,
-  course,
   enrollment,
   profile,
   currentLessonId,
@@ -33,7 +32,6 @@ export function LessonRoadmap({
   courseSlug: string;
   lessons: Lesson[];
   completedIds: Set<string>;
-  course: Course;
   enrollment: Enrollment | null;
   profile: Profile | null;
   currentLessonId?: string;
@@ -42,7 +40,7 @@ export function LessonRoadmap({
 
   const items = lessons.map((lesson, i) => {
     const done = completedIds.has(lesson.id);
-    const accessible = canAccessLesson(lesson, course, enrollment, profile);
+    const accessible = canAccessLesson(lesson, profile);
     let state: NodeState;
     if (done) state = "done";
     else if (!enrolled) state = "locked";
@@ -88,7 +86,7 @@ export function LessonRoadmap({
               )}
               {state === "premium" && (
                 <p className="mt-0.5 text-xs font-medium text-brand-600">
-                  Premium — төлбөр төлсний дараа нээгдэнэ
+                  Premium — төлбөрөө баталгаажуулснаар нээгдэнэ
                 </p>
               )}
             </div>

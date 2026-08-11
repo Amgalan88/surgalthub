@@ -29,6 +29,7 @@ export async function getCurrentProfile(): Promise<Profile | null> {
       full_name: null,
       role: "user",
       phone: null,
+      premium_until: null,
       created_at: user.created_at ?? new Date().toISOString(),
     };
   }

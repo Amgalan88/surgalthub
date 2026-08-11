@@ -17,6 +17,7 @@ export interface Database {
           full_name: string | null;
           role: UserRole;
           phone: string | null;
+          premium_until: string | null;
           created_at: string;
         },
         {
@@ -24,6 +25,7 @@ export interface Database {
           full_name?: string | null;
           role?: UserRole;
           phone?: string | null;
+          premium_until?: string | null;
           created_at?: string;
         },
         {
@@ -31,6 +33,7 @@ export interface Database {
           full_name?: string | null;
           role?: UserRole;
           phone?: string | null;
+          premium_until?: string | null;
           created_at?: string;
         }
       >;

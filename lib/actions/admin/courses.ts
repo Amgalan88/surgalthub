@@ -29,7 +29,6 @@ export async function createCourse(
   const description = String(formData.get("description") ?? "").trim();
   const track = String(formData.get("track") ?? "") as CourseTrack;
   const published = formData.get("published") === "on";
-  const price = Math.max(0, Number(formData.get("price") ?? 0) || 0);
 
   if (!title || !description || !track) {
     return { error: "Бүх талбарыг бөглөнө үү." };
@@ -42,7 +41,7 @@ export async function createCourse(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("courses")
-    .insert({ title, description, track, published, price, slug, created_by: admin.id })
+    .insert({ title, description, track, published, slug, created_by: admin.id })
     .select("id")
     .single();
 
@@ -71,7 +70,6 @@ export async function updateCourse(
   const description = String(formData.get("description") ?? "").trim();
   const track = String(formData.get("track") ?? "") as CourseTrack;
   const published = formData.get("published") === "on";
-  const price = Math.max(0, Number(formData.get("price") ?? 0) || 0);
 
   if (!id || !title || !description || !track) {
     return { error: "Бүх талбарыг бөглөнө үү." };
@@ -83,7 +81,7 @@ export async function updateCourse(
   const supabase = await createClient();
   const { error } = await supabase
     .from("courses")
-    .update({ title, description, track, published, price, slug })
+    .update({ title, description, track, published, slug })
     .eq("id", id);
 
   if (error) {

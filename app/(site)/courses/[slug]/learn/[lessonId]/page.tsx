@@ -33,7 +33,7 @@ export default async function LessonPage({
   if (index === -1) notFound();
 
   const lesson = lessons[index];
-  if (!canAccessLesson(lesson, course, enrollment, profile)) {
+  if (!canAccessLesson(lesson, profile)) {
     redirect(`/courses/${slug}`);
   }
 
@@ -62,7 +62,7 @@ export default async function LessonPage({
             </Link>
             <ol className="mt-4 space-y-1" data-tour="lesson-sidebar">
               {lessons.map((l, i) => {
-                const accessible = canAccessLesson(l, course, enrollment, profile);
+                const accessible = canAccessLesson(l, profile);
                 const content = (
                   <div
                     className={cn(

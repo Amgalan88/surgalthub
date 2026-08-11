@@ -29,15 +29,27 @@ export function AuthForm({
       <input type="hidden" name="next" value={next} />
 
       {mode === "register" && (
-        <div>
-          <Label htmlFor="full_name">Бүтэн нэр</Label>
-          <Input
-            id="full_name"
-            name="full_name"
-            placeholder="Бат Болд"
-            required
-          />
-        </div>
+        <>
+          <div>
+            <Label htmlFor="full_name">Бүтэн нэр</Label>
+            <Input
+              id="full_name"
+              name="full_name"
+              placeholder="Бат Болд"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="phone">Утасны дугаар</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="99112233"
+              required
+            />
+          </div>
+        </>
       )}
 
       <div>

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Course, Enrollment, Profile } from "@/lib/types";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { Course, Profile } from "@/lib/types";
 
 export interface AdminStats {
   totalUsers: number;
@@ -89,37 +90,6 @@ export async function getCourseByIdAdmin(id: string): Promise<Course | null> {
   return data;
 }
 
-export interface CourseEnrollmentRow {
-  enrollment: Enrollment;
-  profile: { id: string; full_name: string | null } | null;
-}
-
-export async function getCourseEnrollments(
-  courseId: string
-): Promise<CourseEnrollmentRow[]> {
-  const supabase = await createClient();
-  const { data: enrollments } = await supabase
-    .from("enrollments")
-    .select("*")
-    .eq("course_id", courseId)
-    .order("enrolled_at", { ascending: false });
-
-  if (!enrollments || enrollments.length === 0) return [];
-
-  const userIds = enrollments.map((e) => e.user_id);
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, full_name")
-    .in("id", userIds);
-
-  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
-
-  return enrollments.map((enrollment) => ({
-    enrollment,
-    profile: profileById.get(enrollment.user_id) ?? null,
-  }));
-}
-
 export async function getAllUsers(): Promise<Profile[]> {
   const supabase = await createClient();
   const { data } = await supabase
@@ -127,4 +97,26 @@ export async function getAllUsers(): Promise<Profile[]> {
     .select("*")
     .order("created_at", { ascending: false });
   return data ?? [];
+}
+
+export interface UserWithEmail extends Profile {
+  email: string | null;
+}
+
+export async function getAllUsersWithEmail(): Promise<UserWithEmail[]> {
+  const profiles = await getAllUsers();
+
+  try {
+    const adminClient = createAdminClient();
+    const { data, error } = await adminClient.auth.admin.listUsers({
+      perPage: 1000,
+    });
+    if (error) throw error;
+
+    const emailById = new Map(data.users.map((u) => [u.id, u.email ?? null]));
+    return profiles.map((p) => ({ ...p, email: emailById.get(p.id) ?? null }));
+  } catch (err) {
+    console.error("getAllUsersWithEmail: falling back without email", err);
+    return profiles.map((p) => ({ ...p, email: null }));
+  }
 }

@@ -1,18 +1,25 @@
-import type { Course, Enrollment, Lesson, Profile } from "@/lib/types";
+import type { Lesson, Profile } from "@/lib/types";
 
-export function canAccessLesson(
-  lesson: Lesson,
-  course: Course,
-  enrollment: Enrollment | null,
-  profile: Profile | null
-): boolean {
-  if (profile?.role === "admin") return true;
-  if ((course.price ?? 0) <= 0) return true;
-  if (lesson.is_free_preview) return true;
-  return enrollment?.has_paid ?? false;
+export const PREMIUM_PRICE_MNT = 120_000;
+export const PREMIUM_DURATION_MONTHS = 6;
+
+export const PAYMENT_INFO = {
+  bank: "Хаан банк",
+  account: "5119007473",
+  accountHolder: "Энхамгалан",
+};
+
+export function isPremiumActive(profile: Profile | null): boolean {
+  if (!profile?.premium_until) return false;
+  return new Date(profile.premium_until).getTime() > Date.now();
 }
 
-export function formatMNT(amount: number | null | undefined): string {
-  if (!amount || amount <= 0) return "Үнэгүй";
+export function canAccessLesson(lesson: Lesson, profile: Profile | null): boolean {
+  if (profile?.role === "admin") return true;
+  if (lesson.is_free_preview) return true;
+  return isPremiumActive(profile);
+}
+
+export function formatMNT(amount: number): string {
   return `${amount.toLocaleString("mn-MN")}₮`;
 }

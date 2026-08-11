@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Crown, Rocket, Settings, Globe } from "lucide-react";
-import { formatMNT } from "@/lib/access";
+import { ArrowRight, Rocket, Settings, Globe } from "lucide-react";
 import { TRACK_LABELS, type Course, type CourseTrack } from "@/lib/types";
 
 const trackConfig: Record<
@@ -28,7 +27,6 @@ const trackConfig: Record<
 };
 
 export function CourseCard({ course }: { course: Course }) {
-  const isPaid = course.price > 0;
   const cfg = trackConfig[course.track];
   const Icon = cfg.icon;
 
@@ -52,18 +50,6 @@ export function CourseCard({ course }: { course: Course }) {
           {/* Icon */}
           <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-brand-300 ring-1 ring-white/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
             <Icon size={30} strokeWidth={1.75} />
-          </span>
-
-          {/* Price / free pill */}
-          <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-black/25 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-inset ring-white/25 backdrop-blur">
-            {isPaid ? (
-              <>
-                <Crown size={11} className="text-brand-300" />
-                {formatMNT(course.price)}
-              </>
-            ) : (
-              "Үнэгүй"
-            )}
           </span>
 
           {/* Track label */}
