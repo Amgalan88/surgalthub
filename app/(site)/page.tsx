@@ -10,6 +10,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
+import { Logo } from "@/components/layout/Logo";
 import { CourseCard } from "@/components/course/CourseCard";
 import { getPublishedCourses } from "@/lib/data/courses";
 import type { CourseTrack } from "@/lib/types";
@@ -76,10 +77,13 @@ export default async function HomePage() {
     <div>
       {/* Hero */}
       <section className="relative overflow-hidden bg-navy-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.18),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.2),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-brand-200 ring-1 ring-inset ring-white/20">
+            <div className="flex">
+              <Logo size="lg" banner />
+            </div>
+            <span className="mt-5 inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-brand-200 ring-1 ring-inset ring-white/20">
               Монголын анхны карго бизнесийн сургалтын платформ
             </span>
             <h1 className="mt-5 text-4xl font-bold leading-tight text-white sm:text-5xl">
@@ -148,7 +152,7 @@ export default async function HomePage() {
               Бидний давуу тал
             </h2>
             <p className="mt-3 text-slate-500">
-              Карго Академийг өөр сургалтуудаас ялгаж буй онцлогууд.
+              Cargo Hub-ыг өөр сургалтуудаас ялгаж буй онцлогууд.
             </p>
           </div>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

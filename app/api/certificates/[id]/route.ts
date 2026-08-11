@@ -33,7 +33,7 @@ export async function GET(
     profiles: { full_name: string | null } | null;
   };
 
-  const courseTitle = cert.courses?.title ?? "Карго Академи";
+  const courseTitle = cert.courses?.title ?? "Cargo Hub";
   const holderName = cert.profiles?.full_name ?? "Оюутан";
 
   const pdfDoc = await PDFDocument.create();
@@ -70,7 +70,7 @@ export async function GET(
     page.drawText(text, { x: (width - textWidth) / 2, y, size, font, color });
   };
 
-  centerText("КАРГО АКАДЕМИ", height - 90, serif, 16, brand);
+  centerText("CARGO HUB", height - 90, serif, 16, brand);
   centerText("ГЭРЧИЛГЭЭ", height - 150, serif, 34, navy);
   centerText(
     "Энэхүү гэрчилгээг доорх хүнд олгож байна",

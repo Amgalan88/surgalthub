@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import AdminSidebar from "@/components/layout/AdminSidebar";
+import AdminShell from "@/components/layout/AdminShell";
 import { getCurrentProfile } from "@/lib/auth";
 
 export default async function AdminLayout({
@@ -11,10 +11,5 @@ export default async function AdminLayout({
   if (!profile) redirect("/login?next=/admin");
   if (profile.role !== "admin") redirect("/dashboard");
 
-  return (
-    <div className="flex min-h-screen bg-slate-50">
-      <AdminSidebar />
-      <main className="min-w-0 flex-1">{children}</main>
-    </div>
-  );
+  return <AdminShell>{children}</AdminShell>;
 }

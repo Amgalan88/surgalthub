@@ -12,7 +12,7 @@ export default async function AdminCoursesPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-navy-900">Сургалтууд</h1>
           <p className="mt-1 text-slate-500">Курс, хичээл, шалгалт удирдах</p>

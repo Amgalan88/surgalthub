@@ -118,7 +118,7 @@ export default async function LessonPage({
 
           {lesson.slides_url && (
             <div className="mt-5 overflow-hidden rounded-xl border border-slate-200">
-              <div className="flex items-center justify-between bg-slate-50 px-4 py-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-2.5">
                 <span className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
                   <FileText size={16} /> Слайд
                 </span>
@@ -139,7 +139,7 @@ export default async function LessonPage({
             <ReactMarkdown>{lesson.content_md}</ReactMarkdown>
           </article>
 
-          <div className="mt-10 flex items-center justify-between border-t border-slate-200 pt-6">
+          <div className="mt-10 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               {prevLesson ? (
                 <Link
@@ -153,10 +153,10 @@ export default async function LessonPage({
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               {!isDone && (
                 <form action={completeAction}>
-                  <Button type="submit" variant="secondary">
+                  <Button type="submit" variant="secondary" className="w-full sm:w-auto">
                     Дуусгасан гэж тэмдэглэх
                   </Button>
                 </form>
@@ -164,14 +164,14 @@ export default async function LessonPage({
               {nextLesson ? (
                 <Link
                   href={`/courses/${slug}/learn/${nextLesson.id}`}
-                  className="inline-flex items-center gap-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+                  className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
                 >
                   Дараах <ChevronRight size={16} />
                 </Link>
               ) : (
                 <Link
                   href={`/courses/${slug}`}
-                  className="inline-flex items-center gap-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+                  className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
                 >
                   Курс руу буцах
                 </Link>

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Package } from "lucide-react";
 import type { Profile } from "@/lib/types";
 import { signOut } from "@/lib/actions/auth";
 import { Button, LinkButton } from "@/components/ui/Button";
+import { Logo } from "./Logo";
 import MobileMenu from "./MobileMenu";
 
 const navLinks = [
@@ -15,11 +15,8 @@ export default function Navbar({ profile }: { profile: Profile | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 font-bold text-navy-900">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
-            <Package size={18} />
-          </span>
-          <span className="text-lg tracking-tight">Карго Академи</span>
+        <Link href="/">
+          <Logo size="sm" />
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
