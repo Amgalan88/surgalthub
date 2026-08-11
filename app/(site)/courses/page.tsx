@@ -37,7 +37,11 @@ export default async function CoursesPage({
         </p>
       </Reveal>
 
-      <Reveal delay={0.1} className="mt-8 flex flex-wrap gap-2">
+      <Reveal
+        delay={0.1}
+        className="mt-8 flex flex-wrap gap-2"
+        data-tour="track-filter"
+      >
         {filters.map((f) => (
           <Link
             key={f.key}
@@ -63,6 +67,7 @@ export default async function CoursesPage({
           key={activeTrack}
           className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           staggerGap={0.08}
+          data-tour="course-grid"
         >
           {courses.map((course) => (
             <StaggerItem key={course.id}>

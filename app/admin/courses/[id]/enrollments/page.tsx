@@ -32,7 +32,7 @@ export default async function AdminEnrollmentsPage({
         </div>
       </div>
 
-      <Card className="mt-6 overflow-hidden">
+      <Card className="mt-6 overflow-hidden" data-tour="admin-enrollments-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">

@@ -62,7 +62,7 @@ export function CourseForm({
         />
       </div>
 
-      <div>
+      <div data-tour="course-price-field">
         <Label htmlFor="price">Үнэ (₮, 0 = үнэгүй курс)</Label>
         <Input
           id="price"
@@ -79,7 +79,10 @@ export function CourseForm({
         </p>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-slate-700">
+      <label
+        className="flex items-center gap-2 text-sm text-slate-700"
+        data-tour="course-published-field"
+      >
         <input
           type="checkbox"
           name="published"

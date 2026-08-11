@@ -60,7 +60,7 @@ export default async function LessonPage({
             >
               ← {course.title}
             </Link>
-            <ol className="mt-4 space-y-1">
+            <ol className="mt-4 space-y-1" data-tour="lesson-sidebar">
               {lessons.map((l, i) => {
                 const accessible = canAccessLesson(l, course, enrollment, profile);
                 const content = (
@@ -158,7 +158,10 @@ export default async function LessonPage({
             <ReactMarkdown>{lesson.content_md}</ReactMarkdown>
           </article>
 
-          <div className="mt-10 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            className="mt-10 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between"
+            data-tour="lesson-nav"
+          >
             <div>
               {prevLesson ? (
                 <Link
@@ -175,7 +178,12 @@ export default async function LessonPage({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               {!isDone && (
                 <form action={completeAction}>
-                  <Button type="submit" variant="secondary" className="w-full sm:w-auto">
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    className="w-full sm:w-auto"
+                    data-tour="mark-complete-btn"
+                  >
                     Дуусгасан гэж тэмдэглэх
                   </Button>
                 </form>

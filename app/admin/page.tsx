@@ -37,7 +37,10 @@ export default async function AdminDashboardPage() {
       <h1 className="text-2xl font-bold text-navy-900">Хяналтын самбар</h1>
       <p className="mt-1 text-slate-500">Платформын ерөнхий үзүүлэлт</p>
 
-      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+        data-tour="admin-stats"
+      >
         {cards.map((c) => (
           <Card key={c.label}>
             <CardBody>

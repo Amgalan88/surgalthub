@@ -17,6 +17,7 @@ export function Reveal({
   once = true,
   className,
   style,
+  ...rest
 }: {
   children: ReactNode;
   delay?: number;
@@ -24,7 +25,7 @@ export function Reveal({
   once?: boolean;
   className?: string;
   style?: CSSProperties;
-}) {
+} & Record<`data-${string}`, string>) {
   return (
     <motion.div
       className={className}
@@ -33,6 +34,7 @@ export function Reveal({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once, margin: "-40px" }}
       transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      {...rest}
     >
       {children}
     </motion.div>
@@ -45,12 +47,13 @@ export function Stagger({
   className,
   style,
   staggerGap = 0.07,
+  ...rest
 }: {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
   staggerGap?: number;
-}) {
+} & Record<`data-${string}`, string>) {
   return (
     <motion.div
       className={className}
@@ -62,6 +65,7 @@ export function Stagger({
         hidden: {},
         show: { transition: { staggerChildren: staggerGap } },
       }}
+      {...rest}
     >
       {children}
     </motion.div>
@@ -72,11 +76,12 @@ export function StaggerItem({
   children,
   className,
   style,
+  ...rest
 }: {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
-}) {
+} & Record<`data-${string}`, string>) {
   return (
     <motion.div
       className={className}
@@ -89,6 +94,7 @@ export function StaggerItem({
           transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
         },
       }}
+      {...rest}
     >
       {children}
     </motion.div>

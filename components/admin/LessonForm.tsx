@@ -46,7 +46,10 @@ export function LessonForm({
         />
       </div>
 
-      <label className="flex items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
+      <label
+        className="flex items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm text-slate-700"
+        data-tour="lesson-free-preview-field"
+      >
         <input
           type="checkbox"
           name="is_free_preview"
@@ -62,7 +65,7 @@ export function LessonForm({
         </span>
       </label>
 
-      <div className="rounded-xl border border-slate-200 p-4">
+      <div className="rounded-xl border border-slate-200 p-4" data-tour="lesson-media-block">
         <h3 className="text-sm font-semibold text-navy-900">Медиа</h3>
         <p className="mt-0.5 text-xs text-slate-500">
           Cloudinary руу шууд байршина. Видео нэмэхдээ YouTube холбоос эсвэл

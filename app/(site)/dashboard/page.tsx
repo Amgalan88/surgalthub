@@ -22,7 +22,7 @@ export default async function DashboardPage() {
       <p className="mt-1 text-slate-500">Таны сургалтын явц</p>
 
       {courses.length === 0 ? (
-        <Card className="mt-8">
+        <Card className="mt-8" data-tour="dashboard-courses">
           <CardBody className="flex flex-col items-center py-14 text-center">
             <BookOpen className="text-slate-300" size={40} />
             <p className="mt-4 text-slate-500">
@@ -37,7 +37,10 @@ export default async function DashboardPage() {
           </CardBody>
         </Card>
       ) : (
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          data-tour="dashboard-courses"
+        >
           {courses.map(({ course, totalLessons, completedLessons }) => {
             const pct =
               totalLessons > 0

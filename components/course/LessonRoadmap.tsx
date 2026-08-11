@@ -53,7 +53,7 @@ export function LessonRoadmap({
   });
 
   return (
-    <ol className="mt-4">
+    <ol className="mt-4" data-tour="lesson-roadmap">
       {items.map(({ lesson, i, done, state, canOpen }) => {
         const node = (
           <div className="group relative flex items-start gap-4">

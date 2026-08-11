@@ -28,6 +28,7 @@ export default async function AdminLessonsPage({
         <h1 className="text-2xl font-bold text-navy-900">Хичээлүүд</h1>
         <Link
           href={`/admin/courses/${id}/lessons/new`}
+          data-tour="admin-add-lesson"
           className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
           <Plus size={16} /> Хичээл нэмэх

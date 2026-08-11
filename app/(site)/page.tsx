@@ -109,6 +109,7 @@ export default async function HomePage() {
                 <LinkButton
                   href="/courses"
                   size="lg"
+                  data-tour="hero-cta"
                   className="shadow-[0_4px_24px_rgba(217,119,6,0.45)]"
                 >
                   Сургалт үзэх <ArrowRight size={18} />
@@ -128,7 +129,11 @@ export default async function HomePage() {
       </section>
 
       {/* Tracks */}
-      <section id="tracks" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+      <section
+        id="tracks"
+        data-tour="tracks-section"
+        className="mx-auto max-w-6xl px-4 py-20 sm:px-6"
+      >
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-navy-900">3 үндсэн чиглэл</h2>
           <p className="mt-3 text-slate-500">
@@ -235,6 +240,7 @@ export default async function HomePage() {
               <LinkButton
                 href="/register"
                 size="lg"
+                data-tour="register-cta"
                 className="shadow-[0_4px_24px_rgba(217,119,6,0.45)]"
               >
                 Үнэгүй бүртгүүлэх

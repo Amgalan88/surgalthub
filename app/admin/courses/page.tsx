@@ -19,13 +19,14 @@ export default async function AdminCoursesPage() {
         </div>
         <Link
           href="/admin/courses/new"
+          data-tour="admin-new-course"
           className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
           <Plus size={16} /> Шинэ курс
         </Link>
       </div>
 
-      <Card className="mt-8 overflow-hidden">
+      <Card className="mt-8 overflow-hidden" data-tour="admin-courses-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">

@@ -12,7 +12,7 @@ export default async function AdminUsersPage() {
       <h1 className="text-2xl font-bold text-navy-900">Хэрэглэгчид</h1>
       <p className="mt-1 text-slate-500">Нийт {users.length} хэрэглэгч</p>
 
-      <Card className="mt-8 overflow-hidden">
+      <Card className="mt-8 overflow-hidden" data-tour="admin-users-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">
