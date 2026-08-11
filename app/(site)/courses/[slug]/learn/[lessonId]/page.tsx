@@ -15,7 +15,8 @@ export default async function LessonPage({
 }: {
   params: Promise<{ slug: string; lessonId: string }>;
 }) {
-  const { slug, lessonId } = await params;
+  const { slug: rawSlug, lessonId } = await params;
+  const slug = decodeURIComponent(rawSlug);
 
   const profile = await getCurrentProfile();
   if (!profile) redirect(`/login?next=/courses/${slug}/learn/${lessonId}`);

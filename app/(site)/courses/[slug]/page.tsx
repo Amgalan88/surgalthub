@@ -19,7 +19,8 @@ export default async function CourseDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const course = await getCourseBySlug(slug);
   if (!course) notFound();
 

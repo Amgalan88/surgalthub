@@ -13,7 +13,8 @@ export default async function QuizPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
 
   const profile = await getCurrentProfile();
   if (!profile) redirect(`/login?next=/courses/${slug}/quiz`);
