@@ -39,27 +39,25 @@ export interface GeneratePasswordResult {
 export async function generateUserPassword(
   userId: string
 ): Promise<GeneratePasswordResult> {
-  await requireAdmin();
-
-  let adminClient;
   try {
-    adminClient = createAdminClient();
+    await requireAdmin();
+
+    const adminClient = createAdminClient();
+    const password = generateRandomPassword();
+    const { error } = await adminClient.auth.admin.updateUserById(userId, {
+      password,
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { password };
   } catch (err) {
     return {
-      error: err instanceof Error ? err.message : "Тохиргоо дутуу байна.",
+      error: err instanceof Error ? err.message : "Тодорхойгүй алдаа гарлаа.",
     };
   }
-
-  const password = generateRandomPassword();
-  const { error } = await adminClient.auth.admin.updateUserById(userId, {
-    password,
-  });
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  return { password };
 }
 
 export async function activatePremiumAccess(userId: string) {

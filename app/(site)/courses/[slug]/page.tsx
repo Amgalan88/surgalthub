@@ -51,6 +51,7 @@ export default async function CourseDetailPage({
   );
   const hasPremium = isPremiumActive(profile) || profile?.role === "admin";
   const hasPremiumLessons = lessons.some((l) => !l.is_free_preview);
+  const allLessonsAccessible = lessons.every((l) => canAccessLesson(l, profile));
 
   const enrollAction = enrollInCourse.bind(null, course.slug, course.id);
 
@@ -144,12 +145,12 @@ export default async function CourseDetailPage({
                     >
                       {completedCount === 0 ? "Эхлэх" : "Үргэлжлүүлэх"}
                     </Link>
-                  ) : total > 0 && completedCount === total ? (
+                  ) : total > 0 && completedCount === total && allLessonsAccessible ? (
                     <div className="mt-5 flex items-center gap-2.5 rounded-xl bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
                       <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
                       Та энэ сургалтыг амжилттай дуусгалаа!
                     </div>
-                  ) : firstUnfinished && !hasPremium ? (
+                  ) : !hasPremium && hasPremiumLessons ? (
                     <div className="mt-5 rounded-lg bg-brand-50 p-4 text-sm text-brand-700">
                       <p className="flex items-center gap-1.5 font-semibold">
                         <Crown size={15} /> Premium хичээлүүд

@@ -74,10 +74,10 @@ export default async function LessonPage({
                           : "text-slate-400"
                     )}
                   >
-                    {completedIds.has(l.id) ? (
-                      <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
-                    ) : !accessible ? (
+                    {!accessible ? (
                       <Lock size={16} className="shrink-0 text-slate-300" />
+                    ) : completedIds.has(l.id) ? (
+                      <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
                     ) : (
                       <PlayCircle size={16} className="shrink-0 text-slate-300" />
                     )}

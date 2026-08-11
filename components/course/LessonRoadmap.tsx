@@ -42,9 +42,9 @@ export function LessonRoadmap({
     const done = completedIds.has(lesson.id);
     const accessible = canAccessLesson(lesson, profile);
     let state: NodeState;
-    if (done) state = "done";
-    else if (!enrolled) state = "locked";
+    if (!enrolled) state = "locked";
     else if (!accessible) state = "premium";
+    else if (done) state = "done";
     else if (lesson.id === currentLessonId) state = "current";
     else state = "available";
     return { lesson, i, done, state, canOpen: enrolled && accessible };
