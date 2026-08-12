@@ -53,6 +53,7 @@ export function LessonRoadmap({
   return (
     <ol className="mt-4" data-tour="lesson-roadmap">
       {items.map(({ lesson, i, done, state, canOpen }) => {
+        const isLast = i === items.length - 1;
         const node = (
           <div className="group relative flex items-start gap-4">
             <span
@@ -94,14 +95,16 @@ export function LessonRoadmap({
         );
 
         return (
-          <li key={lesson.id} className="relative pb-8">
-            <span
-              aria-hidden
-              className={cn(
-                "absolute left-4 top-8 -ml-px h-full w-0.5",
-                done ? "bg-emerald-500" : "bg-slate-200"
-              )}
-            />
+          <li key={lesson.id} className={cn("relative", !isLast && "pb-8")}>
+            {!isLast && (
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute left-4 top-8 -ml-px h-full w-0.5",
+                  done ? "bg-emerald-500" : "bg-slate-200"
+                )}
+              />
+            )}
             {canOpen ? (
               <Link href={`/courses/${courseSlug}/learn/${lesson.id}`}>{node}</Link>
             ) : (

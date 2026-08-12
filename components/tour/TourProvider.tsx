@@ -40,6 +40,8 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       showProgress: true,
       spotlightPadding: 6,
       skipBeacon: true,
+      buttons: ["back", "close", "primary", "skip"],
+      closeButtonAction: "skip",
     },
     locale: {
       back: "Буцах",
