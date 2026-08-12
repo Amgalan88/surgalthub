@@ -15,6 +15,7 @@ import { CourseCard } from "@/components/course/CourseCard";
 import { HeroCanvas } from "@/components/HeroCanvas";
 import { Reveal, Stagger, StaggerItem, TiltCard } from "@/components/motion";
 import { getPublishedCourses } from "@/lib/data/courses";
+import { getCurrentProfile } from "@/lib/auth";
 import type { CourseTrack } from "@/lib/types";
 
 const tracks: {
@@ -73,7 +74,8 @@ const advantages = [
 ];
 
 export default async function HomePage() {
-  const featured = (await getPublishedCourses()).slice(0, 3);
+  const profile = await getCurrentProfile();
+  const featured = (await getPublishedCourses(undefined, profile?.id)).slice(0, 3);
 
   return (
     <div>

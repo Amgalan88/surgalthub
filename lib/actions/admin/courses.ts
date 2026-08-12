@@ -38,6 +38,7 @@ export async function createCourse(
   const published = formData.get("published") === "on";
   const durationLabel = String(formData.get("duration_label") ?? "").trim() || null;
   const outcomes = parseOutcomes(String(formData.get("outcomes") ?? ""));
+  const coverImage = String(formData.get("cover_image") ?? "").trim() || null;
 
   if (!title || !description || !track) {
     return { error: "Бүх талбарыг бөглөнө үү." };
@@ -58,6 +59,7 @@ export async function createCourse(
       slug,
       duration_label: durationLabel,
       outcomes,
+      cover_image: coverImage,
       created_by: admin.id,
     })
     .select("id")
@@ -90,6 +92,7 @@ export async function updateCourse(
   const published = formData.get("published") === "on";
   const durationLabel = String(formData.get("duration_label") ?? "").trim() || null;
   const outcomes = parseOutcomes(String(formData.get("outcomes") ?? ""));
+  const coverImage = String(formData.get("cover_image") ?? "").trim() || null;
 
   if (!id || !title || !description || !track) {
     return { error: "Бүх талбарыг бөглөнө үү." };
@@ -109,6 +112,7 @@ export async function updateCourse(
       slug,
       duration_label: durationLabel,
       outcomes,
+      cover_image: coverImage,
     })
     .eq("id", id);
 

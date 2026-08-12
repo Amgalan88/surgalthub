@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Label, Input, Textarea, Select } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { MediaUploader } from "@/components/admin/MediaUploader";
 import type { CourseFormState } from "@/lib/actions/admin/courses";
 import type { Course } from "@/lib/types";
 
@@ -60,6 +61,20 @@ export function CourseForm({
           defaultValue={course?.description}
           required
         />
+      </div>
+
+      <div className="rounded-xl border border-slate-200 p-4">
+        <MediaUploader
+          fieldName="cover_image"
+          label="Курсын нүүр зураг"
+          accept="image/*"
+          folder="courses/covers"
+          initialUrl={course?.cover_image}
+        />
+        <p className="mt-2 text-xs text-slate-400">
+          Сургалтын жагсаалтад харагдана. Оруулаагүй бол чиглэлийн өнгөт загвар
+          автоматаар харагдана.
+        </p>
       </div>
 
       <div>

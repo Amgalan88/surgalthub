@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { CourseCard } from "@/components/course/CourseCard";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { getPublishedCourses } from "@/lib/data/courses";
+import { getCurrentProfile } from "@/lib/auth";
 import { TRACK_LABELS, type CourseTrack } from "@/lib/types";
 
 const filters: { key: CourseTrack | "all"; label: string }[] = [
@@ -24,8 +25,10 @@ export default async function CoursesPage({
       : "all"
   ) as CourseTrack | "all";
 
+  const profile = await getCurrentProfile();
   const courses = await getPublishedCourses(
-    activeTrack === "all" ? undefined : activeTrack
+    activeTrack === "all" ? undefined : activeTrack,
+    profile?.id
   );
 
   return (
