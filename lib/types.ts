@@ -148,6 +148,61 @@ export interface Database {
           has_paid?: boolean;
         }
       >;
+      lesson_questions: Table<
+        {
+          id: string;
+          lesson_id: string;
+          user_id: string;
+          body: string;
+          answer: string | null;
+          answered_at: string | null;
+          answered_by: string | null;
+          created_at: string;
+        },
+        {
+          id?: string;
+          lesson_id: string;
+          user_id: string;
+          body: string;
+          answer?: string | null;
+          answered_at?: string | null;
+          answered_by?: string | null;
+          created_at?: string;
+        },
+        {
+          id?: string;
+          lesson_id?: string;
+          user_id?: string;
+          body?: string;
+          answer?: string | null;
+          answered_at?: string | null;
+          answered_by?: string | null;
+          created_at?: string;
+        }
+      >;
+      lesson_feedback: Table<
+        {
+          id: string;
+          lesson_id: string;
+          user_id: string;
+          helpful: boolean;
+          created_at: string;
+        },
+        {
+          id?: string;
+          lesson_id: string;
+          user_id: string;
+          helpful: boolean;
+          created_at?: string;
+        },
+        {
+          id?: string;
+          lesson_id?: string;
+          user_id?: string;
+          helpful?: boolean;
+          created_at?: string;
+        }
+      >;
       lesson_progress: Table<
         {
           id: string;
@@ -194,6 +249,10 @@ export type LessonProgress =
   Database["public"]["Tables"]["lesson_progress"]["Row"];
 /** Lesson metadata without any paid content — safe to render while locked. */
 export type LessonOutline = Database["public"]["Views"]["lesson_outline"]["Row"];
+export type LessonQuestion =
+  Database["public"]["Tables"]["lesson_questions"]["Row"];
+export type LessonFeedback =
+  Database["public"]["Tables"]["lesson_feedback"]["Row"];
 
 export const TRACK_LABELS: Record<CourseTrack, string> = {
   opening: "Карго нээх",

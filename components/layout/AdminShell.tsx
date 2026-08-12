@@ -3,7 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, Users, ExternalLink, Menu, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  BookOpen,
+  Users,
+  MessageCircleQuestion,
+  ExternalLink,
+  Menu,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/actions/auth";
 import { Logo } from "./Logo";
@@ -12,6 +20,12 @@ const links = [
   { href: "/admin", label: "Хяналтын самбар", icon: LayoutDashboard, exact: true },
   { href: "/admin/courses", label: "Сургалтууд", icon: BookOpen, exact: false },
   { href: "/admin/users", label: "Хэрэглэгчид", icon: Users, exact: false },
+  {
+    href: "/admin/questions",
+    label: "Асуултууд",
+    icon: MessageCircleQuestion,
+    exact: false,
+  },
 ];
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {

@@ -11,6 +11,8 @@ import {
   getLessonOutline,
 } from "@/lib/data/courses";
 import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
+import { getLessonQuestions, getMyLessonFeedback } from "@/lib/data/engagement";
+import { LessonHelp } from "@/components/lesson/LessonHelp";
 import { getCurrentProfile } from "@/lib/auth";
 import { markLessonComplete } from "@/lib/actions/learning";
 import { isYoutubeUrl, toYoutubeEmbedUrl } from "@/lib/video";
@@ -50,6 +52,11 @@ export default async function LessonPage({
   // RLS is the real gate: this returns null when the caller may not read it.
   const lesson = await getLessonById(lessonId);
   if (!lesson) redirect(`/courses/${slug}?locked=1`);
+
+  const [questions, myFeedback] = await Promise.all([
+    getLessonQuestions(lessonId),
+    getMyLessonFeedback(lessonId, profile.id),
+  ]);
 
   const prevLesson = lessons[index - 1];
   const nextLesson = lessons[index + 1];
@@ -190,6 +197,14 @@ export default async function LessonPage({
           <article className="prose prose-slate mt-6 max-w-none prose-headings:text-navy-900 prose-a:text-brand-600">
             <ReactMarkdown>{lesson.content_md}</ReactMarkdown>
           </article>
+
+          <LessonHelp
+            courseSlug={slug}
+            lessonId={lesson.id}
+            questions={questions}
+            myFeedback={myFeedback}
+            currentUserId={profile.id}
+          />
 
           {/* pb-16 keeps the full-width mobile buttons clear of the floating
               tour launcher pinned to the bottom-right of the viewport. */}

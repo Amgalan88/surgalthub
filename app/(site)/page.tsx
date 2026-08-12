@@ -14,7 +14,9 @@ import { LinkButton } from "@/components/ui/Button";
 import { CourseCard } from "@/components/course/CourseCard";
 import { HeroCanvas } from "@/components/HeroCanvas";
 import { Reveal, Stagger, StaggerItem, TiltCard } from "@/components/motion";
+import { PlatformStatsBar, Testimonials } from "@/components/SocialProof";
 import { getPublishedCourses } from "@/lib/data/courses";
+import { getPlatformStats } from "@/lib/data/engagement";
 import { getCurrentProfile } from "@/lib/auth";
 import type { CourseTrack } from "@/lib/types";
 
@@ -75,7 +77,11 @@ const advantages = [
 
 export default async function HomePage() {
   const profile = await getCurrentProfile();
-  const featured = (await getPublishedCourses(undefined, profile?.id)).slice(0, 3);
+  const [allCourses, stats] = await Promise.all([
+    getPublishedCourses(undefined, profile?.id),
+    getPlatformStats(),
+  ]);
+  const featured = allCourses.slice(0, 3);
 
   return (
     <div>
@@ -129,6 +135,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <PlatformStatsBar stats={stats} />
 
       {/* Tracks */}
       <section
@@ -226,6 +234,8 @@ export default async function HomePage() {
           </Stagger>
         </section>
       )}
+
+      <Testimonials />
 
       {/* CTA */}
       <section className="relative overflow-hidden bg-navy-950">

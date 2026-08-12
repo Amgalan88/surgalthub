@@ -242,6 +242,19 @@ const adminUsersTour: Tour = {
   ],
 };
 
+const adminQuestionsTour: Tour = {
+  id: "admin-questions",
+  steps: [
+    {
+      target: sel("admin-questions"),
+      title: "Суралцагчийн асуулт",
+      content:
+        "Хариулт хүлээж буй асуултууд эхэнд харагдана. Таны хариулт тухайн хичээлийн хуудсанд бүх суралцагчид харагдах тул нэг удаа хариулаад олон хүнд хүрнэ.",
+      placement: "top",
+    },
+  ],
+};
+
 const matchers: { test: RegExp; tour: Tour }[] = [
   { test: /^\/$/, tour: landingTour },
   { test: /^\/courses\/?$/, tour: catalogTour },
@@ -263,6 +276,7 @@ const matchers: { test: RegExp; tour: Tour }[] = [
   },
   { test: /^\/admin\/courses\/[^/]+\/lessons\/?$/, tour: adminLessonsTour },
   { test: /^\/admin\/users\/?$/, tour: adminUsersTour },
+  { test: /^\/admin\/questions\/?$/, tour: adminQuestionsTour },
 ];
 
 export function getTourForPath(pathname: string): Tour | undefined {
