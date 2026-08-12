@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import { CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, FileText, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 import { getCourseBySlug, getLessonsForCourse } from "@/lib/data/courses";
 import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
@@ -44,6 +45,9 @@ export default async function LessonPage({
 
   const prevLesson = lessons[index - 1];
   const nextLesson = lessons[index + 1];
+  const completedCount = lessons.filter((l) => completedIds.has(l.id)).length;
+  const progressPct =
+    lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
   const isYoutube = lesson.video_url ? isYoutubeUrl(lesson.video_url) : false;
   const embedUrl = isYoutube && lesson.video_url ? toYoutubeEmbedUrl(lesson.video_url) : null;
 
@@ -101,6 +105,27 @@ export default async function LessonPage({
         </aside>
 
         <main className="order-1 lg:order-2">
+          {/* On mobile the lesson list sits below the content, so the way back
+              to the course needs to be reachable from the top too. */}
+          <Link
+            href={`/courses/${slug}`}
+            className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-navy-900 lg:hidden"
+          >
+            <ChevronLeft size={15} /> {course.title}
+          </Link>
+
+          <div className="mb-5 rounded-xl bg-slate-50 px-4 py-3 ring-1 ring-inset ring-slate-200/80">
+            <div className="flex items-center justify-between gap-4 text-sm">
+              <span className="font-medium text-navy-900">
+                {index + 1} / {lessons.length} хичээл
+              </span>
+              <span className="text-slate-500">
+                {completedCount} дууссан ({progressPct}%)
+              </span>
+            </div>
+            <ProgressBar value={progressPct} className="mt-2" />
+          </div>
+
           <h1 className="text-2xl font-bold text-navy-900">{lesson.title}</h1>
 
           {lesson.cover_image_url && !lesson.video_url && (
@@ -158,8 +183,10 @@ export default async function LessonPage({
             <ReactMarkdown>{lesson.content_md}</ReactMarkdown>
           </article>
 
+          {/* pb-16 keeps the full-width mobile buttons clear of the floating
+              tour launcher pinned to the bottom-right of the viewport. */}
           <div
-            className="mt-10 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between"
+            className="mt-10 flex flex-col gap-4 border-t border-slate-200 pb-16 pt-6 sm:flex-row sm:items-center sm:justify-between sm:pb-0"
             data-tour="lesson-nav"
           >
             <div>
