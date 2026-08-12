@@ -1,4 +1,7 @@
-import type { Lesson, Profile } from "@/lib/types";
+import type { Profile } from "@/lib/types";
+
+/** Everything the access check needs — satisfied by both Lesson and LessonOutline. */
+type AccessibleLesson = { is_free_preview: boolean };
 
 export const PREMIUM_PRICE_MNT = 120_000;
 export const PREMIUM_DURATION_MONTHS = 6;
@@ -34,7 +37,7 @@ export function formatPremiumDate(value: string): string {
 }
 
 export function canAccessLesson(
-  lesson: Lesson,
+  lesson: AccessibleLesson,
   profile: Profile | null,
   alreadyCompleted = false
 ): boolean {

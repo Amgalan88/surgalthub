@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Check, Lock, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccessLesson } from "@/lib/access";
-import type { Enrollment, Lesson, Profile } from "@/lib/types";
+import type { Enrollment, LessonOutline, Profile } from "@/lib/types";
 
 type NodeState = "done" | "current" | "available" | "premium" | "locked";
 
@@ -30,7 +30,7 @@ export function LessonRoadmap({
   currentLessonId,
 }: {
   courseSlug: string;
-  lessons: Lesson[];
+  lessons: LessonOutline[];
   completedIds: Set<string>;
   enrollment: Enrollment | null;
   profile: Profile | null;

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Course, CourseTrack, Lesson } from "@/lib/types";
+import type { Course, CourseTrack, Lesson, LessonOutline } from "@/lib/types";
 
 /** A course plus the summary numbers the catalog card needs. */
 export interface CourseWithMeta extends Course {
@@ -32,8 +32,9 @@ export async function getPublishedCourses(
     if (courses.length === 0) return [];
 
     const courseIds = courses.map((c) => c.id);
+    // Counted from the outline view so locked lessons still show up in totals.
     const { data: lessons } = await supabase
-      .from("lessons")
+      .from("lesson_outline")
       .select("id, course_id, is_free_preview")
       .in("course_id", courseIds);
 
@@ -108,6 +109,10 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
   }
 }
 
+/**
+ * Full lesson rows. RLS only returns the ones the caller may actually read,
+ * so use this when the paid content itself is needed — not for listings.
+ */
 export async function getLessonsForCourse(courseId: string): Promise<Lesson[]> {
   try {
     const supabase = await createClient();
@@ -121,5 +126,44 @@ export async function getLessonsForCourse(courseId: string): Promise<Lesson[]> {
   } catch (err) {
     console.error("getLessonsForCourse failed:", err);
     return [];
+  }
+}
+
+/**
+ * Titles and ordering for every lesson in the course, including locked ones.
+ * Carries no paid content, so it is what roadmaps and sidebars should render.
+ */
+export async function getLessonOutline(
+  courseId: string
+): Promise<LessonOutline[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("lesson_outline")
+      .select("*")
+      .eq("course_id", courseId)
+      .order("order_index", { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  } catch (err) {
+    console.error("getLessonOutline failed:", err);
+    return [];
+  }
+}
+
+/** Single full lesson, or null when RLS says the caller may not read it. */
+export async function getLessonById(lessonId: string): Promise<Lesson | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("lessons")
+      .select("*")
+      .eq("id", lessonId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error("getLessonById failed:", err);
+    return null;
   }
 }

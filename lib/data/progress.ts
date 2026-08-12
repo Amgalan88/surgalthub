@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { canAccessLesson } from "@/lib/access";
-import type { Course, Enrollment, Lesson, Profile } from "@/lib/types";
+import type { Course, Enrollment, LessonOutline, Profile } from "@/lib/types";
 
 export async function getEnrollment(
   userId: string,
@@ -55,8 +55,9 @@ export async function getDashboardCourses(
 
   const courseIds = rows.map((r) => r.courses.id);
 
+  // Outline view: totals must include lessons this user cannot open yet.
   const { data: lessons } = await supabase
-    .from("lessons")
+    .from("lesson_outline")
     .select("*")
     .in("course_id", courseIds)
     .order("order_index", { ascending: true });
@@ -67,7 +68,7 @@ export async function getDashboardCourses(
     .eq("user_id", profile.id);
 
   const completedLessonIds = new Set((progress ?? []).map((p) => p.lesson_id));
-  const lessonsByCourse = new Map<string, Lesson[]>();
+  const lessonsByCourse = new Map<string, LessonOutline[]>();
   for (const l of lessons ?? []) {
     const list = lessonsByCourse.get(l.course_id) ?? [];
     list.push(l);

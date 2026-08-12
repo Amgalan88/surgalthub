@@ -169,7 +169,19 @@ export interface Database {
         }
       >;
     };
-    Views: Record<string, never>;
+    Views: {
+      /** Contentless lesson metadata, safe to expose for locked lessons. */
+      lesson_outline: {
+        Row: {
+          id: string;
+          course_id: string;
+          title: string;
+          order_index: number;
+          is_free_preview: boolean;
+        };
+        Relationships: [];
+      };
+    };
     Functions: Record<string, never>;
   };
 }
@@ -180,6 +192,8 @@ export type Lesson = Database["public"]["Tables"]["lessons"]["Row"];
 export type Enrollment = Database["public"]["Tables"]["enrollments"]["Row"];
 export type LessonProgress =
   Database["public"]["Tables"]["lesson_progress"]["Row"];
+/** Lesson metadata without any paid content — safe to render while locked. */
+export type LessonOutline = Database["public"]["Views"]["lesson_outline"]["Row"];
 
 export const TRACK_LABELS: Record<CourseTrack, string> = {
   opening: "Карго нээх",

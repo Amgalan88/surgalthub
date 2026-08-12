@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LessonRoadmap } from "@/components/course/LessonRoadmap";
-import { getCourseBySlug, getLessonsForCourse } from "@/lib/data/courses";
+import { getCourseBySlug, getLessonOutline } from "@/lib/data/courses";
 import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
 import { enrollInCourse } from "@/lib/actions/learning";
@@ -42,7 +42,7 @@ export default async function CourseDetailPage({
   if (!course) notFound();
 
   const [lessons, profile] = await Promise.all([
-    getLessonsForCourse(course.id),
+    getLessonOutline(course.id),
     getCurrentProfile(),
   ]);
 

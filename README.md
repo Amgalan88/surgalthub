@@ -59,6 +59,11 @@
    - `supabase/migrations/0005_drop_quiz_certificates.sql` — шалгалт/гэрчилгээний хүснэгтүүдийг устгах
    - `supabase/migrations/0006_platform_premium.sql` — `profiles.premium_until`
      (платформ даяарх Premium эрх) + бүртгэлийн үед утас хадгалах
+   - `supabase/migrations/0007_course_marketing_fields.sql` — курсын үргэлжлэх
+     хугацаа, "юу сурах вэ" жагсаалт
+   - `supabase/migrations/0008_lesson_content_rls.sql` — **заавал**: төлбөрийн
+     хаалтыг өгөгдлийн санд хэрэгжүүлнэ. Үүнийг ажиллуулаагүй бол
+     `lesson_outline` view байхгүй тул хичээлийн жагсаалт хоосон харагдана.
 
 5. [cloudinary.com](https://cloudinary.com) дээр үнэгүй акаунт үүсгэ (админ
    панелаас зураг/видео/аудио/PDF байршуулахад хэрэгтэй). Dashboard-ын нүүр

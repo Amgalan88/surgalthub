@@ -5,7 +5,11 @@ import { CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, FileText, Lock } f
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { getCourseBySlug, getLessonsForCourse } from "@/lib/data/courses";
+import {
+  getCourseBySlug,
+  getLessonById,
+  getLessonOutline,
+} from "@/lib/data/courses";
 import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
 import { markLessonComplete } from "@/lib/actions/learning";
@@ -29,19 +33,23 @@ export default async function LessonPage({
   const enrollment = await getEnrollment(profile.id, course.id);
   if (!enrollment) redirect(`/courses/${slug}`);
 
-  const lessons = await getLessonsForCourse(course.id);
+  const lessons = await getLessonOutline(course.id);
   const index = lessons.findIndex((l) => l.id === lessonId);
   if (index === -1) notFound();
 
-  const lesson = lessons[index];
+  const outline = lessons[index];
   const completedIds = await getCompletedLessonIds(
     profile.id,
     lessons.map((l) => l.id)
   );
-  const isDone = completedIds.has(lesson.id);
-  if (!canAccessLesson(lesson, profile, isDone)) {
+  const isDone = completedIds.has(outline.id);
+  if (!canAccessLesson(outline, profile, isDone)) {
     redirect(`/courses/${slug}?locked=1`);
   }
+
+  // RLS is the real gate: this returns null when the caller may not read it.
+  const lesson = await getLessonById(lessonId);
+  if (!lesson) redirect(`/courses/${slug}?locked=1`);
 
   const prevLesson = lessons[index - 1];
   const nextLesson = lessons[index + 1];
