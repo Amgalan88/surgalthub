@@ -16,7 +16,15 @@ export default function MobileMenu({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="md:hidden">
+    <div className="flex items-center gap-2 md:hidden">
+      {profile && (
+        <span
+          aria-label={`Нэвтэрсэн: ${profile.full_name ?? "Хэрэглэгч"}`}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white"
+        >
+          {(profile.full_name?.trim()?.[0] ?? "Х").toUpperCase()}
+        </span>
+      )}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -43,6 +51,9 @@ export default function MobileMenu({
           <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
             {profile ? (
               <>
+                <p className="px-3 pb-1 text-xs text-slate-400">
+                  Нэвтэрсэн: <span className="text-slate-200">{profile.full_name ?? "Хэрэглэгч"}</span>
+                </p>
                 {profile.role === "admin" && (
                   <Link
                     href="/admin"

@@ -34,6 +34,14 @@ export default function Navbar({ profile }: { profile: Profile | null }) {
         <div className="hidden items-center gap-3 md:flex">
           {profile ? (
             <>
+              <span className="flex items-center gap-2 text-sm font-medium text-slate-200">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white">
+                  {(profile.full_name?.trim()?.[0] ?? "Х").toUpperCase()}
+                </span>
+                <span className="hidden max-w-[9rem] truncate lg:inline">
+                  {profile.full_name ?? "Хэрэглэгч"}
+                </span>
+              </span>
               {profile.role === "admin" && (
                 <LinkButton
                   href="/admin"
