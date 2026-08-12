@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Crown, CheckCircle2, Landmark, Lock } from "lucide-react";
+import { Crown, CheckCircle2, Landmark, Lock, Clock, BookOpen, ListChecks } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -77,7 +77,25 @@ export default async function CourseDetailPage({
             {course.title}
           </h1>
           <p className="mt-3 max-w-2xl leading-relaxed text-slate-300">{course.description}</p>
-          <p className="mt-4 text-sm text-slate-400">{total} хичээл</p>
+
+          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-300">
+            {course.duration_label && (
+              <span className="flex items-center gap-1.5">
+                <Clock size={15} className="text-brand-400" />
+                {course.duration_label}
+              </span>
+            )}
+            <span className="flex items-center gap-1.5">
+              <BookOpen size={15} className="text-brand-400" />
+              {total} хичээл
+            </span>
+            {course.outcomes.length > 0 && (
+              <span className="flex items-center gap-1.5">
+                <ListChecks size={15} className="text-brand-400" />
+                {course.outcomes.length} суралцахуй
+              </span>
+            )}
+          </div>
         </div>
       </section>
 
@@ -94,7 +112,27 @@ export default async function CourseDetailPage({
         )}
         <div className="grid gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2">
+            {course.outcomes.length > 0 && (
+              <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-navy-900">
+                  <ListChecks size={19} className="text-brand-600" />
+                  Юу сурах вэ?
+                </h2>
+                <ul className="mt-4 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+                  {course.outcomes.map((outcome, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                      <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+                      {outcome}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <h2 className="text-xl font-semibold text-navy-900">Сургалтын зам</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Хичээлүүдийн бүрэн хөтөлбөр, алхам алхмаар.
+            </p>
             {total === 0 ? (
               <div className="mt-4 rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-400">
                 Хичээл тун удахгүй нэмэгдэнэ.

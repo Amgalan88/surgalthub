@@ -62,6 +62,30 @@ export function CourseForm({
         />
       </div>
 
+      <div>
+        <Label htmlFor="duration_label">Үргэлжлэх хугацаа</Label>
+        <Input
+          id="duration_label"
+          name="duration_label"
+          defaultValue={course?.duration_label ?? ""}
+          placeholder="Жишээ: 6 цаг, 2 долоо хоног"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="outcomes">Юу сурах вэ? (мөр бүрт нэг зүйл)</Label>
+        <Textarea
+          id="outcomes"
+          name="outcomes"
+          rows={5}
+          defaultValue={course?.outcomes?.join("\n") ?? ""}
+          placeholder={"Карго компани хэрхэн бүртгүүлэхийг мэдэх\nАнхны харилцагчаа хэрхэн олохыг сурах"}
+        />
+        <p className="mt-1 text-xs text-slate-400">
+          Курсын хуудсан дээр шалгалтын жагсаалт (checklist) хэлбэрээр харагдана.
+        </p>
+      </div>
+
       <label
         className="flex items-center gap-2 text-sm text-slate-700"
         data-tour="course-published-field"

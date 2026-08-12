@@ -19,6 +19,13 @@ function slugify(input: string): string {
     .slice(0, 80);
 }
 
+function parseOutcomes(raw: string): string[] {
+  return raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
 export async function createCourse(
   _prevState: CourseFormState,
   formData: FormData
@@ -29,6 +36,8 @@ export async function createCourse(
   const description = String(formData.get("description") ?? "").trim();
   const track = String(formData.get("track") ?? "") as CourseTrack;
   const published = formData.get("published") === "on";
+  const durationLabel = String(formData.get("duration_label") ?? "").trim() || null;
+  const outcomes = parseOutcomes(String(formData.get("outcomes") ?? ""));
 
   if (!title || !description || !track) {
     return { error: "Бүх талбарыг бөглөнө үү." };
@@ -41,7 +50,16 @@ export async function createCourse(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("courses")
-    .insert({ title, description, track, published, slug, created_by: admin.id })
+    .insert({
+      title,
+      description,
+      track,
+      published,
+      slug,
+      duration_label: durationLabel,
+      outcomes,
+      created_by: admin.id,
+    })
     .select("id")
     .single();
 
@@ -70,6 +88,8 @@ export async function updateCourse(
   const description = String(formData.get("description") ?? "").trim();
   const track = String(formData.get("track") ?? "") as CourseTrack;
   const published = formData.get("published") === "on";
+  const durationLabel = String(formData.get("duration_label") ?? "").trim() || null;
+  const outcomes = parseOutcomes(String(formData.get("outcomes") ?? ""));
 
   if (!id || !title || !description || !track) {
     return { error: "Бүх талбарыг бөглөнө үү." };
@@ -81,7 +101,15 @@ export async function updateCourse(
   const supabase = await createClient();
   const { error } = await supabase
     .from("courses")
-    .update({ title, description, track, published, slug })
+    .update({
+      title,
+      description,
+      track,
+      published,
+      slug,
+      duration_label: durationLabel,
+      outcomes,
+    })
     .eq("id", id);
 
   if (error) {

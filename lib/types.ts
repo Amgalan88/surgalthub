@@ -47,6 +47,8 @@ export interface Database {
           cover_image: string | null;
           published: boolean;
           price: number;
+          duration_label: string | null;
+          outcomes: string[];
           created_by: string | null;
           created_at: string;
         },
@@ -59,6 +61,8 @@ export interface Database {
           cover_image?: string | null;
           published?: boolean;
           price?: number;
+          duration_label?: string | null;
+          outcomes?: string[];
           created_by?: string | null;
           created_at?: string;
         },
@@ -71,6 +75,8 @@ export interface Database {
           cover_image?: string | null;
           published?: boolean;
           price?: number;
+          duration_label?: string | null;
+          outcomes?: string[];
           created_by?: string | null;
           created_at?: string;
         }
