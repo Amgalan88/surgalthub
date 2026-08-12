@@ -9,9 +9,28 @@ export const PAYMENT_INFO = {
   accountHolder: "Энхамгалан",
 };
 
+/** Warn the user their access is running out once it is this close to expiring. */
+export const PREMIUM_EXPIRY_WARNING_DAYS = 14;
+
 export function isPremiumActive(profile: Profile | null): boolean {
   if (!profile?.premium_until) return false;
   return new Date(profile.premium_until).getTime() > Date.now();
+}
+
+/** Whole days left on the subscription, or null when it is absent or already over. */
+export function premiumDaysRemaining(profile: Profile | null): number | null {
+  if (!profile?.premium_until) return null;
+  const remainingMs = new Date(profile.premium_until).getTime() - Date.now();
+  if (remainingMs <= 0) return null;
+  return Math.ceil(remainingMs / 86_400_000);
+}
+
+export function formatPremiumDate(value: string): string {
+  return new Date(value).toLocaleDateString("mn-MN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 export function canAccessLesson(

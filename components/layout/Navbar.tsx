@@ -7,6 +7,7 @@ import MobileMenu from "./MobileMenu";
 
 const navLinks = [
   { href: "/courses", label: "Сургалтууд" },
+  { href: "/premium", label: "Premium" },
   { href: "/#tracks", label: "Чиглэлүүд" },
   { href: "/#advantages", label: "Давуу тал" },
 ];

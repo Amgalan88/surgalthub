@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Rocket, Settings, Globe } from "lucide-react";
-import { TRACK_LABELS, type Course, type CourseTrack } from "@/lib/types";
+import { ArrowRight, Rocket, Settings, Globe, Clock, BookOpen, Crown } from "lucide-react";
+import type { CourseWithMeta } from "@/lib/data/courses";
+import { TRACK_LABELS, type CourseTrack } from "@/lib/types";
 
 const trackConfig: Record<
   CourseTrack,
@@ -26,7 +27,7 @@ const trackConfig: Record<
   },
 };
 
-export function CourseCard({ course }: { course: Course }) {
+export function CourseCard({ course }: { course: CourseWithMeta }) {
   const cfg = trackConfig[course.track];
   const Icon = cfg.icon;
 
@@ -56,6 +57,13 @@ export function CourseCard({ course }: { course: Course }) {
           <span className="absolute bottom-3 right-4 text-[11px] font-medium tracking-wide text-white/60">
             {TRACK_LABELS[course.track]}
           </span>
+
+          {/* Premium marker */}
+          {course.hasPremiumLessons && (
+            <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-brand-200 ring-1 ring-inset ring-white/25 backdrop-blur-sm">
+              <Crown size={11} /> Premium
+            </span>
+          )}
         </div>
 
         {/* Body */}
@@ -67,7 +75,20 @@ export function CourseCard({ course }: { course: Course }) {
             {course.description}
           </p>
 
-          <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+          <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <BookOpen size={13} className="text-slate-400" />
+              {course.lessonCount} хичээл
+            </span>
+            {course.duration_label && (
+              <span className="flex items-center gap-1.5">
+                <Clock size={13} className="text-slate-400" />
+                {course.duration_label}
+              </span>
+            )}
+          </div>
+
+          <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
             <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600">
               Дэлгэрэнгүй
               <ArrowRight

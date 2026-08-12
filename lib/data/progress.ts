@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Course, Enrollment } from "@/lib/types";
+import { canAccessLesson } from "@/lib/access";
+import type { Course, Enrollment, Lesson, Profile } from "@/lib/types";
 
 export async function getEnrollment(
   userId: string,
@@ -34,17 +35,19 @@ export interface DashboardCourse {
   course: Course;
   totalLessons: number;
   completedLessons: number;
+  /** Next unfinished lesson the viewer can actually open, if any. */
+  nextLessonId: string | null;
 }
 
 export async function getDashboardCourses(
-  userId: string
+  profile: Profile
 ): Promise<DashboardCourse[]> {
   const supabase = await createClient();
 
   const { data: enrollments } = await supabase
     .from("enrollments")
     .select("*, courses(*)")
-    .eq("user_id", userId)
+    .eq("user_id", profile.id)
     .order("enrolled_at", { ascending: false });
 
   const rows = (enrollments as unknown as (Enrollment & { courses: Course })[]) ?? [];
@@ -54,30 +57,35 @@ export async function getDashboardCourses(
 
   const { data: lessons } = await supabase
     .from("lessons")
-    .select("id, course_id")
-    .in("course_id", courseIds);
+    .select("*")
+    .in("course_id", courseIds)
+    .order("order_index", { ascending: true });
 
   const { data: progress } = await supabase
     .from("lesson_progress")
     .select("lesson_id")
-    .eq("user_id", userId);
+    .eq("user_id", profile.id);
 
   const completedLessonIds = new Set((progress ?? []).map((p) => p.lesson_id));
-  const lessonsByCourse = new Map<string, string[]>();
+  const lessonsByCourse = new Map<string, Lesson[]>();
   for (const l of lessons ?? []) {
     const list = lessonsByCourse.get(l.course_id) ?? [];
-    list.push(l.id);
+    list.push(l);
     lessonsByCourse.set(l.course_id, list);
   }
 
   return rows.map((row) => {
-    const courseLessonIds = lessonsByCourse.get(row.courses.id) ?? [];
+    const courseLessons = lessonsByCourse.get(row.courses.id) ?? [];
+    const nextLesson = courseLessons.find(
+      (l) => !completedLessonIds.has(l.id) && canAccessLesson(l, profile)
+    );
     return {
       enrollment: row,
       course: row.courses,
-      totalLessons: courseLessonIds.length,
-      completedLessons: courseLessonIds.filter((id) => completedLessonIds.has(id))
+      totalLessons: courseLessons.length,
+      completedLessons: courseLessons.filter((l) => completedLessonIds.has(l.id))
         .length,
+      nextLessonId: nextLesson?.id ?? null,
     };
   });
 }

@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Crown, CheckCircle2, Landmark, Lock, Clock, BookOpen, ListChecks } from "lucide-react";
+import {
+  Crown,
+  CheckCircle2,
+  Landmark,
+  Lock,
+  Clock,
+  BookOpen,
+  ListChecks,
+  ArrowRight,
+} from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -222,6 +231,12 @@ export default async function CourseDetailPage({
                           {PAYMENT_INFO.accountHolder})
                         </p>
                       </div>
+                      <Link
+                        href="/premium"
+                        className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
+                      >
+                        Дэлгэрэнгүй заавар <ArrowRight size={14} />
+                      </Link>
                     </div>
                   ) : null}
                 </>

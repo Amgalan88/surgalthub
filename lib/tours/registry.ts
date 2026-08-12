@@ -123,10 +123,30 @@ const dashboardTour: Tour = {
   id: "dashboard",
   steps: [
     {
+      target: sel("premium-status"),
+      title: "Таны эрхийн байдал",
+      content:
+        "Premium эрх идэвхтэй эсэх, хэзээ дуусахыг эндээс байнга харна. Идэвхгүй бол энд дарж төлбөрийн зааврыг харна уу.",
+      placement: "bottom",
+    },
+    {
       target: sel("dashboard-courses"),
       title: "Таны сургалтууд",
       content:
-        "Бүртгүүлсэн курс бүрийн явц энд харагдана. Одоогоор хоосон бол доор байгаа товчоор курс хайж бүртгүүлээрэй.",
+        "Бүртгүүлсэн курс бүрийн явц энд харагдана. 'Үргэлжлүүлэх' дарвал үзээгүй байгаа дараагийн хичээл рүү шууд орно.",
+      placement: "top",
+    },
+  ],
+};
+
+const premiumTour: Tour = {
+  id: "premium",
+  steps: [
+    {
+      target: sel("premium-steps"),
+      title: "Хэрхэн нээх вэ?",
+      content:
+        "Дансанд төлбөрөө шилжүүлээд, баримтаа админд илгээнэ. Админ баталгаажуулмагц бүх хичээл нээгдэнэ.",
       placement: "top",
     },
   ],
@@ -228,6 +248,7 @@ const matchers: { test: RegExp; tour: Tour }[] = [
   { test: /^\/courses\/[^/]+\/learn\/[^/]+\/?$/, tour: lessonViewerTour },
   { test: /^\/courses\/[^/]+\/?$/, tour: courseDetailTour },
   { test: /^\/dashboard\/?$/, tour: dashboardTour },
+  { test: /^\/premium\/?$/, tour: premiumTour },
   { test: /^\/admin\/?$/, tour: adminDashboardTour },
   { test: /^\/admin\/courses\/?$/, tour: adminCoursesTour },
   { test: /^\/admin\/courses\/new\/?$/, tour: adminCourseFormTour },

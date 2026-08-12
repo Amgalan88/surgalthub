@@ -4,6 +4,7 @@ import { BookOpen } from "lucide-react";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { PremiumStatusCard } from "@/components/premium/PremiumStatusCard";
 import { getCurrentProfile } from "@/lib/auth";
 import { getDashboardCourses } from "@/lib/data/progress";
 import { TRACK_LABELS } from "@/lib/types";
@@ -12,7 +13,7 @@ export default async function DashboardPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login?next=/dashboard");
 
-  const courses = await getDashboardCourses(profile.id);
+  const courses = await getDashboardCourses(profile);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -20,6 +21,10 @@ export default async function DashboardPage() {
         Сайн байна уу, {profile.full_name ?? "найз"}!
       </h1>
       <p className="mt-1 text-slate-500">Таны сургалтын явц</p>
+
+      <div data-tour="premium-status" className="mt-6">
+        <PremiumStatusCard profile={profile} showLink />
+      </div>
 
       {courses.length === 0 ? (
         <Card className="mt-8" data-tour="dashboard-courses">
@@ -41,38 +46,48 @@ export default async function DashboardPage() {
           className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           data-tour="dashboard-courses"
         >
-          {courses.map(({ course, totalLessons, completedLessons }) => {
-            const pct =
-              totalLessons > 0
-                ? Math.round((completedLessons / totalLessons) * 100)
-                : 0;
-            return (
-              <Card key={course.id}>
-                <CardBody>
-                  <Badge tone="brand">{TRACK_LABELS[course.track]}</Badge>
-                  <h3 className="mt-3 font-semibold text-navy-900">
-                    {course.title}
-                  </h3>
-                  <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-                    <span>Явц</span>
-                    <span>
-                      {completedLessons}/{totalLessons}
-                    </span>
-                  </div>
-                  <ProgressBar value={pct} className="mt-1.5" />
+          {courses.map(
+            ({ course, totalLessons, completedLessons, nextLessonId }) => {
+              const pct =
+                totalLessons > 0
+                  ? Math.round((completedLessons / totalLessons) * 100)
+                  : 0;
+              return (
+                <Card key={course.id}>
+                  <CardBody>
+                    <Badge tone="brand">{TRACK_LABELS[course.track]}</Badge>
+                    <h3 className="mt-3 font-semibold text-navy-900">
+                      {course.title}
+                    </h3>
+                    <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
+                      <span>Явц</span>
+                      <span>
+                        {completedLessons}/{totalLessons}
+                      </span>
+                    </div>
+                    <ProgressBar value={pct} className="mt-1.5" />
 
-                  <div className="mt-4">
-                    <Link
-                      href={`/courses/${course.slug}`}
-                      className="block flex-1 rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-brand-700"
-                    >
-                      {pct === 100 ? "Дахин үзэх" : "Үргэлжлүүлэх"}
-                    </Link>
-                  </div>
-                </CardBody>
-              </Card>
-            );
-          })}
+                    <div className="mt-4">
+                      <Link
+                        href={
+                          nextLessonId
+                            ? `/courses/${course.slug}/learn/${nextLessonId}`
+                            : `/courses/${course.slug}`
+                        }
+                        className="block flex-1 rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-brand-700"
+                      >
+                        {nextLessonId
+                          ? completedLessons === 0
+                            ? "Эхлэх"
+                            : "Үргэлжлүүлэх"
+                          : "Курс харах"}
+                      </Link>
+                    </div>
+                  </CardBody>
+                </Card>
+              );
+            }
+          )}
         </div>
       )}
     </div>
