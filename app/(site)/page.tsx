@@ -123,12 +123,12 @@ export default async function HomePage() {
                   Сургалт үзэх <ArrowRight size={18} />
                 </LinkButton>
                 <LinkButton
-                  href="/register"
+                  href={profile ? "/dashboard" : "/register"}
                   size="lg"
                   variant="outline"
                   className="bg-white/5 text-white border-white/30 hover:bg-white/10"
                 >
-                  Үнэгүй бүртгүүлэх
+                  {profile ? "Хяналтын самбар" : "Үнэгүй бүртгүүлэх"}
                 </LinkButton>
               </div>
             </Reveal>
@@ -243,19 +243,23 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
           <Reveal>
             <h2 className="text-3xl font-bold text-white">
-              Өнөөдрөөс карго бизнесээ эхлүүлээрэй
+              {profile
+                ? "Сургалтаа үргэлжлүүлээрэй"
+                : "Өнөөдрөөс карго бизнесээ эхлүүлээрэй"}
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-slate-300">
-              Үнэгүй бүртгүүлж, эхний хичээлээ шууд эхлүүлээрэй.
+              {profile
+                ? "Таны эхэлсэн хичээлүүд хүлээж байна."
+                : "Үнэгүй бүртгүүлж, эхний хичээлээ шууд эхлүүлээрэй."}
             </p>
             <div className="mt-7">
               <LinkButton
-                href="/register"
+                href={profile ? "/dashboard" : "/register"}
                 size="lg"
                 data-tour="register-cta"
                 className="shadow-[0_4px_24px_rgba(217,119,6,0.45)]"
               >
-                Үнэгүй бүртгүүлэх
+                {profile ? "Хяналтын самбар руу" : "Үнэгүй бүртгүүлэх"}
               </LinkButton>
             </div>
           </Reveal>

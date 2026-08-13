@@ -163,12 +163,19 @@ export default async function CourseDetailPage({
               {!profile ? (
                 <>
                   <p className="text-sm text-slate-500">
-                    Сургалтад бүртгүүлэхийн тулд эхлээд нэвтэрнэ үү.
+                    Хичээл үзэхийн тулд эхлээд бүртгэлдээ нэвтэрнэ үү. Бүртгэл
+                    үүсгэх үнэгүй.
                   </p>
                   <Link
-                    href={`/login?next=/courses/${course.slug}`}
+                    href={`/register?next=/courses/${course.slug}`}
                     data-tour="enroll-cta"
                     className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+                  >
+                    Үнэгүй бүртгүүлэх
+                  </Link>
+                  <Link
+                    href={`/login?next=/courses/${course.slug}`}
+                    className="mt-2 inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
                   >
                     Нэвтрэх
                   </Link>
@@ -176,7 +183,7 @@ export default async function CourseDetailPage({
               ) : !enrollment ? (
                 <>
                   <p className="text-sm text-slate-500">
-                    Энэ сургалтад бүртгүүлж, хичээлээ эхлүүлээрэй.
+                    Энэ сургалтад нэгдээд хичээлээ эхлүүлээрэй. Нэгдэх үнэгүй.
                   </p>
                   <form action={enrollAction} className="mt-4">
                     <Button
@@ -185,7 +192,7 @@ export default async function CourseDetailPage({
                       size="lg"
                       data-tour="enroll-cta"
                     >
-                      Бүртгүүлэх
+                      Сургалтад нэгдэх
                     </Button>
                   </form>
                 </>

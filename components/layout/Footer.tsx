@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { LogoWordmark } from "./Logo";
+import { getCurrentProfile } from "@/lib/auth";
 
-export default function Footer() {
+export default async function Footer() {
+  const profile = await getCurrentProfile();
+
   return (
     <footer className="mt-auto border-t border-white/10 bg-navy-950 text-slate-300">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -44,15 +47,30 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/register" className="hover:text-white">
-                    Бүртгүүлэх
+                  <Link href="/premium" className="hover:text-white">
+                    Premium
                   </Link>
                 </li>
-                <li>
-                  <Link href="/login" className="hover:text-white">
-                    Нэвтрэх
-                  </Link>
-                </li>
+                {profile ? (
+                  <li>
+                    <Link href="/dashboard" className="hover:text-white">
+                      Хяналтын самбар
+                    </Link>
+                  </li>
+                ) : (
+                  <>
+                    <li>
+                      <Link href="/register" className="hover:text-white">
+                        Бүртгүүлэх
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/login" className="hover:text-white">
+                        Нэвтрэх
+                      </Link>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
           </div>

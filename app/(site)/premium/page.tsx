@@ -46,7 +46,8 @@ export default async function PremiumPage() {
           </div>
         )}
 
-        <PaymentInstructions />
+        {/* Admins already have unlimited access, so payment steps are noise. */}
+        {profile?.role !== "admin" && <PaymentInstructions />}
 
         <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="font-semibold text-navy-900">Түгээмэл асуулт</h2>
