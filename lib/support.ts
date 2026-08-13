@@ -3,9 +3,13 @@
  * so it can be changed in one place without an admin screen for a single value.
  */
 export const SUPPORT_CONTACT = {
-  /** Messenger/Facebook page URL. Leave empty to hide that option. */
-  messenger: "https://m.me/cargohub.mn",
-  /** Shown as a tel: link on mobile. Leave empty to hide. */
+  /**
+   * Messenger link, e.g. "https://m.me/<facebook-page-username>". Needs a
+   * Facebook Page with a username set, not a personal profile. Empty while
+   * unconfigured so no button points somewhere wrong.
+   */
+  messenger: "",
+  /** Shown as a tel: link on mobile, e.g. "99112233". Leave empty to hide. */
   phone: "",
 };
 
