@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import DashboardTabs from "@/components/layout/DashboardTabs";
+
+export const metadata: Metadata = {
+  title: "Хяналтын самбар",
+  robots: { index: false, follow: false },
+};
 
 export default function DashboardLayout({
   children,

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import type { Profile } from "@/lib/types";
 import { signOut } from "@/lib/actions/auth";
@@ -14,6 +15,23 @@ export default function MobileMenu({
   navLinks: { href: string; label: string }[];
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const [lastPathname, setLastPathname] = useState(pathname);
+
+  // Close after any navigation, including the browser back button.
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    setOpen(false);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   return (
     <div className="flex items-center gap-2 md:hidden">
@@ -28,14 +46,19 @@ export default function MobileMenu({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Цэс"
+        aria-label={open ? "Цэс хаах" : "Цэс нээх"}
+        aria-expanded={open}
+        aria-controls="mobile-menu"
         className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:bg-white/10 hover:text-white"
       >
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {open && (
-        <div className="absolute inset-x-0 top-16 z-50 border-b border-white/10 bg-navy-950 px-4 pb-4 shadow-xl">
+        <div
+          id="mobile-menu"
+          className="absolute inset-x-0 top-16 z-50 border-b border-white/10 bg-navy-950 px-4 pb-4 shadow-xl"
+        >
           <nav className="flex flex-col gap-1 py-2">
             {navLinks.map((link) => (
               <Link

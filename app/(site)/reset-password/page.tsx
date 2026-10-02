@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Card, CardBody } from "@/components/ui/Card";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { getCurrentProfile } from "@/lib/auth";
+
+export const metadata: Metadata = {
+  title: "Шинэ нууц үг",
+  robots: { index: false },
+};
 
 export default async function ResetPasswordPage() {
   const profile = await getCurrentProfile();

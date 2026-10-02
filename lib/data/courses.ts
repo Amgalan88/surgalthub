@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, CourseTrack, Lesson, LessonOutline } from "@/lib/types";
 
@@ -93,21 +94,22 @@ export async function getPublishedCourses(
   }
 }
 
-export async function getCourseBySlug(slug: string): Promise<Course | null> {
+/** Memoised per request: generateMetadata and the page both need it. */
+export const getCourseBySlug = cache(async (slug: string): Promise<Course | null> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("courses")
       .select("*")
       .eq("slug", slug)
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return data;
   } catch (err) {
     console.error("getCourseBySlug failed:", err);
     return null;
   }
-}
+});
 
 /**
  * Full lesson rows. RLS only returns the ones the caller may actually read,
@@ -133,9 +135,9 @@ export async function getLessonsForCourse(courseId: string): Promise<Lesson[]> {
  * Titles and ordering for every lesson in the course, including locked ones.
  * Carries no paid content, so it is what roadmaps and sidebars should render.
  */
-export async function getLessonOutline(
+export const getLessonOutline = cache(async (
   courseId: string
-): Promise<LessonOutline[]> {
+): Promise<LessonOutline[]> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -149,7 +151,7 @@ export async function getLessonOutline(
     console.error("getLessonOutline failed:", err);
     return [];
   }
-}
+});
 
 /** Single full lesson, or null when RLS says the caller may not read it. */
 export async function getLessonById(lessonId: string): Promise<Lesson | null> {

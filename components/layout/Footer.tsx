@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LogoWordmark } from "./Logo";
 import { getCurrentProfile } from "@/lib/auth";
+import { SupportLinks } from "@/components/SupportLinks";
 
 export default async function Footer() {
   const profile = await getCurrentProfile();
@@ -15,6 +16,7 @@ export default async function Footer() {
               Карго бизнес нээх, ажиллуулах, вэбсайт ашиглах чиглэлээр
               практик мэдлэг олгох онлайн сургалтын платформ.
             </p>
+            <SupportLinks tone="dark" className="mt-4" />
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">

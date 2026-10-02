@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -11,7 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LessonRoadmap } from "@/components/course/LessonRoadmap";
 import { getCourseBySlug, getLessonOutline } from "@/lib/data/courses";
@@ -27,6 +28,32 @@ import {
   PREMIUM_PRICE_MNT,
 } from "@/lib/access";
 import { TRACK_LABELS } from "@/lib/types";
+import { getSiteUrl, SITE_NAME } from "@/lib/site";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const course = await getCourseBySlug(decodeURIComponent(slug));
+  if (!course) return { title: "Сургалт олдсонгүй", robots: { index: false } };
+
+  const description = course.description.slice(0, 200);
+  const path = `/courses/${course.slug}`;
+  return {
+    title: course.title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      title: course.title,
+      description,
+      url: path,
+      ...(course.cover_image ? { images: [{ url: course.cover_image }] } : {}),
+    },
+  };
+}
 
 export default async function CourseDetailPage({
   params,
@@ -69,8 +96,32 @@ export default async function CourseDetailPage({
 
   const enrollAction = enrollInCourse.bind(null, course.slug, course.id);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: course.title,
+    description: course.description,
+    url: `${getSiteUrl()}/courses/${course.slug}`,
+    inLanguage: "mn",
+    provider: { "@type": "Organization", name: SITE_NAME, sameAs: getSiteUrl() },
+    ...(course.cover_image ? { image: course.cover_image } : {}),
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: "online",
+      ...(course.duration_label ? { courseWorkload: course.duration_label } : {}),
+    },
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        // JSON.stringify output is escaped for "<" so admin-entered text
+        // cannot close the script tag.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <section className="relative overflow-hidden bg-navy-950">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6">
@@ -167,14 +218,14 @@ export default async function CourseDetailPage({
                     үүсгэх үнэгүй.
                   </p>
                   <Link
-                    href={`/register?next=/courses/${course.slug}`}
+                    href={`/register?next=${encodeURIComponent(`/courses/${course.slug}`)}`}
                     data-tour="enroll-cta"
                     className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
                   >
                     Үнэгүй бүртгүүлэх
                   </Link>
                   <Link
-                    href={`/login?next=/courses/${course.slug}`}
+                    href={`/login?next=${encodeURIComponent(`/courses/${course.slug}`)}`}
                     className="mt-2 inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
                   >
                     Нэвтрэх
@@ -186,14 +237,14 @@ export default async function CourseDetailPage({
                     Энэ сургалтад нэгдээд хичээлээ эхлүүлээрэй. Нэгдэх үнэгүй.
                   </p>
                   <form action={enrollAction} className="mt-4">
-                    <Button
-                      type="submit"
+                    <SubmitButton
                       className="w-full"
                       size="lg"
+                      pendingLabel="Түр хүлээнэ үү..."
                       data-tour="enroll-cta"
                     >
                       Сургалтад нэгдэх
-                    </Button>
+                    </SubmitButton>
                   </form>
                 </>
               ) : (

@@ -64,6 +64,11 @@
    - `supabase/migrations/0008_lesson_content_rls.sql` — **заавал**: төлбөрийн
      хаалтыг өгөгдлийн санд хэрэгжүүлнэ. Үүнийг ажиллуулаагүй бол
      `lesson_outline` view байхгүй тул хичээлийн жагсаалт хоосон харагдана.
+   - `supabase/migrations/0009_lesson_questions_feedback.sql` — хичээлийн
+     асуулт/хариулт, "ойлгомжтой байсан уу" үнэлгээ
+   - `supabase/migrations/0010_launch_hardening.sql` — **заавал**: хэрэглэгч
+     өөрийгөө админ/Premium болгох, төлбөргүйгээр Premium хичээл нээх
+     цоорхойг хаана; нүүр хуудасны статистик, индексүүд.
 
 5. [cloudinary.com](https://cloudinary.com) дээр үнэгүй акаунт үүсгэ (админ
    панелаас зураг/видео/аудио/PDF байршуулахад хэрэгтэй). Dashboard-ын нүүр
@@ -88,6 +93,28 @@
 
    [http://localhost:3000](http://localhost:3000) хаягаар нээ.
 
+## Ажиллуулахын өмнөх шалгах жагсаалт
+
+1. Supabase SQL Editor дээр `0010_launch_hardening.sql`-г ажиллуулсан.
+2. Hosting (Vercel г.м.) дээр `.env.local`-ийн бүх утга + доорхыг тохируулсан:
+
+   ```bash
+   NEXT_PUBLIC_SITE_URL=https://таны-домэйн.mn
+   NEXT_PUBLIC_SUPPORT_MESSENGER_URL=https://m.me/<page-username>
+   NEXT_PUBLIC_SUPPORT_PHONE=99112233
+   NEXT_PUBLIC_SUPPORT_EMAIL=info@таны-домэйн.mn
+   ```
+
+   Холбоо барих утгууд хоосон бол Premium хуудсанд "баримтаа илгээх" суваг
+   харагдахгүй — хэрэглэгч төлбөрөө хийгээд хэнд хандахаа мэдэхгүй болно.
+3. Supabase → Authentication → URL Configuration: **Site URL**-ийг домэйнээр,
+   **Redirect URLs**-д `https://таны-домэйн.mn/auth/confirm` нэмсэн. Үгүй бол
+   бүртгэл баталгаажуулах, нууц үг сэргээх имэйлийн холбоос ажиллахгүй.
+4. Supabase-ийн үнэгүй имэйл илгээгч цагт цөөн имэйл л явуулдаг тул олон
+   хэрэглэгчтэй болохоор Authentication → SMTP Settings дээр өөрийн SMTP
+   (Resend, Brevo г.м.) тохируулах.
+5. Google Search Console-д `https://таны-домэйн.mn/sitemap.xml`-г бүртгүүлэх.
+
 ## Админ болох
 
 Анх бүртгүүлсэн хэрэглэгч бүр `user` эрхтэй үүснэ. Өөрийгөө админ болгохын
@@ -107,7 +134,8 @@ select id, email from auth.users;
 
 ## Технологи
 
-- **Next.js 16** (App Router, Server Actions, `proxy.ts` route protection)
+- **Next.js 16** (App Router, Server Actions, `proxy.ts` route protection,
+  `sitemap.xml`/`robots.txt`, аюулгүй байдлын HTTP header-үүд)
 - **Supabase**: Postgres + Auth + Row Level Security
 - **Tailwind CSS v4** — брэндийн өнгө (`app/globals.css`)
 - **react-markdown** — хичээлийн агуулга

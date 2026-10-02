@@ -1,7 +1,7 @@
-import { MessageCircleQuestion, Phone, CheckCircle2, Clock } from "lucide-react";
+import { MessageCircleQuestion, CheckCircle2, Clock } from "lucide-react";
 import { AskQuestionForm } from "./AskQuestionForm";
 import { LessonFeedback } from "./LessonFeedback";
-import { SUPPORT_CONTACT, hasSupportContact } from "@/lib/support";
+import { SupportLinks } from "@/components/SupportLinks";
 import type { QuestionWithContext } from "@/lib/data/engagement";
 
 function formatDate(value: string): string {
@@ -48,30 +48,7 @@ export function LessonHelp({
           хэрэг болно.
         </p>
 
-        {hasSupportContact() && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {SUPPORT_CONTACT.messenger && (
-              <a
-                href={SUPPORT_CONTACT.messenger}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 text-sm font-medium text-navy-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
-              >
-                <MessageCircleQuestion size={15} className="text-brand-600" />
-                Messenger-ээр шууд бичих
-              </a>
-            )}
-            {SUPPORT_CONTACT.phone && (
-              <a
-                href={`tel:${SUPPORT_CONTACT.phone}`}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 text-sm font-medium text-navy-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
-              >
-                <Phone size={15} className="text-brand-600" />
-                {SUPPORT_CONTACT.phone}
-              </a>
-            )}
-          </div>
-        )}
+        <SupportLinks className="mt-4" />
 
         <div className="mt-4">
           <AskQuestionForm courseSlug={courseSlug} lessonId={lessonId} />

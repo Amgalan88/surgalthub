@@ -237,7 +237,16 @@ export interface Database {
         Relationships: [];
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      platform_stats: {
+        Args: Record<string, never>;
+        Returns: {
+          learners: number;
+          lessons_completed: number;
+          courses: number;
+        }[];
+      };
+    };
   };
 }
 

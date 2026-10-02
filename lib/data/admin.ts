@@ -108,12 +108,15 @@ export async function getAllUsersWithEmail(): Promise<UserWithEmail[]> {
 
   try {
     const adminClient = createAdminClient();
-    const { data, error } = await adminClient.auth.admin.listUsers({
-      perPage: 1000,
-    });
-    if (error) throw error;
+    const emailById = new Map<string, string | null>();
+    const perPage = 1000;
+    for (let page = 1; ; page++) {
+      const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage });
+      if (error) throw error;
+      for (const u of data.users) emailById.set(u.id, u.email ?? null);
+      if (data.users.length < perPage) break;
+    }
 
-    const emailById = new Map(data.users.map((u) => [u.id, u.email ?? null]));
     return profiles.map((p) => ({ ...p, email: emailById.get(p.id) ?? null }));
   } catch (err) {
     console.error("getAllUsersWithEmail: falling back without email", err);

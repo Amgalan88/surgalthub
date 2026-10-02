@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Crown } from "lucide-react";
 import { PremiumStatusCard } from "@/components/premium/PremiumStatusCard";
 import { PaymentInstructions } from "@/components/premium/PaymentInstructions";
 import { getCurrentProfile } from "@/lib/auth";
+import { formatMNT, PREMIUM_DURATION_MONTHS, PREMIUM_PRICE_MNT } from "@/lib/access";
 
-export const metadata = {
-  title: "Premium эрх | Cargo Hub",
+export const metadata: Metadata = {
+  title: "Premium эрх",
+  description: `Нэг удаагийн ${formatMNT(PREMIUM_PRICE_MNT)} төлбөрөөр ${PREMIUM_DURATION_MONTHS} сарын турш Cargo Hub-ын бүх сургалтын бүх хичээлийг үзээрэй.`,
+  alternates: { canonical: "/premium" },
 };
 
 export default async function PremiumPage() {

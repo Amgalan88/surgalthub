@@ -1,23 +1,59 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TourProvider } from "@/components/tour/TourProvider";
 import { TourLauncherButton } from "@/components/tour/TourLauncherButton";
+import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
+// The interface is Mongolian, so the Cyrillic subset is the one that matters;
+// without it every heading silently fell back to the system font.
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Cargo Hub — Карго бизнесийн сургалтын платформ",
-  description:
-    "Карго нээх, ажиллуулах, вэбсайт ашиглах чиглэлээр практик онлайн сургалт. Өөрийн хэмнэлээр, хаанаас ч суралцаарай.",
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: `${SITE_NAME} — Карго бизнесийн сургалтын платформ`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "карго",
+    "карго бизнес",
+    "карго нээх",
+    "онлайн сургалт",
+    "Cargo Hub",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "mn_MN",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — Карго бизнесийн сургалтын платформ`,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    images: [{ url: "/logo-banner.jpg", alt: SITE_NAME }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — Карго бизнесийн сургалтын платформ`,
+    description: SITE_DESCRIPTION,
+    images: ["/logo-banner.jpg"],
+  },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b1224",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

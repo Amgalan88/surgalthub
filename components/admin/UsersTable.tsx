@@ -9,7 +9,8 @@ import {
   activatePremiumAccess,
   revokePremiumAccess,
 } from "@/lib/actions/admin/users";
-import { isPremiumActive } from "@/lib/access";
+import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
+import { isPremiumActive, PREMIUM_DURATION_MONTHS } from "@/lib/access";
 import type { UserWithEmail } from "@/lib/data/admin";
 
 function GeneratePasswordCell({ userId }: { userId: string }) {
@@ -107,22 +108,28 @@ function PremiumCell({
       )}
       <div className="flex items-center gap-2">
         <form action={activateAction}>
-          <button
-            type="submit"
+          <ConfirmSubmitButton
+            confirmMessage={
+              active
+                ? `Premium эрхийг одоогийн дуусах хугацаан дээр нэмж ${PREMIUM_DURATION_MONTHS} сараар сунгах уу?`
+                : `Төлбөр баталгаажсан уу? ${PREMIUM_DURATION_MONTHS} сарын Premium эрх идэвхжүүлэх үү?`
+            }
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
           >
             <Crown size={13} />
-            {active ? "Сунгах" : "Идэвхжүүлэх (6 сар)"}
-          </button>
+            {active
+              ? `Сунгах (+${PREMIUM_DURATION_MONTHS} сар)`
+              : `Идэвхжүүлэх (${PREMIUM_DURATION_MONTHS} сар)`}
+          </ConfirmSubmitButton>
         </form>
         {active && (
           <form action={revokeAction}>
-            <button
-              type="submit"
+            <ConfirmSubmitButton
+              confirmMessage="Энэ хэрэглэгчийн Premium эрхийг цуцлах уу? Үзээгүй Premium хичээлүүд нь шууд хаагдана."
               className="whitespace-nowrap rounded-lg px-2 py-1.5 text-xs font-medium text-slate-400 hover:bg-red-50 hover:text-red-600"
             >
               Цуцлах
-            </button>
+            </ConfirmSubmitButton>
           </form>
         )}
       </div>
@@ -151,6 +158,8 @@ export function UsersTable({ users }: { users: UserWithEmail[] }) {
           className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
         />
         <Input
+          type="search"
+          aria-label="Хэрэглэгч хайх"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Имэйл, утас, нэрээр хайх..."

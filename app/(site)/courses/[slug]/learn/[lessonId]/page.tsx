@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, FileText, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import {
   getCourseBySlug,
@@ -17,6 +18,22 @@ import { getCurrentProfile } from "@/lib/auth";
 import { markLessonComplete } from "@/lib/actions/learning";
 import { isYoutubeUrl, toYoutubeEmbedUrl } from "@/lib/video";
 import { canAccessLesson } from "@/lib/access";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string; lessonId: string }>;
+}): Promise<Metadata> {
+  const { slug: rawSlug, lessonId } = await params;
+  const course = await getCourseBySlug(decodeURIComponent(rawSlug));
+  if (!course) return { robots: { index: false } };
+  const outline = await getLessonOutline(course.id);
+  const lesson = outline.find((l) => l.id === lessonId);
+  return {
+    title: lesson ? `${lesson.title} — ${course.title}` : course.title,
+    robots: { index: false },
+  };
+}
 
 export default async function LessonPage({
   params,
@@ -66,7 +83,14 @@ export default async function LessonPage({
   const isYoutube = lesson.video_url ? isYoutubeUrl(lesson.video_url) : false;
   const embedUrl = isYoutube && lesson.video_url ? toYoutubeEmbedUrl(lesson.video_url) : null;
 
-  const completeAction = markLessonComplete.bind(null, slug, lesson.id);
+  // After "complete", carry on to the next lesson if it is open to this
+  // learner; otherwise the course page, which explains what unlocks the rest.
+  const nextAccessible =
+    nextLesson && canAccessLesson(nextLesson, profile, completedIds.has(nextLesson.id));
+  const continueTo = nextAccessible
+    ? `/courses/${slug}/learn/${nextLesson.id}`
+    : `/courses/${slug}`;
+  const completeAction = markLessonComplete.bind(null, slug, lesson.id, continueTo);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -157,6 +181,9 @@ export default async function LessonPage({
               <div className="mt-5 aspect-video overflow-hidden rounded-xl bg-black">
                 <iframe
                   src={embedUrl}
+                  title={lesson.title}
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   className="h-full w-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -166,13 +193,22 @@ export default async function LessonPage({
               <video
                 src={lesson.video_url}
                 controls
+                playsInline
+                preload="metadata"
+                controlsList="nodownload"
                 poster={lesson.cover_image_url ?? undefined}
                 className="mt-5 max-h-[480px] w-full rounded-xl bg-black"
               />
             ))}
 
           {lesson.audio_url && (
-            <audio src={lesson.audio_url} controls className="mt-5 w-full" />
+            <audio
+              src={lesson.audio_url}
+              controls
+              preload="metadata"
+              controlsList="nodownload"
+              className="mt-5 w-full"
+            />
           )}
 
           {lesson.slides_url && (
@@ -184,18 +220,51 @@ export default async function LessonPage({
                 <a
                   href={lesson.slides_url}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="text-sm font-medium text-brand-600"
                 >
                   Шинэ цонхоор нээх
                 </a>
               </div>
-              <iframe src={lesson.slides_url} className="h-[600px] w-full" title="Слайд" />
+              <iframe
+                src={lesson.slides_url}
+                loading="lazy"
+                className="h-[420px] w-full sm:h-[600px]"
+                title="Слайд"
+              />
             </div>
           )}
 
           <article className="prose prose-slate mt-6 max-w-none prose-headings:text-navy-900 prose-a:text-brand-600">
-            <ReactMarkdown>{lesson.content_md}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                a: ({ href, children }) => {
+                  const external = href ? /^https?:\/\//.test(href) : false;
+                  return (
+                    <a
+                      href={href}
+                      {...(external
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                    >
+                      {children}
+                    </a>
+                  );
+                },
+                img: ({ src, alt }) => (
+                  // Markdown images can come from any host, so next/image
+                  // (which needs an allow-list) does not fit here.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={typeof src === "string" ? src : undefined}
+                    alt={alt ?? ""}
+                    loading="lazy"
+                  />
+                ),
+              }}
+            >
+              {lesson.content_md}
+            </ReactMarkdown>
           </article>
 
           <LessonHelp
@@ -228,30 +297,37 @@ export default async function LessonPage({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               {!isDone && (
                 <form action={completeAction}>
-                  <Button
-                    type="submit"
-                    variant="secondary"
+                  <SubmitButton
                     className="w-full sm:w-auto"
+                    pendingLabel="Хадгалж байна..."
                     data-tour="mark-complete-btn"
                   >
-                    Дуусгасан гэж тэмдэглэх
-                  </Button>
+                    <CheckCircle2 size={16} />
+                    {nextAccessible ? "Дуусгаад дараагийнх руу" : "Дуусгасан гэж тэмдэглэх"}
+                  </SubmitButton>
                 </form>
               )}
               {nextLesson ? (
                 <Link
                   href={`/courses/${slug}/learn/${nextLesson.id}`}
-                  className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1 rounded-lg px-4 py-2.5 text-sm font-medium",
+                    isDone
+                      ? "bg-brand-600 text-white hover:bg-brand-700"
+                      : "text-slate-600 ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
+                  )}
                 >
-                  Дараах <ChevronRight size={16} />
+                  {isDone ? "Дараах" : "Алгасах"} <ChevronRight size={16} />
                 </Link>
               ) : (
-                <Link
-                  href={`/courses/${slug}`}
-                  className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-                >
-                  Курс руу буцах
-                </Link>
+                isDone && (
+                  <Link
+                    href={`/courses/${slug}`}
+                    className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+                  >
+                    Курс руу буцах
+                  </Link>
+                )
               )}
             </div>
           </div>

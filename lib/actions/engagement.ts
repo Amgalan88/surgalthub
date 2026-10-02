@@ -31,7 +31,10 @@ export async function askLessonQuestion(
     .from("lesson_questions")
     .insert({ lesson_id: lessonId, user_id: profile.id, body });
 
-  if (error) return { error: error.message };
+  if (error) {
+    console.error("askLessonQuestion failed:", error);
+    return { error: "Асуулт илгээж чадсангүй. Дахин оролдоно уу." };
+  }
 
   revalidatePath(`/courses/${courseSlug}/learn/${lessonId}`);
   return { success: true };

@@ -5,6 +5,9 @@ import {
   PREMIUM_DURATION_MONTHS,
   PREMIUM_PRICE_MNT,
 } from "@/lib/access";
+import { hasSupportContact } from "@/lib/support";
+import { SupportLinks } from "@/components/SupportLinks";
+import { CopyButton } from "@/components/ui/CopyButton";
 
 const steps = [
   {
@@ -47,14 +50,30 @@ export function PaymentInstructions() {
             </div>
             <div className="flex items-center justify-between gap-4">
               <dt className="text-slate-400">Дансны дугаар</dt>
-              <dd className="font-mono text-base font-semibold text-brand-300">
+              <dd className="flex items-center gap-1 font-mono text-base font-semibold text-brand-300">
                 {PAYMENT_INFO.account}
+                <CopyButton
+                  value={PAYMENT_INFO.account}
+                  label="Дансны дугаар хуулах"
+                  className="text-slate-400 hover:bg-white/10 hover:text-white"
+                />
               </dd>
             </div>
             <div className="flex items-center justify-between gap-4">
               <dt className="text-slate-400">Хүлээн авагч</dt>
               <dd className="font-medium text-white">
                 {PAYMENT_INFO.accountHolder}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-slate-400">Дүн</dt>
+              <dd className="flex items-center gap-1 font-semibold text-white">
+                {formatMNT(PREMIUM_PRICE_MNT)}
+                <CopyButton
+                  value={String(PREMIUM_PRICE_MNT)}
+                  label="Дүн хуулах"
+                  className="text-slate-400 hover:bg-white/10 hover:text-white"
+                />
               </dd>
             </div>
           </dl>
@@ -85,6 +104,16 @@ export function PaymentInstructions() {
           );
         })}
       </ol>
+
+      {hasSupportContact() && (
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="font-semibold text-navy-900">Баримтаа илгээх</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Гүйлгээний баримтын зургаа доорх сувгийн аль нэгээр илгээгээрэй.
+          </p>
+          <SupportLinks className="mt-4" />
+        </div>
+      )}
     </div>
   );
 }

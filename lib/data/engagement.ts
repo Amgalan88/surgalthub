@@ -74,24 +74,22 @@ export interface PlatformStats {
   courses: number;
 }
 
-/** Aggregate counts used for social proof on the landing page. */
+/**
+ * Aggregate counts used for social proof on the landing page. Goes through a
+ * database function because the underlying rows are private to each learner.
+ */
 export async function getPlatformStats(): Promise<PlatformStats> {
   const supabase = await createClient();
-  const [{ count: learners }, { count: lessonsCompleted }, { count: courses }] =
-    await Promise.all([
-      supabase.from("enrollments").select("*", { count: "exact", head: true }),
-      supabase
-        .from("lesson_progress")
-        .select("*", { count: "exact", head: true }),
-      supabase
-        .from("courses")
-        .select("*", { count: "exact", head: true })
-        .eq("published", true),
-    ]);
+  const { data, error } = await supabase.rpc("platform_stats").maybeSingle();
+
+  if (error || !data) {
+    // Migration 0010 not applied yet: hide the bar rather than show zeros.
+    return { learners: 0, lessonsCompleted: 0, courses: 0 };
+  }
 
   return {
-    learners: learners ?? 0,
-    lessonsCompleted: lessonsCompleted ?? 0,
-    courses: courses ?? 0,
+    learners: Number(data.learners),
+    lessonsCompleted: Number(data.lessons_completed),
+    courses: Number(data.courses),
   };
 }

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
 
@@ -9,7 +10,11 @@ export async function requireAdmin(): Promise<Profile> {
   return profile;
 }
 
-export async function getCurrentProfile(): Promise<Profile | null> {
+/**
+ * The signed-in user's profile. Memoised per request: the layout, navbar,
+ * footer and page all ask for it, and each call is two network round trips.
+ */
+export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -35,4 +40,4 @@ export async function getCurrentProfile(): Promise<Profile | null> {
   }
 
   return profile;
-}
+});

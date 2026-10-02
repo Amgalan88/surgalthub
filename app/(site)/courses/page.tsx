@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CourseCard } from "@/components/course/CourseCard";
@@ -12,6 +13,13 @@ const filters: { key: CourseTrack | "all"; label: string }[] = [
   { key: "operating", label: TRACK_LABELS.operating },
   { key: "platform", label: TRACK_LABELS.platform },
 ];
+
+export const metadata: Metadata = {
+  title: "Сургалтууд",
+  description:
+    "Карго нээх, ажиллуулах, онлайн карго платформ ашиглах чиглэлийн бүх онлайн сургалт. Эхний хичээлүүд үнэгүй.",
+  alternates: { canonical: "/courses" },
+};
 
 export default async function CoursesPage({
   searchParams,

@@ -36,6 +36,8 @@ export function AuthForm({
               id="full_name"
               name="full_name"
               placeholder="Бат Болд"
+              autoComplete="name"
+              maxLength={80}
               required
             />
           </div>
@@ -45,7 +47,11 @@ export function AuthForm({
               id="phone"
               name="phone"
               type="tel"
+              inputMode="tel"
               placeholder="99112233"
+              autoComplete="tel"
+              pattern="\+?[0-9\s\-]{8,15}"
+              title="8 оронтой утасны дугаар"
               required
             />
           </div>
@@ -58,7 +64,9 @@ export function AuthForm({
           id="email"
           name="email"
           type="email"
+          inputMode="email"
           placeholder="you@example.com"
+          autoComplete="email"
           required
         />
       </div>
@@ -71,17 +79,31 @@ export function AuthForm({
           type="password"
           placeholder="••••••••"
           minLength={6}
+          autoComplete={mode === "login" ? "current-password" : "new-password"}
           required
         />
+        {mode === "register" && (
+          <p className="mt-1.5 text-xs text-slate-400">Доод тал нь 6 тэмдэгт.</p>
+        )}
       </div>
 
       {state.error && (
-        <p className="rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+        <p role="alert" className="rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
           {state.error}
         </p>
       )}
+      {state.notice && (
+        <p role="status" className="rounded-lg bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-700">
+          {state.notice}
+        </p>
+      )}
 
-      <Button type="submit" className="w-full" size="lg" disabled={pending}>
+      <Button
+        type="submit"
+        className="w-full"
+        size="lg"
+        disabled={pending || Boolean(state.notice)}
+      >
         {pending
           ? "Түр хүлээнэ үү..."
           : mode === "login"

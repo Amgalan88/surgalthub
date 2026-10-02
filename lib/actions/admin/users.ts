@@ -60,13 +60,27 @@ export async function generateUserPassword(
   }
 }
 
+/**
+ * Grants (or renews) Premium. Renewing before expiry stacks on top of the
+ * remaining time, so a learner who pays early never loses days they bought.
+ */
 export async function activatePremiumAccess(userId: string) {
   await requireAdmin();
 
-  const until = new Date();
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("premium_until")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const now = Date.now();
+  const current = profile?.premium_until
+    ? new Date(profile.premium_until).getTime()
+    : 0;
+  const until = new Date(Math.max(now, current));
   until.setMonth(until.getMonth() + PREMIUM_DURATION_MONTHS);
 
-  const supabase = await createClient();
   await supabase
     .from("profiles")
     .update({ premium_until: until.toISOString() })

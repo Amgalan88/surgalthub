@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Card, CardBody } from "@/components/ui/Card";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { getCurrentProfile } from "@/lib/auth";
+
+export const metadata: Metadata = {
+  title: "Нууц үг сэргээх",
+  robots: { index: false },
+};
 
 export default async function ForgotPasswordPage() {
   const profile = await getCurrentProfile();

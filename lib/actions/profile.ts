@@ -18,6 +18,12 @@ export async function updateProfile(
   if (!fullName) {
     return { error: "Нэрээ оруулна уу." };
   }
+  if (fullName.length > 80) {
+    return { error: "Нэр хэт урт байна." };
+  }
+  if (phone && !/^\+?[0-9\s-]{8,15}$/.test(phone)) {
+    return { error: "Утасны дугаараа зөв оруулна уу (жишээ нь 99112233)." };
+  }
 
   const supabase = await createClient();
   const {
@@ -30,7 +36,10 @@ export async function updateProfile(
     .update({ full_name: fullName, phone: phone || null })
     .eq("id", user.id);
 
-  if (error) return { error: error.message };
+  if (error) {
+    console.error("updateProfile failed:", error);
+    return { error: "Хадгалж чадсангүй. Дахин оролдоно уу." };
+  }
 
   revalidatePath("/dashboard/profile");
   return { success: true };
