@@ -10,6 +10,7 @@ import {
   MessageCircleQuestion,
   ExternalLink,
   Menu,
+  Upload,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ import { Logo } from "./Logo";
 const links = [
   { href: "/admin", label: "Хяналтын самбар", icon: LayoutDashboard, exact: true },
   { href: "/admin/courses", label: "Сургалтууд", icon: BookOpen, exact: false },
+  { href: "/admin/import", label: "Хичээл оруулах", icon: Upload, exact: false },
   { href: "/admin/users", label: "Хэрэглэгчид", icon: Users, exact: false },
   {
     href: "/admin/questions",
