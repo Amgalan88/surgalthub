@@ -167,9 +167,9 @@ export function UsersTable({ users }: { users: UserWithEmail[] }) {
         />
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+          <thead className="border-b border-slate-200 text-xs text-slate-500">
             <tr>
               <th className="px-5 py-3 font-medium">Нэр</th>
               <th className="px-5 py-3 font-medium">Имэйл</th>

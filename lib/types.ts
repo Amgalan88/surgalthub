@@ -1,5 +1,6 @@
 export type UserRole = "user" | "admin";
 export type CourseTrack = "opening" | "operating" | "platform";
+export type PaymentStatus = "pending" | "approved" | "rejected";
 
 type Table<Row, Insert, Update> = {
   Row: Row;
@@ -203,6 +204,41 @@ export interface Database {
           created_at?: string;
         }
       >;
+      payment_requests: Table<
+        {
+          id: string;
+          user_id: string;
+          amount: number;
+          payer_name: string | null;
+          status: PaymentStatus;
+          admin_note: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+        },
+        {
+          id?: string;
+          user_id: string;
+          amount: number;
+          payer_name?: string | null;
+          status?: PaymentStatus;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+        },
+        {
+          id?: string;
+          user_id?: string;
+          amount?: number;
+          payer_name?: string | null;
+          status?: PaymentStatus;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+        }
+      >;
       lesson_progress: Table<
         {
           id: string;
@@ -238,6 +274,10 @@ export interface Database {
       };
     };
     Functions: {
+      approve_payment_request: {
+        Args: { request_id: string; months: number };
+        Returns: string;
+      };
       platform_stats: {
         Args: Record<string, never>;
         Returns: {
@@ -260,6 +300,8 @@ export type LessonProgress =
 export type LessonOutline = Database["public"]["Views"]["lesson_outline"]["Row"];
 export type LessonQuestion =
   Database["public"]["Tables"]["lesson_questions"]["Row"];
+export type PaymentRequest =
+  Database["public"]["Tables"]["payment_requests"]["Row"];
 export type LessonFeedback =
   Database["public"]["Tables"]["lesson_feedback"]["Row"];
 

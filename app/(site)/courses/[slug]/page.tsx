@@ -11,6 +11,7 @@ import { PremiumOffer } from "@/components/premium/PremiumOffer";
 import { getCourseBySlug, getCoursePosition, getLessonOutline } from "@/lib/data/courses";
 import { getCompletedLessonIds } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
+import { getMyPaymentState } from "@/lib/data/payments";
 import { canAccessLesson, isPremiumActive } from "@/lib/access";
 import { getSiteUrl, SITE_NAME } from "@/lib/site";
 
@@ -73,6 +74,10 @@ export default async function CourseDetailPage({
     (l) => !canAccessLesson(l, profile, completedIds.has(l.id))
   ).length;
   const hasPremium = profile?.role === "admin" || isPremiumActive(profile);
+  const paymentPending =
+    profile && lockedCount > 0 && !hasPremium
+      ? Boolean((await getMyPaymentState(profile.id)).pending)
+      : false;
   const action = primaryCourseAction(course.slug, lessons, completedIds, profile);
   const nextLessonId = lessons.find(
     (l) => !completedIds.has(l.id) && canAccessLesson(l, profile)
@@ -260,7 +265,7 @@ export default async function CourseDetailPage({
 
           <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
             {lockedCount > 0 ? (
-              <PremiumOffer lessonCount={lockedCount} />
+              <PremiumOffer lessonCount={lockedCount} pending={paymentPending} />
             ) : (
               hasPremium && (
                 <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">

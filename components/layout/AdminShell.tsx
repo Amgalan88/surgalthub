@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Banknote,
   LayoutDashboard,
   BookOpen,
   Users,
@@ -19,6 +20,7 @@ import { Logo } from "./Logo";
 
 const links = [
   { href: "/admin", label: "Хяналтын самбар", icon: LayoutDashboard, exact: true },
+  { href: "/admin/payments", label: "Төлбөрүүд", icon: Banknote, exact: false },
   { href: "/admin/courses", label: "Сургалтууд", icon: BookOpen, exact: false },
   { href: "/admin/import", label: "Хичээл оруулах", icon: Upload, exact: false },
   { href: "/admin/users", label: "Хэрэглэгчид", icon: Users, exact: false },
@@ -30,7 +32,13 @@ const links = [
   },
 ];
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({
+  onNavigate,
+  pendingPayments,
+}: {
+  onNavigate?: () => void;
+  pendingPayments: number;
+}) {
   const pathname = usePathname();
 
   return (
@@ -58,7 +66,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               )}
             >
               <link.icon size={17} />
-              {link.label}
+              <span className="flex-1">{link.label}</span>
+              {link.href === "/admin/payments" && pendingPayments > 0 && (
+                <span className="rounded-full bg-gold-400 px-2 py-0.5 text-xs font-semibold text-navy-950">
+                  {pendingPayments}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -85,14 +98,20 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export default function AdminShell({ children }: { children: React.ReactNode }) {
+export default function AdminShell({
+  children,
+  pendingPayments = 0,
+}: {
+  children: React.ReactNode;
+  pendingPayments?: number;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 lg:flex-row">
       {/* Desktop sidebar */}
       <aside className="hidden shrink-0 flex-col border-r border-slate-200 bg-navy-900 text-white lg:flex lg:w-64">
-        <SidebarContent />
+        <SidebarContent pendingPayments={pendingPayments} />
       </aside>
 
       {/* Mobile topbar */}
@@ -102,9 +121,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Цэс нээх"
-          className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-white/10"
+          className="relative flex h-9 w-9 items-center justify-center rounded-lg hover:bg-white/10"
         >
           <Menu size={20} />
+          {pendingPayments > 0 && (
+            <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-gold-400" />
+          )}
         </button>
       </div>
 
@@ -127,7 +149,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 <X size={20} />
               </button>
             </div>
-            <SidebarContent onNavigate={() => setOpen(false)} />
+            <SidebarContent onNavigate={() => setOpen(false)} pendingPayments={pendingPayments} />
           </aside>
         </div>
       )}

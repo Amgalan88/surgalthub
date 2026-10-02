@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/Badge";
 import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
 import { getAllCoursesAdmin } from "@/lib/data/admin";
 import { deleteCourse, toggleCoursePublished } from "@/lib/actions/admin/courses";
-import { TRACK_LABELS } from "@/lib/types";
 
 export default async function AdminCoursesPage() {
   const courses = await getAllCoursesAdmin();
@@ -14,8 +13,8 @@ export default async function AdminCoursesPage() {
     <div className="p-6 sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-navy-900">Сургалтууд</h1>
-          <p className="mt-1 text-slate-500">Курс, хичээл, шалгалт удирдах</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-navy-900">Сургалтууд</h1>
+          <p className="mt-1 text-slate-500">Курс дээр дарж хичээлүүдийг нь засна.</p>
         </div>
         <Link
           href="/admin/courses/new"
@@ -29,10 +28,9 @@ export default async function AdminCoursesPage() {
       <Card className="mt-8 overflow-hidden" data-tour="admin-courses-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <thead className="border-b border-slate-200 text-xs text-slate-500">
               <tr>
                 <th className="px-5 py-3 font-medium">Нэр</th>
-                <th className="px-5 py-3 font-medium">Чиглэл</th>
                 <th className="px-5 py-3 font-medium">Хичээл</th>
                 <th className="px-5 py-3 font-medium">Бүртгэл</th>
                 <th className="px-5 py-3 font-medium">Төлөв</th>
@@ -50,10 +48,12 @@ export default async function AdminCoursesPage() {
                 return (
                   <tr key={course.id}>
                     <td className="px-5 py-3.5 font-medium text-navy-900">
-                      {course.title}
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-500">
-                      {TRACK_LABELS[course.track]}
+                      <Link
+                        href={`/admin/courses/${course.id}/lessons`}
+                        className="hover:text-brand-700"
+                      >
+                        {course.title}
+                      </Link>
                     </td>
                     <td className="px-5 py-3.5 text-slate-500">
                       {course.lesson_count}
@@ -100,7 +100,7 @@ export default async function AdminCoursesPage() {
               })}
               {courses.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-slate-400">
+                  <td colSpan={5} className="px-5 py-12 text-center text-slate-400">
                     Курс алга байна. Эхний курсаа үүсгээрэй.
                   </td>
                 </tr>

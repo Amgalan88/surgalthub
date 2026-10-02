@@ -26,7 +26,7 @@ export default async function AdminLessonsPage({
       </Link>
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-navy-900">Хичээлүүд</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-navy-900">Хичээлүүд</h1>
         <Link
           href={`/admin/courses/${id}/lessons/new`}
           data-tour="admin-add-lesson"

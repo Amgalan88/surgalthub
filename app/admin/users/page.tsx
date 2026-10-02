@@ -6,10 +6,10 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="text-2xl font-bold text-navy-900">Хэрэглэгчид</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-navy-900">Хэрэглэгчид</h1>
       <p className="mt-1 text-slate-500">
-        Нийт {users.length} хэрэглэгч. Имэйл/утсаар хайж, төлбөр баталгаажсан
-        хэрэглэгчийг 6 сарын хугацаагаар идэвхжүүлээрэй.
+        Нийт {users.length} хэрэглэгч. Төлбөрийг ихэвчлэн &quot;Төлбөрүүд&quot; хэсгээс
+        баталгаажуулна. Эндээс Premium-ийг гараар нээх, цуцлах боломжтой.
       </p>
 
       <div className="mt-8">
