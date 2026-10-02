@@ -2,40 +2,49 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #0f172a;
+  --background: #ffffff;
+  --foreground: #0f1a33;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-golos);
   --font-mono: var(--font-geist-mono);
 
-  /* Cargo Hub brand palette: royal blue + gold, matching the logo mark */
-  --color-brand-50: #fffbeb;
-  --color-brand-100: #fef3c7;
-  --color-brand-200: #fde68a;
-  --color-brand-300: #fcd34d;
-  --color-brand-400: #fbbf24;
-  --color-brand-500: #f59e0b;
-  --color-brand-600: #d97706;
-  --color-brand-700: #b45309;
+  /* Cargo Hub palette, taken from the logo: royal blue with a warm gold accent.
+     "brand" is the blue used for actions and links. */
+  --color-brand-50: #eff4ff;
+  --color-brand-100: #dce6fd;
+  --color-brand-200: #c0d2fc;
+  --color-brand-300: #94b3f9;
+  --color-brand-400: #6189f4;
+  --color-brand-500: #3d65ee;
+  --color-brand-600: #1f4bd8;
+  --color-brand-700: #1a3cb0;
+  --color-brand-800: #1b358b;
+  --color-brand-900: #1b306e;
 
-  --color-navy-50: #eff6ff;
-  --color-navy-100: #dbeafe;
-  --color-navy-200: #bfdbfe;
-  --color-navy-700: #1d4ed8;
-  --color-navy-800: #1e3a8a;
-  --color-navy-900: #172554;
-  --color-navy-950: #0b1224;
+  /* Ink for headings and the dark footer. */
+  --color-navy-50: #f3f5f9;
+  --color-navy-100: #e4e8f0;
+  --color-navy-200: #c9d1e0;
+  --color-navy-700: #2c3a5a;
+  --color-navy-800: #1b2744;
+  --color-navy-900: #0f1a33;
+  --color-navy-950: #0a1226;
+
+  --color-gold-100: #fdf1cf;
+  --color-gold-200: #fbe3a0;
+  --color-gold-300: #f8d06a;
+  --color-gold-400: #f4bd3c;
+  --color-gold-500: #e3a41b;
+  --color-gold-700: #8f5f0b;
 }
 
-/* ── Premium micro-details ─────────────────────────────── */
-
 ::selection {
-  background: var(--color-brand-500);
-  color: #fff;
+  background: var(--color-gold-200);
+  color: var(--color-navy-900);
 }
 
 html {
@@ -88,24 +97,7 @@ body {
   animation: shimmer 1.4s infinite linear;
 }
 
-/* Soft entrance for page sections */
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-up {
-  animation: fade-up 0.5s ease-out both;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .fade-up,
   .skeleton {
     animation: none;
   }

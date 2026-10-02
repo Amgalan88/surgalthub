@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
 import { getCourseByIdAdmin } from "@/lib/data/admin";
 import { getLessonsForCourse } from "@/lib/data/courses";
@@ -42,9 +43,11 @@ export default async function AdminLessonsPage({
             return (
               <li key={lesson.id} className="flex items-center gap-3 px-5 py-3.5">
                 <span className="text-sm text-slate-400">{i + 1}.</span>
-                <span className="flex-1 text-sm font-medium text-navy-900">
+                <span className="min-w-0 flex-1 text-sm font-medium text-navy-900">
                   {lesson.title}
                 </span>
+                {lesson.is_free_preview && <Badge tone="green">Үнэгүй</Badge>}
+                {!lesson.video_url && <Badge tone="red">Видео алга</Badge>}
                 <Link
                   href={`/admin/courses/${id}/lessons/${lesson.id}`}
                   className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"

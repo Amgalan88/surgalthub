@@ -38,7 +38,7 @@ export default function MobileMenu({
       {profile && (
         <span
           aria-label={`Нэвтэрсэн: ${profile.full_name ?? "Хэрэглэгч"}`}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-200"
         >
           {(profile.full_name?.trim()?.[0] ?? "Х").toUpperCase()}
         </span>
@@ -49,7 +49,7 @@ export default function MobileMenu({
         aria-label={open ? "Цэс хаах" : "Цэс нээх"}
         aria-expanded={open}
         aria-controls="mobile-menu"
-        className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:bg-white/10 hover:text-white"
+        className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-navy-900"
       >
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -57,7 +57,7 @@ export default function MobileMenu({
       {open && (
         <div
           id="mobile-menu"
-          className="absolute inset-x-0 top-16 z-50 border-b border-white/10 bg-navy-950 px-4 pb-4 shadow-xl"
+          className="absolute inset-x-0 top-16 z-50 border-b border-slate-200 bg-white px-4 pb-4 shadow-lg shadow-navy-900/5"
         >
           <nav className="flex flex-col gap-1 py-2">
             {navLinks.map((link) => (
@@ -65,23 +65,23 @@ export default function MobileMenu({
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white"
+                className="rounded-lg px-3 py-3 text-[15px] text-navy-900 hover:bg-slate-50"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
-          <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
+          <div className="flex flex-col gap-2 border-t border-slate-200 pt-3">
             {profile ? (
               <>
-                <p className="px-3 pb-1 text-xs text-slate-400">
-                  Нэвтэрсэн: <span className="text-slate-200">{profile.full_name ?? "Хэрэглэгч"}</span>
+                <p className="px-3 pb-1 text-xs text-slate-500">
+                  Нэвтэрсэн: <span className="font-medium text-navy-900">{profile.full_name ?? "Хэрэглэгч"}</span>
                 </p>
                 {profile.role === "admin" && (
                   <Link
                     href="/admin"
                     onClick={() => setOpen(false)}
-                    className="rounded-lg border border-white/25 px-3 py-2.5 text-center text-sm font-medium text-white"
+                    className="rounded-lg border border-slate-300 px-3 py-2.5 text-center text-sm font-medium text-navy-900"
                   >
                     Админ
                   </Link>
@@ -91,12 +91,12 @@ export default function MobileMenu({
                   onClick={() => setOpen(false)}
                   className="rounded-lg bg-brand-600 px-3 py-2.5 text-center text-sm font-medium text-white"
                 >
-                  Хяналтын самбар
+                  Миний сургалт
                 </Link>
                 <form action={signOut}>
                   <button
                     type="submit"
-                    className="w-full rounded-lg px-3 py-2.5 text-center text-sm font-medium text-slate-300 hover:text-white"
+                    className="w-full rounded-lg px-3 py-2.5 text-center text-sm font-medium text-slate-500 hover:text-navy-900"
                   >
                     Гарах
                   </button>
@@ -107,7 +107,7 @@ export default function MobileMenu({
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="rounded-lg border border-white/25 px-3 py-2.5 text-center text-sm font-medium text-white"
+                  className="rounded-lg border border-slate-300 px-3 py-2.5 text-center text-sm font-medium text-navy-900"
                 >
                   Нэвтрэх
                 </Link>

@@ -2,22 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, FileText, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CheckCircle2, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { LinkButton } from "@/components/ui/Button";
+import { LessonList } from "@/components/course/LessonList";
+import { lessonHref } from "@/components/course/courseLinks";
+import { PremiumOffer } from "@/components/premium/PremiumOffer";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import {
   getCourseBySlug,
   getLessonById,
   getLessonOutline,
+  getNextCourse,
 } from "@/lib/data/courses";
-import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
+import { ensureEnrollment, getCompletedLessonIds } from "@/lib/data/progress";
 import { getLessonQuestions, getMyLessonFeedback } from "@/lib/data/engagement";
 import { LessonHelp } from "@/components/lesson/LessonHelp";
 import { getCurrentProfile } from "@/lib/auth";
 import { markLessonComplete } from "@/lib/actions/learning";
-import { isYoutubeUrl, toYoutubeEmbedUrl } from "@/lib/video";
-import { canAccessLesson } from "@/lib/access";
+import { cloudinaryVideoPoster, isYoutubeUrl, toYoutubeEmbedUrl } from "@/lib/video";
+import { LessonVideo } from "@/components/lesson/LessonVideo";
+import { canAccessLesson, isPremiumActive } from "@/lib/access";
 
 export async function generateMetadata({
   params,
@@ -43,25 +48,24 @@ export default async function LessonPage({
   const { slug: rawSlug, lessonId } = await params;
   const slug = decodeURIComponent(rawSlug);
 
-  const profile = await getCurrentProfile();
-  if (!profile) redirect(`/login?next=/courses/${slug}/learn/${lessonId}`);
-
-  const course = await getCourseBySlug(slug);
+  const [course, profile] = await Promise.all([getCourseBySlug(slug), getCurrentProfile()]);
   if (!course) notFound();
-
-  const enrollment = await getEnrollment(profile.id, course.id);
-  if (!enrollment) redirect(`/courses/${slug}`);
 
   const lessons = await getLessonOutline(course.id);
   const index = lessons.findIndex((l) => l.id === lessonId);
   if (index === -1) notFound();
 
   const outline = lessons[index];
-  const completedIds = await getCompletedLessonIds(
-    profile.id,
-    lessons.map((l) => l.id)
-  );
+  const completedIds = profile
+    ? await getCompletedLessonIds(
+        profile.id,
+        lessons.map((l) => l.id)
+      )
+    : new Set<string>();
   const isDone = completedIds.has(outline.id);
+
+  // Free lessons are open to everyone, signed in or not; the course page
+  // explains how to unlock the rest.
   if (!canAccessLesson(outline, profile, isDone)) {
     redirect(`/courses/${slug}?locked=1`);
   }
@@ -70,10 +74,14 @@ export default async function LessonPage({
   const lesson = await getLessonById(lessonId);
   if (!lesson) redirect(`/courses/${slug}?locked=1`);
 
-  const [questions, myFeedback] = await Promise.all([
-    getLessonQuestions(lessonId),
-    getMyLessonFeedback(lessonId, profile.id),
-  ]);
+  const [questions, myFeedback, nextCourse] = profile
+    ? await Promise.all([
+        getLessonQuestions(lessonId),
+        getMyLessonFeedback(lessonId, profile.id),
+        getNextCourse(course.id),
+        ensureEnrollment(profile.id, course.id),
+      ])
+    : await Promise.all([[], null, getNextCourse(course.id)]);
 
   const prevLesson = lessons[index - 1];
   const nextLesson = lessons[index + 1];
@@ -82,103 +90,48 @@ export default async function LessonPage({
     lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
   const isYoutube = lesson.video_url ? isYoutubeUrl(lesson.video_url) : false;
   const embedUrl = isYoutube && lesson.video_url ? toYoutubeEmbedUrl(lesson.video_url) : null;
+  const hasPremium = profile?.role === "admin" || isPremiumActive(profile);
+  const lockedCount = lessons.filter(
+    (l) => !canAccessLesson(l, profile, completedIds.has(l.id))
+  ).length;
 
   // After "complete", carry on to the next lesson if it is open to this
   // learner; otherwise the course page, which explains what unlocks the rest.
   const nextAccessible =
     nextLesson && canAccessLesson(nextLesson, profile, completedIds.has(nextLesson.id));
-  const continueTo = nextAccessible
-    ? `/courses/${slug}/learn/${nextLesson.id}`
-    : `/courses/${slug}`;
+  const continueTo = nextAccessible ? lessonHref(slug, nextLesson.id) : `/courses/${slug}`;
   const completeAction = markLessonComplete.bind(null, slug, lesson.id, continueTo);
+  const here = lessonHref(slug, lesson.id);
+
+  // What the player offers once the video ends.
+  const afterVideo = nextLesson
+    ? nextAccessible
+      ? { href: lessonHref(slug, nextLesson.id), label: "Дараагийн хичээл" }
+      : { href: "/premium", label: "Дараагийн хичээлийг нээх" }
+    : nextCourse
+      ? { href: `/courses/${nextCourse.slug}`, label: `Дараагийн курс: ${nextCourse.title}` }
+      : { href: `/courses/${slug}`, label: "Курс руу буцах" };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
-        <aside className="order-2 lg:order-1">
-          <div className="lg:sticky lg:top-24">
-            <Link
-              href={`/courses/${slug}`}
-              className="text-sm font-medium text-slate-500 hover:text-navy-900"
-            >
-              ← {course.title}
-            </Link>
-            <ol className="mt-4 space-y-1" data-tour="lesson-sidebar">
-              {lessons.map((l, i) => {
-                const accessible = canAccessLesson(l, profile, completedIds.has(l.id));
-                const content = (
-                  <div
-                    className={cn(
-                      "flex items-center gap-2 rounded-lg px-3 py-2 text-sm",
-                      l.id === lesson.id
-                        ? "bg-brand-50 font-medium text-brand-700"
-                        : accessible
-                          ? "text-slate-600 hover:bg-slate-50"
-                          : "text-slate-400"
-                    )}
-                  >
-                    {!accessible ? (
-                      <Lock size={16} className="shrink-0 text-slate-300" />
-                    ) : completedIds.has(l.id) ? (
-                      <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
-                    ) : (
-                      <PlayCircle size={16} className="shrink-0 text-slate-300" />
-                    )}
-                    <span className="line-clamp-1">
-                      {i + 1}. {l.title}
-                    </span>
-                  </div>
-                );
-                return (
-                  <li key={l.id}>
-                    {accessible ? (
-                      <Link href={`/courses/${slug}/learn/${l.id}`}>{content}</Link>
-                    ) : (
-                      content
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-        </aside>
+    <div className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6">
+      <div className="flex items-center justify-between gap-4 text-sm">
+        <Link
+          href={`/courses/${slug}`}
+          className="inline-flex min-w-0 items-center gap-1 text-slate-500 hover:text-navy-900"
+        >
+          <ChevronLeft size={16} className="shrink-0" />
+          <span className="truncate">{course.title}</span>
+        </Link>
+        <span className="shrink-0 tabular-nums text-slate-500">
+          Хичээл {index + 1} / {lessons.length}
+        </span>
+      </div>
 
-        <main className="order-1 lg:order-2">
-          {/* On mobile the lesson list sits below the content, so the way back
-              to the course needs to be reachable from the top too. */}
-          <Link
-            href={`/courses/${slug}`}
-            className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-navy-900 lg:hidden"
-          >
-            <ChevronLeft size={15} /> {course.title}
-          </Link>
-
-          <div className="mb-5 rounded-xl bg-slate-50 px-4 py-3 ring-1 ring-inset ring-slate-200/80">
-            <div className="flex items-center justify-between gap-4 text-sm">
-              <span className="font-medium text-navy-900">
-                {index + 1} / {lessons.length} хичээл
-              </span>
-              <span className="text-slate-500">
-                {completedCount} дууссан ({progressPct}%)
-              </span>
-            </div>
-            <ProgressBar value={progressPct} className="mt-2" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-navy-900">{lesson.title}</h1>
-
-          {lesson.cover_image_url && !lesson.video_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={lesson.cover_image_url}
-              alt={lesson.title}
-              className="mt-5 max-h-96 w-full rounded-xl object-cover"
-            />
-          )}
-
+      <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_320px]">
+        <main className="min-w-0">
           {lesson.video_url &&
             (embedUrl ? (
-              <div className="mt-5 aspect-video overflow-hidden rounded-xl bg-black">
+              <div className="aspect-video overflow-hidden rounded-xl bg-black">
                 <iframe
                   src={embedUrl}
                   title={lesson.title}
@@ -190,16 +143,96 @@ export default async function LessonPage({
                 />
               </div>
             ) : (
-              <video
+              <LessonVideo
+                key={lesson.id}
+                lessonId={lesson.id}
                 src={lesson.video_url}
-                controls
-                playsInline
-                preload="metadata"
-                controlsList="nodownload"
-                poster={lesson.cover_image_url ?? undefined}
-                className="mt-5 max-h-[480px] w-full rounded-xl bg-black"
+                poster={lesson.cover_image_url ?? cloudinaryVideoPoster(lesson.video_url)}
+                title={lesson.title}
+                alreadyDone={isDone}
+                onWatched={
+                  profile && !isDone
+                    ? markLessonComplete.bind(null, slug, lesson.id, null)
+                    : undefined
+                }
+                next={afterVideo}
               />
             ))}
+
+          {lesson.cover_image_url && !lesson.video_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={lesson.cover_image_url}
+              alt={lesson.title}
+              className="max-h-96 w-full rounded-xl object-cover"
+            />
+          )}
+
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-semibold leading-snug tracking-tight text-navy-900">
+                {lesson.title}
+              </h1>
+              {outline.is_free_preview && !hasPremium && (
+                <p className="mt-1 text-sm text-emerald-700">Үнэгүй хичээл</p>
+              )}
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2">
+              {prevLesson && (
+                <LinkButton
+                  href={lessonHref(slug, prevLesson.id)}
+                  variant="outline"
+                  aria-label="Өмнөх хичээл"
+                  className="px-3"
+                >
+                  <ChevronLeft size={16} />
+                </LinkButton>
+              )}
+              {profile && !isDone ? (
+                <form action={completeAction} className="flex-1 sm:flex-none">
+                  <SubmitButton className="w-full" pendingLabel="Хадгалж байна...">
+                    <CheckCircle2 size={16} />
+                    {nextAccessible ? "Дуусгаад дараагийнх" : "Үзэж дууслаа"}
+                  </SubmitButton>
+                </form>
+              ) : nextLesson ? (
+                <LinkButton
+                  href={nextAccessible ? lessonHref(slug, nextLesson.id) : `/courses/${slug}?locked=1`}
+                  className="flex-1 sm:flex-none"
+                >
+                  Дараагийн хичээл <ChevronRight size={16} />
+                </LinkButton>
+              ) : (
+                <LinkButton href={afterVideo.href} className="flex-1 sm:flex-none">
+                  {afterVideo.label} <ChevronRight size={16} />
+                </LinkButton>
+              )}
+            </div>
+          </div>
+
+          {profile && isDone && (
+            <p className="mt-3 flex items-center gap-1.5 text-sm text-emerald-700">
+              <CheckCircle2 size={15} /> Та энэ хичээлийг үзэж дуусгасан
+            </p>
+          )}
+
+          {!profile && (
+            <div className="mt-6 flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <p className="text-sm leading-relaxed text-slate-600">
+                <span className="font-medium text-navy-900">Үнэгүй бүртгүүлээрэй.</span>{" "}
+                Үзсэн хичээл тань хадгалагдаж, ойлгомжгүй зүйлээ багшаас асууж болно.
+              </p>
+              <div className="flex shrink-0 gap-2">
+                <LinkButton href={`/register?next=${encodeURIComponent(here)}`} size="sm">
+                  Бүртгүүлэх
+                </LinkButton>
+                <LinkButton href={`/login?next=${encodeURIComponent(here)}`} size="sm" variant="outline">
+                  Нэвтрэх
+                </LinkButton>
+              </div>
+            </div>
+          )}
 
           {lesson.audio_url && (
             <audio
@@ -207,12 +240,12 @@ export default async function LessonPage({
               controls
               preload="metadata"
               controlsList="nodownload"
-              className="mt-5 w-full"
+              className="mt-6 w-full"
             />
           )}
 
           {lesson.slides_url && (
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200">
+            <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
               <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-2.5">
                 <span className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
                   <FileText size={16} /> Слайд
@@ -221,7 +254,7 @@ export default async function LessonPage({
                   href={lesson.slides_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-medium text-brand-600"
+                  className="text-sm font-medium text-brand-700"
                 >
                   Шинэ цонхоор нээх
                 </a>
@@ -235,103 +268,75 @@ export default async function LessonPage({
             </div>
           )}
 
-          <article className="prose prose-slate mt-6 max-w-none prose-headings:text-navy-900 prose-a:text-brand-600">
-            <ReactMarkdown
-              components={{
-                a: ({ href, children }) => {
-                  const external = href ? /^https?:\/\//.test(href) : false;
-                  return (
-                    <a
-                      href={href}
-                      {...(external
-                        ? { target: "_blank", rel: "noopener noreferrer" }
-                        : {})}
-                    >
-                      {children}
-                    </a>
-                  );
-                },
-                img: ({ src, alt }) => (
-                  // Markdown images can come from any host, so next/image
-                  // (which needs an allow-list) does not fit here.
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={typeof src === "string" ? src : undefined}
-                    alt={alt ?? ""}
-                    loading="lazy"
-                  />
-                ),
-              }}
-            >
-              {lesson.content_md}
-            </ReactMarkdown>
-          </article>
+          {lesson.content_md.trim() && (
+            <article className="prose prose-slate mt-8 max-w-none prose-headings:font-semibold prose-headings:text-navy-900 prose-a:text-brand-700">
+              <ReactMarkdown
+                components={{
+                  a: ({ href, children }) => {
+                    const external = href ? /^https?:\/\//.test(href) : false;
+                    return (
+                      <a
+                        href={href}
+                        {...(external
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
+                        {children}
+                      </a>
+                    );
+                  },
+                  img: ({ src, alt }) => (
+                    // Markdown images can come from any host, so next/image
+                    // (which needs an allow-list) does not fit here.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={typeof src === "string" ? src : undefined}
+                      alt={alt ?? ""}
+                      loading="lazy"
+                    />
+                  ),
+                }}
+              >
+                {lesson.content_md}
+              </ReactMarkdown>
+            </article>
+          )}
 
-          <LessonHelp
-            courseSlug={slug}
-            lessonId={lesson.id}
-            questions={questions}
-            myFeedback={myFeedback}
-            currentUserId={profile.id}
-          />
-
-          {/* pb-16 keeps the full-width mobile buttons clear of the floating
-              tour launcher pinned to the bottom-right of the viewport. */}
-          <div
-            className="mt-10 flex flex-col gap-4 border-t border-slate-200 pb-16 pt-6 sm:flex-row sm:items-center sm:justify-between sm:pb-0"
-            data-tour="lesson-nav"
-          >
-            <div>
-              {prevLesson ? (
-                <Link
-                  href={`/courses/${slug}/learn/${prevLesson.id}`}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-navy-900"
-                >
-                  <ChevronLeft size={16} /> Өмнөх
-                </Link>
-              ) : (
-                <span />
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              {!isDone && (
-                <form action={completeAction}>
-                  <SubmitButton
-                    className="w-full sm:w-auto"
-                    pendingLabel="Хадгалж байна..."
-                    data-tour="mark-complete-btn"
-                  >
-                    <CheckCircle2 size={16} />
-                    {nextAccessible ? "Дуусгаад дараагийнх руу" : "Дуусгасан гэж тэмдэглэх"}
-                  </SubmitButton>
-                </form>
-              )}
-              {nextLesson ? (
-                <Link
-                  href={`/courses/${slug}/learn/${nextLesson.id}`}
-                  className={cn(
-                    "inline-flex items-center justify-center gap-1 rounded-lg px-4 py-2.5 text-sm font-medium",
-                    isDone
-                      ? "bg-brand-600 text-white hover:bg-brand-700"
-                      : "text-slate-600 ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
-                  )}
-                >
-                  {isDone ? "Дараах" : "Алгасах"} <ChevronRight size={16} />
-                </Link>
-              ) : (
-                isDone && (
-                  <Link
-                    href={`/courses/${slug}`}
-                    className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-                  >
-                    Курс руу буцах
-                  </Link>
-                )
-              )}
-            </div>
-          </div>
+          {profile && (
+            <LessonHelp
+              courseSlug={slug}
+              lessonId={lesson.id}
+              questions={questions}
+              myFeedback={myFeedback}
+              currentUserId={profile.id}
+            />
+          )}
         </main>
+
+        <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+          {profile && (
+            <div>
+              <div className="flex justify-between text-sm text-slate-500">
+                <span>Таны явц</span>
+                <span className="tabular-nums">
+                  {completedCount}/{lessons.length}
+                </span>
+              </div>
+              <ProgressBar value={progressPct} className="mt-2" />
+            </div>
+          )}
+          <div className="lg:max-h-[calc(100vh-14rem)] lg:overflow-y-auto">
+            <LessonList
+              courseSlug={slug}
+              lessons={lessons}
+              completedIds={completedIds}
+              profile={profile}
+              currentLessonId={lesson.id}
+              compact
+            />
+          </div>
+          {lockedCount > 0 && !hasPremium && <PremiumOffer lessonCount={lockedCount} />}
+        </aside>
       </div>
     </div>
   );

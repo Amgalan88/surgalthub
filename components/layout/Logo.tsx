@@ -28,12 +28,14 @@ export function Logo({
   );
 }
 
-/** Header/footer зэрэг navy дэвсгэр дээр: лого + бичвэр */
+/** Лого + бичвэр. `tone="dark"` нь бараан дэвсгэр (footer) дээр. */
 export function LogoWordmark({
   size = "sm",
+  tone = "light",
   className,
 }: {
   size?: "sm" | "md";
+  tone?: "light" | "dark";
   className?: string;
 }) {
   const heightPx = size === "md" ? 34 : 26;
@@ -47,10 +49,18 @@ export function LogoWordmark({
         width={widthPx}
         height={heightPx}
         priority
-        className="h-auto rounded-md object-contain ring-1 ring-white/20"
+        className={cn(
+          "h-auto rounded-md object-contain",
+          tone === "dark" && "ring-1 ring-white/15"
+        )}
         style={{ height: heightPx, width: "auto" }}
       />
-      <span className="text-base font-bold tracking-tight text-white">
+      <span
+        className={cn(
+          "text-[15px] font-semibold tracking-tight",
+          tone === "dark" ? "text-white" : "text-navy-900"
+        )}
+      >
         Cargo Hub
       </span>
     </span>

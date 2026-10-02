@@ -62,3 +62,22 @@ export function toYoutubeEmbedUrl(url: string): string | null {
     return null;
   }
 }
+
+/**
+ * A still frame from a Cloudinary-hosted video, so the player shows a picture
+ * instead of a black box before it starts. Null for anything else.
+ */
+export function cloudinaryVideoPoster(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname !== "res.cloudinary.com" || !u.pathname.includes("/video/upload/")) {
+      return null;
+    }
+    u.pathname = u.pathname
+      .replace("/video/upload/", "/video/upload/so_2,w_1280,c_limit/")
+      .replace(/\.[a-z0-9]+$/i, ".jpg");
+    return u.toString();
+  } catch {
+    return null;
+  }
+}

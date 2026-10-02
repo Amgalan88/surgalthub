@@ -6,81 +6,42 @@ import { SupportLinks } from "@/components/SupportLinks";
 export default async function Footer() {
   const profile = await getCurrentProfile();
 
+  const links = [
+    { href: "/courses", label: "Сургалтууд" },
+    { href: "/premium", label: "Үнэ" },
+    { href: "/#faq", label: "Түгээмэл асуулт" },
+    ...(profile
+      ? [{ href: "/dashboard", label: "Миний сургалт" }]
+      : [
+          { href: "/register", label: "Бүртгүүлэх" },
+          { href: "/login", label: "Нэвтрэх" },
+        ]),
+  ];
+
   return (
-    <footer className="mt-auto border-t border-white/10 bg-navy-950 text-slate-300">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <div className="flex flex-col gap-8 md:flex-row md:justify-between">
-          <div>
-            <LogoWordmark size="sm" />
-            <p className="mt-3 max-w-xs text-sm text-slate-400">
-              Карго бизнес нээх, ажиллуулах, вэбсайт ашиглах чиглэлээр
-              практик мэдлэг олгох онлайн сургалтын платформ.
+    <footer className="mt-auto bg-navy-950 text-slate-400">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-sm">
+            <LogoWordmark size="sm" tone="dark" />
+            <p className="mt-4 text-sm leading-relaxed">
+              Карго хэрхэн ажилладаг, өдөр тутам гардаг асуудлыг хэрхэн
+              шийдэхийг бодит жишээн дээр заадаг видео сургалт.
             </p>
-            <SupportLinks tone="dark" className="mt-4" />
+            <SupportLinks tone="dark" className="mt-5" />
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            <div>
-              <h4 className="text-sm font-semibold text-white">Чиглэл</h4>
-              <ul className="mt-3 space-y-2 text-sm text-slate-400">
-                <li>
-                  <Link href="/courses?track=opening" className="hover:text-white">
-                    Карго нээх
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/courses?track=operating" className="hover:text-white">
-                    Карго ажиллуулах
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/courses?track=platform" className="hover:text-white">
-                    Вэбсайт ашиглах
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-white">Платформ</h4>
-              <ul className="mt-3 space-y-2 text-sm text-slate-400">
-                <li>
-                  <Link href="/courses" className="hover:text-white">
-                    Бүх сургалт
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/premium" className="hover:text-white">
-                    Premium
-                  </Link>
-                </li>
-                {profile ? (
-                  <li>
-                    <Link href="/dashboard" className="hover:text-white">
-                      Хяналтын самбар
-                    </Link>
-                  </li>
-                ) : (
-                  <>
-                    <li>
-                      <Link href="/register" className="hover:text-white">
-                        Бүртгүүлэх
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="/login" className="hover:text-white">
-                        Нэвтрэх
-                      </Link>
-                    </li>
-                  </>
-                )}
-              </ul>
-            </div>
-          </div>
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-12 gap-y-3 text-sm">
+            {links.map((link) => (
+              <Link key={link.href} href={link.href} className="hover:text-white">
+                {link.label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
-        <div className="mt-8 border-t border-white/10 pt-6 text-xs text-slate-500">
-          © {new Date().getFullYear()} Cargo Hub. Бүх эрх хуулиар
-          хамгаалагдсан.
+        <div className="mt-10 border-t border-white/10 pt-6 text-xs text-slate-500">
+          © {new Date().getFullYear()} Cargo Hub
         </div>
       </div>
     </footer>

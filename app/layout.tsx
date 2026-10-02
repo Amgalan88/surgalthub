@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Golos_Text } from "next/font/google";
 import "./globals.css";
 import { TourProvider } from "@/components/tour/TourProvider";
 import { TourLauncherButton } from "@/components/tour/TourLauncherButton";
 import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
-// The interface is Mongolian, so the Cyrillic subset is the one that matters;
-// without it every heading silently fell back to the system font.
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin", "cyrillic"],
+// Golos was drawn for Cyrillic first, so Mongolian text (ө, ү) sets evenly
+// instead of looking like a Latin font with borrowed letters.
+const golos = Golos_Text({
+  variable: "--font-golos",
+  subsets: ["latin", "cyrillic", "cyrillic-ext"],
   display: "swap",
 });
 
@@ -53,14 +53,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b1224",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="mn"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${golos.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-white">
         <TourProvider>

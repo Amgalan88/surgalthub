@@ -30,10 +30,10 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     continuous: true,
     scrollToFirstStep: true,
     options: {
-      primaryColor: "#d97706",
-      textColor: "#172554",
+      primaryColor: "#1f4bd8",
+      textColor: "#0f1a33",
       backgroundColor: "#ffffff",
-      overlayColor: "rgba(23, 37, 84, 0.6)",
+      overlayColor: "rgba(15, 26, 51, 0.6)",
       arrowColor: "#ffffff",
       zIndex: 70,
       spotlightRadius: 8,
@@ -48,6 +48,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       close: "Хаах",
       last: "Дуусгах",
       next: "Дараах",
+      nextWithProgress: "Дараах ({current}/{total})",
       skip: "Алгасах",
     },
   });

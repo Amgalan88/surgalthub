@@ -4,24 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/site";
-
-export async function enrollInCourse(courseSlug: string, courseId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/courses/${encodeURIComponent(courseSlug)}`);
-
-  await supabase
-    .from("enrollments")
-    .upsert(
-      { user_id: user.id, course_id: courseId },
-      { onConflict: "user_id,course_id", ignoreDuplicates: true }
-    );
-
-  revalidatePath(`/courses/${courseSlug}`);
-  revalidatePath("/dashboard");
-}
+import { ensureEnrollment } from "@/lib/data/progress";
 
 /**
  * Records the lesson as done and, when that was the last one, stamps the
@@ -47,6 +30,10 @@ export async function markLessonComplete(
     .eq("id", lessonId)
     .maybeSingle();
   if (!lesson) redirect(`/courses/${courseSlug}?locked=1`);
+
+  // Normally done when the lesson page opened; repeated here so completion is
+  // always counted against an enrollment.
+  await ensureEnrollment(user.id, lesson.course_id);
 
   await supabase
     .from("lesson_progress")

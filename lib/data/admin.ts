@@ -54,7 +54,8 @@ export async function getAllCoursesAdmin(): Promise<
   const { data: courses } = await supabase
     .from("courses")
     .select("*")
-    .order("created_at", { ascending: false });
+    // Same order as the public curriculum, so "Курс 01" is first here too.
+    .order("created_at", { ascending: true });
 
   if (!courses || courses.length === 0) return [];
 

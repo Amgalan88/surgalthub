@@ -26,12 +26,12 @@ export function PremiumStatusCard({
     return (
       <div
         className={cn(
-          "rounded-2xl bg-navy-900 p-5 text-white ring-1 ring-inset ring-white/10",
+          "rounded-xl bg-navy-900 p-5 text-white ring-1 ring-inset ring-white/10",
           className
         )}
       >
         <p className="flex items-center gap-2 font-semibold">
-          <InfinityIcon size={18} className="text-brand-400" />
+          <InfinityIcon size={18} className="text-gold-300" />
           Хугацаагүй хандалт
         </p>
         <p className="mt-1 text-sm text-slate-300">
@@ -49,7 +49,7 @@ export function PremiumStatusCard({
     return (
       <div
         className={cn(
-          "rounded-2xl p-5 ring-1 ring-inset",
+          "rounded-xl p-5 ring-1 ring-inset",
           expiringSoon
             ? "bg-amber-50 ring-amber-600/20"
             : "bg-emerald-50 ring-emerald-600/20",
@@ -98,7 +98,7 @@ export function PremiumStatusCard({
   return (
     <div
       className={cn(
-        "rounded-2xl bg-brand-50 p-5 ring-1 ring-inset ring-brand-600/20",
+        "rounded-xl bg-brand-50 p-5 ring-1 ring-inset ring-brand-600/20",
         className
       )}
     >
