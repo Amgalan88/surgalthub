@@ -48,6 +48,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       close: "Хаах",
       last: "Дуусгах",
       next: "Дараах",
+      nextWithProgress: "Дараах ({current}/{total})",
       skip: "Алгасах",
     },
   });

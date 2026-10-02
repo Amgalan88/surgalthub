@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Check, Play } from "lucide-react";
+import { ArrowRight, Check, Lock, Play } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
 import { CourseRow } from "@/components/course/CourseRow";
-import { primaryCourseAction } from "@/components/course/courseLinks";
+import { courseNumber, nextInCurriculum } from "@/components/course/courseLinks";
 import { Faq } from "@/components/marketing/Faq";
 import { Testimonials } from "@/components/SocialProof";
 import { getPublishedCourses } from "@/lib/data/courses";
@@ -21,10 +21,8 @@ export default async function HomePage() {
 
   const totalLessons = courses.reduce((sum, c) => sum + c.lessonCount, 0);
   const freeLessons = courses.reduce((sum, c) => sum + c.freeLessonCount, 0);
-  const first = courses[0];
-  const firstAction = first
-    ? primaryCourseAction(first.slug, first.lessons, new Set(first.completedLessonIds), profile)
-    : { href: "/courses", label: "Сургалтууд үзэх" };
+  const up = nextInCurriculum(courses, profile);
+  const firstAction = up ?? { href: "/courses", label: "Сургалтууд үзэх", locked: false };
   const hasPremium = profile?.role === "admin" || isPremiumActive(profile);
 
   return (
@@ -49,7 +47,7 @@ export default async function HomePage() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <LinkButton href={firstAction.href} size="lg">
-                <Play size={16} fill="currentColor" />
+                {firstAction.locked ? <Lock size={16} /> : <Play size={16} fill="currentColor" />}
                 {firstAction.label}
               </LinkButton>
               <LinkButton href="#curriculum" size="lg" variant="outline">
@@ -75,7 +73,7 @@ export default async function HomePage() {
           >
             <div className="relative aspect-video">
               <Image
-                src={first?.cover_image ?? "/logo-banner.jpg"}
+                src={up?.course.cover_image ?? "/logo-banner.jpg"}
                 alt=""
                 fill
                 priority
@@ -87,16 +85,15 @@ export default async function HomePage() {
                 <Play size={24} fill="currentColor" className="ml-1" />
               </span>
             </div>
-            {first && (
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 sm:p-5">
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-white/70">
-                    {first.freeLessonCount > 0 && !hasPremium ? "Үнэгүй · Курс 01" : "Курс 01"}
-                  </p>
-                  <p className="mt-0.5 truncate text-base font-semibold text-white">
-                    {first.lessons[0]?.title ?? first.title}
-                  </p>
-                </div>
+            {up && (
+              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+                <p className="text-xs font-medium text-white/75">
+                  Курс {courseNumber(up.index)}
+                  {up.lesson?.is_free_preview && !hasPremium ? " · Үнэгүй" : ""}
+                </p>
+                <p className="mt-0.5 truncate text-base font-semibold text-white">
+                  {up.lesson?.title ?? up.course.title}
+                </p>
               </div>
             )}
           </Link>

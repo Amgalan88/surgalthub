@@ -13,13 +13,15 @@ import {
   getCourseBySlug,
   getLessonById,
   getLessonOutline,
+  getNextCourse,
 } from "@/lib/data/courses";
 import { ensureEnrollment, getCompletedLessonIds } from "@/lib/data/progress";
 import { getLessonQuestions, getMyLessonFeedback } from "@/lib/data/engagement";
 import { LessonHelp } from "@/components/lesson/LessonHelp";
 import { getCurrentProfile } from "@/lib/auth";
 import { markLessonComplete } from "@/lib/actions/learning";
-import { isYoutubeUrl, toYoutubeEmbedUrl } from "@/lib/video";
+import { cloudinaryVideoPoster, isYoutubeUrl, toYoutubeEmbedUrl } from "@/lib/video";
+import { LessonVideo } from "@/components/lesson/LessonVideo";
 import { canAccessLesson, isPremiumActive } from "@/lib/access";
 
 export async function generateMetadata({
@@ -72,13 +74,14 @@ export default async function LessonPage({
   const lesson = await getLessonById(lessonId);
   if (!lesson) redirect(`/courses/${slug}?locked=1`);
 
-  const [questions, myFeedback] = profile
+  const [questions, myFeedback, nextCourse] = profile
     ? await Promise.all([
         getLessonQuestions(lessonId),
         getMyLessonFeedback(lessonId, profile.id),
+        getNextCourse(course.id),
         ensureEnrollment(profile.id, course.id),
       ])
-    : [[], null];
+    : await Promise.all([[], null, getNextCourse(course.id)]);
 
   const prevLesson = lessons[index - 1];
   const nextLesson = lessons[index + 1];
@@ -99,6 +102,15 @@ export default async function LessonPage({
   const continueTo = nextAccessible ? lessonHref(slug, nextLesson.id) : `/courses/${slug}`;
   const completeAction = markLessonComplete.bind(null, slug, lesson.id, continueTo);
   const here = lessonHref(slug, lesson.id);
+
+  // What the player offers once the video ends.
+  const afterVideo = nextLesson
+    ? nextAccessible
+      ? { href: lessonHref(slug, nextLesson.id), label: "Дараагийн хичээл" }
+      : { href: "/premium", label: "Дараагийн хичээлийг нээх" }
+    : nextCourse
+      ? { href: `/courses/${nextCourse.slug}`, label: `Дараагийн курс: ${nextCourse.title}` }
+      : { href: `/courses/${slug}`, label: "Курс руу буцах" };
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6">
@@ -131,15 +143,19 @@ export default async function LessonPage({
                 />
               </div>
             ) : (
-              <video
+              <LessonVideo
                 key={lesson.id}
+                lessonId={lesson.id}
                 src={lesson.video_url}
-                controls
-                playsInline
-                preload="metadata"
-                controlsList="nodownload"
-                poster={lesson.cover_image_url ?? undefined}
-                className="aspect-video w-full rounded-xl bg-black"
+                poster={lesson.cover_image_url ?? cloudinaryVideoPoster(lesson.video_url)}
+                title={lesson.title}
+                alreadyDone={isDone}
+                onWatched={
+                  profile && !isDone
+                    ? markLessonComplete.bind(null, slug, lesson.id, null)
+                    : undefined
+                }
+                next={afterVideo}
               />
             ))}
 
@@ -188,8 +204,8 @@ export default async function LessonPage({
                   Дараагийн хичээл <ChevronRight size={16} />
                 </LinkButton>
               ) : (
-                <LinkButton href={`/courses/${slug}`} variant="outline" className="flex-1 sm:flex-none">
-                  Курс руу буцах
+                <LinkButton href={afterVideo.href} className="flex-1 sm:flex-none">
+                  {afterVideo.label} <ChevronRight size={16} />
                 </LinkButton>
               )}
             </div>

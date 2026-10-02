@@ -181,3 +181,25 @@ export const getCoursePosition = cache(async (courseId: string): Promise<number 
     return null;
   }
 });
+
+/** The published course that follows this one in the curriculum, if any. */
+export async function getNextCourse(
+  courseId: string
+): Promise<Pick<Course, "slug" | "title"> | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("courses")
+      .select("id, slug, title")
+      .eq("published", true)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    const list = data ?? [];
+    const index = list.findIndex((c) => c.id === courseId);
+    const next = index === -1 ? undefined : list[index + 1];
+    return next ? { slug: next.slug, title: next.title } : null;
+  } catch (err) {
+    console.error("getNextCourse failed:", err);
+    return null;
+  }
+}

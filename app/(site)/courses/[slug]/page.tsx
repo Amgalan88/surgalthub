@@ -144,7 +144,7 @@ export default async function CourseDetailPage({
               {total > 0 && (
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <LinkButton href={action.href} size="lg">
-                    <Play size={16} fill="currentColor" />
+                    {action.locked ? <Lock size={16} /> : <Play size={16} fill="currentColor" />}
                     {action.label}
                   </LinkButton>
                   {!profile && (
@@ -188,7 +188,11 @@ export default async function CourseDetailPage({
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                 />
                 <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-brand-600 shadow-lg transition-transform group-hover:scale-105">
-                  <Play size={22} fill="currentColor" className="ml-0.5" />
+                  {action.locked ? (
+                    <Lock size={20} />
+                  ) : (
+                    <Play size={22} fill="currentColor" className="ml-0.5" />
+                  )}
                 </span>
               </Link>
             )}

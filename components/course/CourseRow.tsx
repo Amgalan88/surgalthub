@@ -53,7 +53,7 @@ export function CourseRow({
         <span className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 py-1 pl-1.5 pr-3 text-xs font-medium text-navy-900 shadow-sm">
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-white">
-            <Play size={10} fill="currentColor" />
+            {action.locked ? <Lock size={10} /> : <Play size={10} fill="currentColor" />}
           </span>
           {action.label}
         </span>
