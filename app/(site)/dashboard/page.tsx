@@ -1,95 +1,40 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpen } from "lucide-react";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { ProgressBar } from "@/components/ui/ProgressBar";
+import { CourseRow } from "@/components/course/CourseRow";
 import { PremiumStatusCard } from "@/components/premium/PremiumStatusCard";
 import { getCurrentProfile } from "@/lib/auth";
-import { getDashboardCourses } from "@/lib/data/progress";
-import { TRACK_LABELS } from "@/lib/types";
+import { getPublishedCourses } from "@/lib/data/courses";
 
 export default async function DashboardPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login?next=/dashboard");
 
-  const courses = await getDashboardCourses(profile);
+  const courses = await getPublishedCourses(profile.id);
+  const firstName = profile.full_name?.trim().split(/\s+/)[0];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="text-2xl font-bold text-navy-900">
-        Сайн байна уу, {profile.full_name ?? "найз"}!
-      </h1>
-      <p className="mt-1 text-slate-500">Таны сургалтын явц</p>
+    <div className="bg-slate-50/70">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <h1 className="text-2xl font-semibold tracking-tight text-navy-900">
+          {firstName ? `Сайн байна уу, ${firstName}` : "Сайн байна уу"}
+        </h1>
+        <p className="mt-1 text-slate-600">
+          Курсуудаа дарааллаар нь үзээрэй. Явц тань автоматаар хадгалагдана.
+        </p>
 
-      <div data-tour="premium-status" className="mt-6">
-        <PremiumStatusCard profile={profile} showLink />
+        <PremiumStatusCard profile={profile} showLink className="mt-6" />
+
+        {courses.length === 0 ? (
+          <p className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center text-slate-500">
+            Хичээлүүд удахгүй нэмэгдэнэ.
+          </p>
+        ) : (
+          <div className="mt-8 space-y-5">
+            {courses.map((course, i) => (
+              <CourseRow key={course.id} course={course} index={i} profile={profile} />
+            ))}
+          </div>
+        )}
       </div>
-
-      {courses.length === 0 ? (
-        <Card className="mt-8" data-tour="dashboard-courses">
-          <CardBody className="flex flex-col items-center py-14 text-center">
-            <BookOpen className="text-slate-300" size={40} />
-            <p className="mt-4 text-slate-500">
-              Та одоогоор ямар ч сургалтад бүртгүүлээгүй байна.
-            </p>
-            <Link
-              href="/courses"
-              className="mt-4 inline-flex items-center justify-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            >
-              Сургалт харах
-            </Link>
-          </CardBody>
-        </Card>
-      ) : (
-        <div
-          className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-          data-tour="dashboard-courses"
-        >
-          {courses.map(
-            ({ course, totalLessons, completedLessons, nextLessonId }) => {
-              const pct =
-                totalLessons > 0
-                  ? Math.round((completedLessons / totalLessons) * 100)
-                  : 0;
-              return (
-                <Card key={course.id}>
-                  <CardBody>
-                    <Badge tone="brand">{TRACK_LABELS[course.track]}</Badge>
-                    <h3 className="mt-3 font-semibold text-navy-900">
-                      {course.title}
-                    </h3>
-                    <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-                      <span>Явц</span>
-                      <span>
-                        {completedLessons}/{totalLessons}
-                      </span>
-                    </div>
-                    <ProgressBar value={pct} className="mt-1.5" />
-
-                    <div className="mt-4">
-                      <Link
-                        href={
-                          nextLessonId
-                            ? `/courses/${course.slug}/learn/${nextLessonId}`
-                            : `/courses/${course.slug}`
-                        }
-                        className="block flex-1 rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-brand-700"
-                      >
-                        {nextLessonId
-                          ? completedLessons === 0
-                            ? "Эхлэх"
-                            : "Үргэлжлүүлэх"
-                          : "Курс харах"}
-                      </Link>
-                    </div>
-                  </CardBody>
-                </Card>
-              );
-            }
-          )}
-        </div>
-      )}
     </div>
   );
 }

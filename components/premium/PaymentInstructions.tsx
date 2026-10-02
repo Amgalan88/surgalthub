@@ -30,49 +30,49 @@ const steps = [
 export function PaymentInstructions() {
   return (
     <div>
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
         <p className="text-sm text-slate-500">Нэг удаагийн төлбөр</p>
-        <p className="mt-1 text-3xl font-bold text-navy-900">
+        <p className="mt-1 text-3xl font-semibold tracking-tight text-navy-900">
           {formatMNT(PREMIUM_PRICE_MNT)}
         </p>
         <p className="mt-1 text-sm text-slate-500">
           {PREMIUM_DURATION_MONTHS} сарын турш бүх сургалтын бүх хичээл нээлттэй.
         </p>
 
-        <div className="mt-5 rounded-xl bg-navy-950 p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-5">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Шилжүүлэх данс
           </p>
           <dl className="mt-3 space-y-2 text-sm">
             <div className="flex items-center justify-between gap-4">
-              <dt className="text-slate-400">Банк</dt>
-              <dd className="font-medium text-white">{PAYMENT_INFO.bank}</dd>
+              <dt className="text-slate-500">Банк</dt>
+              <dd className="font-medium text-navy-900">{PAYMENT_INFO.bank}</dd>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <dt className="text-slate-400">Дансны дугаар</dt>
-              <dd className="flex items-center gap-1 font-mono text-base font-semibold text-brand-300">
+              <dt className="text-slate-500">Дансны дугаар</dt>
+              <dd className="flex items-center gap-1 font-mono text-base font-semibold text-navy-900">
                 {PAYMENT_INFO.account}
                 <CopyButton
                   value={PAYMENT_INFO.account}
                   label="Дансны дугаар хуулах"
-                  className="text-slate-400 hover:bg-white/10 hover:text-white"
+                  className="text-slate-400 hover:bg-slate-200 hover:text-navy-900"
                 />
               </dd>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <dt className="text-slate-400">Хүлээн авагч</dt>
-              <dd className="font-medium text-white">
+              <dt className="text-slate-500">Хүлээн авагч</dt>
+              <dd className="font-medium text-navy-900">
                 {PAYMENT_INFO.accountHolder}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <dt className="text-slate-400">Дүн</dt>
-              <dd className="flex items-center gap-1 font-semibold text-white">
+              <dt className="text-slate-500">Дүн</dt>
+              <dd className="flex items-center gap-1 font-semibold text-navy-900">
                 {formatMNT(PREMIUM_PRICE_MNT)}
                 <CopyButton
                   value={String(PREMIUM_PRICE_MNT)}
                   label="Дүн хуулах"
-                  className="text-slate-400 hover:bg-white/10 hover:text-white"
+                  className="text-slate-400 hover:bg-slate-200 hover:text-navy-900"
                 />
               </dd>
             </div>
@@ -86,13 +86,13 @@ export function PaymentInstructions() {
           return (
             <li
               key={step.title}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              className="rounded-xl border border-slate-200 bg-white p-5"
             >
               <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
                   <Icon size={17} />
                 </span>
-                <span className="text-xs font-semibold text-slate-400">
+                <span className="text-xs font-medium text-slate-500">
                   {i + 1}-р алхам
                 </span>
               </div>
@@ -106,7 +106,7 @@ export function PaymentInstructions() {
       </ol>
 
       {hasSupportContact() && (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
           <p className="font-semibold text-navy-900">Баримтаа илгээх</p>
           <p className="mt-1 text-sm text-slate-500">
             Гүйлгээний баримтын зургаа доорх сувгийн аль нэгээр илгээгээрэй.

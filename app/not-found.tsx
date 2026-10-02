@@ -10,7 +10,7 @@ import { LogoWordmark } from "@/components/layout/Logo";
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-white/10 bg-navy-950">
+      <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center px-4 sm:px-6">
           <Link href="/" aria-label="Cargo Hub нүүр">
             <LogoWordmark size="sm" />

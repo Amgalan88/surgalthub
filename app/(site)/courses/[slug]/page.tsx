@@ -1,33 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import {
-  Crown,
-  CheckCircle2,
-  Landmark,
-  Lock,
-  Clock,
-  BookOpen,
-  ListChecks,
-  ArrowRight,
-} from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
-import { SubmitButton } from "@/components/ui/SubmitButton";
+import { Check, ChevronRight, Lock, Play } from "lucide-react";
+import { LinkButton } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { LessonRoadmap } from "@/components/course/LessonRoadmap";
-import { getCourseBySlug, getLessonOutline } from "@/lib/data/courses";
-import { getCompletedLessonIds, getEnrollment } from "@/lib/data/progress";
+import { LessonList } from "@/components/course/LessonList";
+import { courseNumber, primaryCourseAction } from "@/components/course/courseLinks";
+import { PremiumOffer } from "@/components/premium/PremiumOffer";
+import { getCourseBySlug, getCoursePosition, getLessonOutline } from "@/lib/data/courses";
+import { getCompletedLessonIds } from "@/lib/data/progress";
 import { getCurrentProfile } from "@/lib/auth";
-import { enrollInCourse } from "@/lib/actions/learning";
-import {
-  canAccessLesson,
-  formatMNT,
-  isPremiumActive,
-  PAYMENT_INFO,
-  PREMIUM_DURATION_MONTHS,
-  PREMIUM_PRICE_MNT,
-} from "@/lib/access";
-import { TRACK_LABELS } from "@/lib/types";
+import { canAccessLesson, isPremiumActive } from "@/lib/access";
 import { getSiteUrl, SITE_NAME } from "@/lib/site";
 
 export async function generateMetadata({
@@ -68,12 +52,12 @@ export default async function CourseDetailPage({
   const course = await getCourseBySlug(slug);
   if (!course) notFound();
 
-  const [lessons, profile] = await Promise.all([
+  const [lessons, profile, position] = await Promise.all([
     getLessonOutline(course.id),
     getCurrentProfile(),
+    getCoursePosition(course.id),
   ]);
 
-  const enrollment = profile ? await getEnrollment(profile.id, course.id) : null;
   const completedIds = profile
     ? await getCompletedLessonIds(
         profile.id,
@@ -84,17 +68,15 @@ export default async function CourseDetailPage({
   const total = lessons.length;
   const completedCount = lessons.filter((l) => completedIds.has(l.id)).length;
   const progressPct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
-  const firstUnfinished = lessons.find((l) => !completedIds.has(l.id)) ?? lessons[0];
-  const firstAccessibleUnfinished = lessons.find(
+  const freeCount = lessons.filter((l) => l.is_free_preview).length;
+  const lockedCount = lessons.filter(
+    (l) => !canAccessLesson(l, profile, completedIds.has(l.id))
+  ).length;
+  const hasPremium = profile?.role === "admin" || isPremiumActive(profile);
+  const action = primaryCourseAction(course.slug, lessons, completedIds, profile);
+  const nextLessonId = lessons.find(
     (l) => !completedIds.has(l.id) && canAccessLesson(l, profile)
-  );
-  const hasPremium = isPremiumActive(profile) || profile?.role === "admin";
-  const hasPremiumLessons = lessons.some((l) => !l.is_free_preview);
-  const allLessonsAccessible = lessons.every((l) =>
-    canAccessLesson(l, profile, completedIds.has(l.id))
-  );
-
-  const enrollAction = enrollInCourse.bind(null, course.slug, course.id);
+  )?.id;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -122,66 +104,131 @@ export default async function CourseDetailPage({
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}
       />
-      <section className="relative overflow-hidden bg-navy-950">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.18),transparent_55%)]" />
-        <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge tone="brand">{TRACK_LABELS[course.track]}</Badge>
-            {hasPremiumLessons && (
-              <Badge tone="slate" className="bg-white/10 text-brand-200 ring-white/20">
-                <Crown size={12} /> Premium хичээлтэй
-              </Badge>
-            )}
-          </div>
-          <h1 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
-            {course.title}
-          </h1>
-          <p className="mt-3 max-w-2xl leading-relaxed text-slate-300">{course.description}</p>
 
-          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-300">
-            {course.duration_label && (
-              <span className="flex items-center gap-1.5">
-                <Clock size={15} className="text-brand-400" />
-                {course.duration_label}
-              </span>
-            )}
-            <span className="flex items-center gap-1.5">
-              <BookOpen size={15} className="text-brand-400" />
-              {total} хичээл
+      <section className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-slate-500">
+            <Link href="/courses" className="hover:text-navy-900">
+              Сургалтууд
+            </Link>
+            <ChevronRight size={14} />
+            <span className="truncate">
+              {position ? `Курс ${courseNumber(position - 1)}` : course.title}
             </span>
-            {course.outcomes.length > 0 && (
-              <span className="flex items-center gap-1.5">
-                <ListChecks size={15} className="text-brand-400" />
-                {course.outcomes.length} суралцахуй
-              </span>
+          </nav>
+
+          <div className="mt-6 grid items-start gap-10 lg:grid-cols-[1.15fr_1fr]">
+            <div>
+              <h1 className="text-3xl font-semibold leading-tight tracking-tight text-navy-900 sm:text-4xl">
+                {course.title}
+              </h1>
+              <p className="mt-4 max-w-2xl text-lg leading-relaxed text-slate-600">
+                {course.description}
+              </p>
+              <p className="mt-5 flex flex-wrap gap-x-2 text-sm text-slate-500">
+                <span>{total} хичээл</span>
+                {course.duration_label && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span>{course.duration_label}</span>
+                  </>
+                )}
+                {freeCount > 0 && !hasPremium && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span className="text-emerald-700">{freeCount} нь үнэгүй</span>
+                  </>
+                )}
+              </p>
+
+              {total > 0 && (
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <LinkButton href={action.href} size="lg">
+                    <Play size={16} fill="currentColor" />
+                    {action.label}
+                  </LinkButton>
+                  {!profile && (
+                    <p className="text-sm text-slate-500">
+                      Бүртгэлгүйгээр үзэж болно.{" "}
+                      <Link
+                        href={`/login?next=${encodeURIComponent(`/courses/${course.slug}`)}`}
+                        className="font-medium text-brand-700 hover:text-brand-800"
+                      >
+                        Нэвтрэх
+                      </Link>
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {completedCount > 0 && (
+                <div className="mt-8 max-w-sm">
+                  <div className="flex justify-between text-sm text-slate-500">
+                    <span>Таны явц</span>
+                    <span>
+                      {completedCount}/{total} хичээл
+                    </span>
+                  </div>
+                  <ProgressBar value={progressPct} className="mt-2" />
+                </div>
+              )}
+            </div>
+
+            {course.cover_image && (
+              <Link
+                href={action.href}
+                className="group relative block aspect-video overflow-hidden rounded-xl bg-navy-900 ring-1 ring-navy-900/10"
+              >
+                <Image
+                  src={course.cover_image}
+                  alt=""
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 480px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+                <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-brand-600 shadow-lg transition-transform group-hover:scale-105">
+                  <Play size={22} fill="currentColor" className="ml-0.5" />
+                </span>
+              </Link>
             )}
           </div>
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14">
         {locked === "1" && (
-          <div className="mb-6 flex items-start gap-2.5 rounded-xl bg-amber-50 px-4 py-3.5 text-sm text-amber-800 ring-1 ring-inset ring-amber-600/20">
-            <Lock size={18} className="mt-0.5 shrink-0 text-amber-600" />
+          <div className="mb-8 flex items-start gap-3 rounded-xl border border-gold-300 bg-gold-100/60 px-4 py-3.5 text-sm text-navy-900">
+            <Lock size={17} className="mt-0.5 shrink-0 text-gold-700" />
             <p>
-              Тухайн хичээл нээгдээгүй байна — энэ нь Premium эрх шаарддаг бөгөөд
-              танд одоогоор идэвхтэй Premium байхгүй тул үзэх боломжгүй. Доорх
-              зааврын дагуу төлбөрөө шилжүүлээд админтай холбогдоорой.
+              Энэ хичээл Premium эрхтэй хүнд нээгдэнэ.{" "}
+              <Link href="/premium" className="font-medium text-brand-700 underline underline-offset-2">
+                Premium хэрхэн авах вэ
+              </Link>
+              {!profile && (
+                <>
+                  {" "}· Premium эрхтэй бол{" "}
+                  <Link
+                    href={`/login?next=${encodeURIComponent(`/courses/${course.slug}`)}`}
+                    className="font-medium text-brand-700 underline underline-offset-2"
+                  >
+                    нэвтэрнэ үү
+                  </Link>
+                </>
+              )}
             </p>
           </div>
         )}
-        <div className="grid gap-10 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+
+        <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
+          <div className="min-w-0">
             {course.outcomes.length > 0 && (
-              <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="flex items-center gap-2 text-lg font-semibold text-navy-900">
-                  <ListChecks size={19} className="text-brand-600" />
-                  Юу сурах вэ?
-                </h2>
-                <ul className="mt-4 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+              <div className="mb-10">
+                <h2 className="text-xl font-semibold text-navy-900">Юу сурах вэ</h2>
+                <ul className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">
                   {course.outcomes.map((outcome, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                      <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+                    <li key={i} className="flex gap-3 text-[15px] text-slate-700">
+                      <Check size={18} className="mt-0.5 shrink-0 text-brand-600" />
                       {outcome}
                     </li>
                   ))}
@@ -189,117 +236,51 @@ export default async function CourseDetailPage({
               </div>
             )}
 
-            <h2 className="text-xl font-semibold text-navy-900">Сургалтын зам</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Хичээлүүдийн бүрэн хөтөлбөр, алхам алхмаар.
-            </p>
+            <h2 className="text-xl font-semibold text-navy-900">Хичээлүүд</h2>
             {total === 0 ? (
-              <div className="mt-4 rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-400">
-                Хичээл тун удахгүй нэмэгдэнэ.
-              </div>
+              <p className="mt-4 rounded-xl border border-dashed border-slate-300 px-4 py-10 text-center text-slate-500">
+                Хичээлүүд удахгүй нэмэгдэнэ.
+              </p>
             ) : (
-              <LessonRoadmap
-                courseSlug={course.slug}
-                lessons={lessons}
-                completedIds={completedIds}
-                enrollment={enrollment}
-                profile={profile}
-                currentLessonId={firstUnfinished?.id}
-              />
+              <div className="mt-4">
+                <LessonList
+                  courseSlug={course.slug}
+                  lessons={lessons}
+                  completedIds={completedIds}
+                  profile={profile}
+                  currentLessonId={completedCount > 0 ? nextLessonId : undefined}
+                />
+              </div>
             )}
           </div>
 
-          <aside className="lg:col-span-1">
-            <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              {!profile ? (
-                <>
-                  <p className="text-sm text-slate-500">
-                    Хичээл үзэхийн тулд эхлээд бүртгэлдээ нэвтэрнэ үү. Бүртгэл
-                    үүсгэх үнэгүй.
-                  </p>
-                  <Link
-                    href={`/register?next=${encodeURIComponent(`/courses/${course.slug}`)}`}
-                    data-tour="enroll-cta"
-                    className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-                  >
-                    Үнэгүй бүртгүүлэх
-                  </Link>
-                  <Link
-                    href={`/login?next=${encodeURIComponent(`/courses/${course.slug}`)}`}
-                    className="mt-2 inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
-                  >
-                    Нэвтрэх
-                  </Link>
-                </>
-              ) : !enrollment ? (
-                <>
-                  <p className="text-sm text-slate-500">
-                    Энэ сургалтад нэгдээд хичээлээ эхлүүлээрэй. Нэгдэх үнэгүй.
-                  </p>
-                  <form action={enrollAction} className="mt-4">
-                    <SubmitButton
-                      className="w-full"
-                      size="lg"
-                      pendingLabel="Түр хүлээнэ үү..."
-                      data-tour="enroll-cta"
-                    >
-                      Сургалтад нэгдэх
-                    </SubmitButton>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Явц</span>
-                    <span className="font-medium text-navy-900">
-                      {completedCount}/{total}
-                    </span>
-                  </div>
-                  <ProgressBar value={progressPct} className="mt-2" />
-
-                  {firstAccessibleUnfinished ? (
-                    <Link
-                      href={`/courses/${course.slug}/learn/${firstAccessibleUnfinished.id}`}
-                      data-tour="enroll-cta"
-                      className="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-                    >
-                      {completedCount === 0 ? "Эхлэх" : "Үргэлжлүүлэх"}
-                    </Link>
-                  ) : total > 0 && completedCount === total && allLessonsAccessible ? (
-                    <div className="mt-5 flex items-center gap-2.5 rounded-xl bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                      <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
-                      Та энэ сургалтыг амжилттай дуусгалаа!
-                    </div>
-                  ) : !hasPremium && hasPremiumLessons ? (
-                    <div className="mt-5 rounded-lg bg-brand-50 p-4 text-sm text-brand-700">
-                      <p className="flex items-center gap-1.5 font-semibold">
-                        <Crown size={15} /> Premium хичээлүүд
-                      </p>
-                      <p className="mt-1 text-brand-700/80">
-                        Үлдсэн хичээлүүдийг {PREMIUM_DURATION_MONTHS} сарын турш
-                        хүссэн үедээ үзэхийн тулд {formatMNT(PREMIUM_PRICE_MNT)}
-                        -г доорх дансанд шилжүүлээд, баримтаа админд
-                        (нэр/утас/имэйлээ дурдаж) илгээгээрэй.
-                      </p>
-                      <div className="mt-3 flex items-center gap-2 rounded-lg bg-white px-3 py-2.5 ring-1 ring-inset ring-brand-200">
-                        <Landmark size={16} className="shrink-0 text-brand-600" />
-                        <p className="text-xs text-navy-900">
-                          <span className="font-semibold">{PAYMENT_INFO.bank}</span>{" "}
-                          — {PAYMENT_INFO.account} (
-                          {PAYMENT_INFO.accountHolder})
-                        </p>
-                      </div>
-                      <Link
-                        href="/premium"
-                        className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
-                      >
-                        Дэлгэрэнгүй заавар <ArrowRight size={14} />
-                      </Link>
-                    </div>
-                  ) : null}
-                </>
-              )}
-            </div>
+          <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+            {lockedCount > 0 ? (
+              <PremiumOffer lessonCount={lockedCount} />
+            ) : (
+              hasPremium && (
+                <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+                  <p className="font-medium text-navy-900">Бүх хичээл нээлттэй</p>
+                  <p className="mt-1">Танд Premium эрх идэвхтэй байна.</p>
+                </div>
+              )
+            )}
+            {!profile && (
+              <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+                <p className="font-medium text-navy-900">Явцаа хадгалах уу?</p>
+                <p className="mt-1 leading-relaxed">
+                  Үнэгүй бүртгүүлбэл үзсэн хичээлээ тэмдэглэж, дараа нь
+                  орхисон газраасаа үргэлжлүүлнэ.
+                </p>
+                <LinkButton
+                  href={`/register?next=${encodeURIComponent(`/courses/${course.slug}`)}`}
+                  variant="outline"
+                  className="mt-4 w-full"
+                >
+                  Үнэгүй бүртгүүлэх
+                </LinkButton>
+              </div>
+            )}
           </aside>
         </div>
       </div>

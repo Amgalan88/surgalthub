@@ -26,132 +26,6 @@ export interface Tour {
 
 const sel = (tour: string) => `[data-tour="${tour}"]`;
 
-const landingTour: Tour = {
-  id: "landing",
-  steps: [
-    {
-      target: sel("hero-cta"),
-      title: "Тавтай морил!",
-      content:
-        "Энд карго бизнес нээх, ажиллуулах, онлайн платформ ашиглах чиглэлээр курс олдоно. Эндээс сургалтын жагсаалт руу шууд орж болно.",
-      placement: "bottom",
-    },
-    {
-      target: sel("tracks-section"),
-      title: "3 үндсэн чиглэл",
-      content:
-        "Та юу хийхээ мэдэхгүй байвал эндээс өөрт тохирсон чиглэлээ сонгож эхлээрэй — нээх, ажиллуулах эсвэл платформ ашиглах.",
-      placement: "top",
-    },
-    {
-      target: sel("register-cta"),
-      title: "Эхлээрэй",
-      content:
-        "Үнэгүй бүртгүүлээд, дурын курсын эхний хичээлүүдийг шууд үзэж эхэлж болно.",
-      placement: "top",
-    },
-  ],
-};
-
-const catalogTour: Tour = {
-  id: "courses-catalog",
-  steps: [
-    {
-      target: sel("track-filter"),
-      title: "Чиглэлээр шүүх",
-      content:
-        "Эндээс өөрт хэрэгтэй чиглэлийн курсуудыг л шүүж харах боломжтой.",
-      placement: "bottom",
-    },
-    {
-      target: sel("course-grid"),
-      title: "Курс сонгох",
-      content:
-        "Курс дээр дарж дэлгэрэнгүй мэдээлэл, хичээлийн жагсаалтыг харна уу.",
-      placement: "top",
-    },
-  ],
-};
-
-const courseDetailTour: Tour = {
-  id: "course-detail",
-  steps: [
-    {
-      target: sel("lesson-roadmap"),
-      title: "Сургалтын зам",
-      content:
-        "Хичээлүүд энд алхам алхмаар харагдана. Ногоон ✓ дууссан, шар одоо үзэх хичээл, 🔒 нь бүртгүүлээгүй эсвэл төлбөртэй хичээлийг заана.",
-      placement: "right",
-    },
-    {
-      target: sel("enroll-cta"),
-      title: "Эхлэх",
-      content:
-        "Энд дарж курст бүртгүүлэх, эсвэл үргэлжлүүлэх боломжтой. Бүртгүүлэх нь үнэгүй — зарим хичээл premium байж болно.",
-      placement: "left",
-    },
-  ],
-};
-
-const lessonViewerTour: Tour = {
-  id: "lesson-viewer",
-  steps: [
-    {
-      target: sel("lesson-sidebar"),
-      title: "Хичээлийн жагсаалт",
-      content:
-        "Энэ курсын бүх хичээлийг эндээс шууд сонгож үзэж болно. ✓ тэмдэгтэй нь дууссан, 🔒 нь одоогоор нээгдээгүй хичээл.",
-      placement: "right",
-    },
-    {
-      target: sel("mark-complete-btn"),
-      title: "Дуусгах",
-      content:
-        "Хичээлээ үзэж дуусаад энд дарж тэмдэглээрэй — таны явц шинэчлэгдэнэ.",
-      placement: "top",
-    },
-    {
-      target: sel("lesson-nav"),
-      title: "Шилжих",
-      content: "Өмнөх, дараагийн хичээл рүү эндээс шууд шилжиж болно.",
-      placement: "top",
-    },
-  ],
-};
-
-const dashboardTour: Tour = {
-  id: "dashboard",
-  steps: [
-    {
-      target: sel("premium-status"),
-      title: "Таны эрхийн байдал",
-      content:
-        "Premium эрх идэвхтэй эсэх, хэзээ дуусахыг эндээс байнга харна. Идэвхгүй бол энд дарж төлбөрийн зааврыг харна уу.",
-      placement: "bottom",
-    },
-    {
-      target: sel("dashboard-courses"),
-      title: "Таны сургалтууд",
-      content:
-        "Бүртгүүлсэн курс бүрийн явц энд харагдана. 'Үргэлжлүүлэх' дарвал үзээгүй байгаа дараагийн хичээл рүү шууд орно.",
-      placement: "top",
-    },
-  ],
-};
-
-const premiumTour: Tour = {
-  id: "premium",
-  steps: [
-    {
-      target: sel("premium-steps"),
-      title: "Хэрхэн нээх вэ?",
-      content:
-        "Дансанд төлбөрөө шилжүүлээд, баримтаа админд илгээнэ. Админ баталгаажуулмагц бүх хичээл нээгдэнэ.",
-      placement: "top",
-    },
-  ],
-};
-
 const adminDashboardTour: Tour = {
   id: "admin-dashboard",
   steps: [
@@ -255,13 +129,9 @@ const adminQuestionsTour: Tour = {
   ],
 };
 
+// Guided tours are for the admin panel only. The public site has to explain
+// itself through its layout; pop-ups on first visit got in learners' way.
 const matchers: { test: RegExp; tour: Tour }[] = [
-  { test: /^\/$/, tour: landingTour },
-  { test: /^\/courses\/?$/, tour: catalogTour },
-  { test: /^\/courses\/[^/]+\/learn\/[^/]+\/?$/, tour: lessonViewerTour },
-  { test: /^\/courses\/[^/]+\/?$/, tour: courseDetailTour },
-  { test: /^\/dashboard\/?$/, tour: dashboardTour },
-  { test: /^\/premium\/?$/, tour: premiumTour },
   { test: /^\/admin\/?$/, tour: adminDashboardTour },
   { test: /^\/admin\/courses\/?$/, tour: adminCoursesTour },
   { test: /^\/admin\/courses\/new\/?$/, tour: adminCourseFormTour },

@@ -1,0 +1,85 @@
+{
+  "demoCourseSlugs": [
+    "kargo-kompani-neekh",
+    "kargo-ajilluulakh-menejment",
+    "kargo-vebsait-ashiglakh"
+  ],
+  "courses": [
+    {
+      "slug": "kargo-hereh-ajilladag",
+      "title": "Карго хэрхэн ажилладаг вэ",
+      "track": "opening",
+      "description": "Захиалга авахаас эхлээд Эрээнээс Улаанбаатар хүртэл ачаа хэрхэн явдгийг алхам алхмаар үзнэ. Ачаа бүртгэх, үнэлэх, илгээхийг бодит жишээн дээр харуулна.",
+      "outcomes": [
+        "Захиалга авч, хүргэлт зохион байгуулах",
+        "Эрээн салбар ба Эрээн–Улаанбаатар чиглэлийн ажиллагаа",
+        "Ачаа бүртгэх, үнэлэх арга",
+        "Бодит ачаа илгээх жишээ"
+      ],
+      "freeLessons": 2,
+      "lessons": [
+        { "title": "Карго хэрхэн ажилладаг вэ — танилцуулга", "folder": "", "match": "audo_enhanced_" },
+        { "title": "Захиалга", "folder": "1. kargo", "match": "1.1 " },
+        { "title": "Хүргэлт", "folder": "1. kargo", "match": "1.2 " },
+        { "title": "Эрээн салбар", "folder": "1. kargo", "match": "1.3 " },
+        { "title": "Эрээн — Улаанбаатар", "folder": "1. kargo", "match": "1.4 EREEN" },
+        { "title": "Ачаа бүртгэл", "folder": "1. kargo", "match": "achaa burtgel" },
+        { "title": "Ачаа үнэлэх", "folder": "1. kargo", "match": "achaa uneleh" },
+        { "title": "Ачаа үнэлгээ: бодит жишээ", "folder": "1. kargo", "match": "achaa unelgee" },
+        { "title": "Ачаа илгээх: бодит жишээ", "folder": "1. kargo", "match": "achaa ylgah" }
+      ]
+    },
+    {
+      "slug": "undsen-oilgoltuud",
+      "title": "Мэдэх ёстой үндсэн ойлголтууд",
+      "track": "platform",
+      "description": "Трак код, дэлгүүр, цуглуулах цэг, хориотой бараа, дамжингийн ачаа зэрэг карго ажилд өдөр бүр тулгардаг ойлголтуудыг энгийнээр тайлбарлана.",
+      "outcomes": [
+        "Трак кодоор ачаа хянах",
+        "Цуглуулах цэг, ачаа авах код",
+        "Хориотой барааг таних",
+        "Дамжингийн ачааг ойлгох"
+      ],
+      "freeLessons": 1,
+      "lessons": [
+        { "title": "Трак код", "folder": "2. yuve", "match": "2.1 " },
+        { "title": "Дэлгүүр гэж юу вэ", "folder": "2. yuve", "match": "2.2 " },
+        { "title": "Цуглуулах цэг, ачаа авах код", "folder": "2. yuve", "match": "2.4-5 " },
+        { "title": "Хориотой бараа ба захиалагч", "folder": "2. yuve", "match": "2.6-7 " },
+        { "title": "Дамжингийн ачаа", "folder": "2. yuve", "match": "2.8 " },
+        { "title": "ID", "folder": "2. yuve", "match": "_ID." },
+        { "title": "Линк", "folder": "2. yuve", "match": "_LINK." },
+        { "title": "Wuliu", "folder": "2. yuve", "match": "_WULIU." },
+        { "title": "Yushou", "folder": "2. yuve", "match": "_YUSHOU." }
+      ]
+    },
+    {
+      "slug": "tugeemel-asuudal",
+      "title": "Түгээмэл асуудал ба шийдэл",
+      "track": "operating",
+      "description": "Ачаа дутуу ирэх, алга болох, эвдрэх, удах, буцаах зэрэг карго ажилд байнга гардаг нөхцөл байдлыг хэрхэн шийдэх, харилцагчид юу гэж тайлбарлахыг үзнэ.",
+      "outcomes": [
+        "Дутуу, алга болсон ачааг шалгах",
+        "Эвдэрсэн ачаа, буцаалтыг шийдэх",
+        "Хил, гаалийн саатлыг тайлбарлах",
+        "Харилцагчтай зөв харилцах"
+      ],
+      "freeLessons": 1,
+      "lessons": [
+        { "title": "Цуг захисан бараа", "folder": "3. asuudal", "match": "3.1 " },
+        { "title": "Хүргэлтэд гарахгүй удах", "folder": "3. asuudal", "match": "3.2 " },
+        { "title": "Ачаа дутуу ирэх", "folder": "3. asuudal", "match": "3.3 " },
+        { "title": "Ачаа алга болох", "folder": "3. asuudal", "match": "3.4 " },
+        { "title": "Ачаа эвдрэх", "folder": "3. asuudal", "match": "3.5 " },
+        { "title": "Ачаа буцаалт", "folder": "3. asuudal", "match": "3.6 " },
+        { "title": "Ачаа түгээлт", "folder": "3. asuudal", "match": "3.7 " },
+        { "title": "Хоосон илгээмж", "folder": "3. asuudal", "match": "3.8 " },
+        { "title": "Ачаа удах", "folder": "3. asuudal", "match": "3.9 " },
+        { "title": "Ачигдаагүй ачаа", "folder": "3. asuudal", "match": "3.10 " },
+        { "title": "Хил, гааль", "folder": "3. asuudal", "match": "3.11 " },
+        { "title": "Гарын үсэг", "folder": "3. asuudal", "match": "3.12 " },
+        { "title": "Үнэтэй ирэх", "folder": "3. asuudal", "match": "3.13 " }
+      ]
+    }
+  ]
+}

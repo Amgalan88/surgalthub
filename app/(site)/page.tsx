@@ -1,268 +1,267 @@
 import Link from "next/link";
-import {
-  Rocket,
-  Settings,
-  Globe,
-  ListChecks,
-  Smartphone,
-  TrendingUp,
-  Users,
-  ArrowRight,
-  type LucideIcon,
-} from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Check, Play } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
-import { CourseCard } from "@/components/course/CourseCard";
-import { HeroCanvas } from "@/components/HeroCanvas";
-import { Reveal, Stagger, StaggerItem, TiltCard } from "@/components/motion";
-import { PlatformStatsBar, Testimonials } from "@/components/SocialProof";
+import { CourseRow } from "@/components/course/CourseRow";
+import { primaryCourseAction } from "@/components/course/courseLinks";
+import { Faq } from "@/components/marketing/Faq";
+import { Testimonials } from "@/components/SocialProof";
 import { getPublishedCourses } from "@/lib/data/courses";
-import { getPlatformStats } from "@/lib/data/engagement";
 import { getCurrentProfile } from "@/lib/auth";
-import type { CourseTrack } from "@/lib/types";
-
-const tracks: {
-  key: CourseTrack;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}[] = [
-  {
-    key: "opening",
-    title: "Карго нээх",
-    description:
-      "Бизнес бүртгэл, гаалийн бичиг баримт, агуулах сонголт зэрэг карго компани нээхэд шаардлагатай алхам бүрийг сурна.",
-    icon: Rocket,
-  },
-  {
-    key: "operating",
-    title: "Карго ажиллуулах",
-    description:
-      "Тээвэр зохион байгуулалт, агуулахын менежмент, харилцагчийн үйлчилгээ, өдөр тутмын үйл ажиллагааг удирдах арга барил.",
-    icon: Settings,
-  },
-  {
-    key: "platform",
-    title: "Карго вэбсайт ашиглах",
-    description:
-      "Онлайн карго платформ дээр захиалга үүсгэх, ачаа хянах, төлбөр тооцоо хийх зэрэг практик ур чадвар.",
-    icon: Globe,
-  },
-];
-
-const advantages = [
-  {
-    title: "Практик, алхам алхмаар",
-    description:
-      "Онолын оронд бодит чеклист, загвар маягт бүхий хичээлүүд — шууд ажил дээрээ хэрэгжүүлнэ.",
-    icon: ListChecks,
-  },
-  {
-    title: "Туршлагатай багш нар",
-    description:
-      "Карго бизнесийг жилүүдийн турш амжилттай ажиллуулсан мэргэжилтнүүдийн гарын авлага.",
-    icon: Users,
-  },
-  {
-    title: "Хаанаас ч, ямар ч төхөөрөмжөөс",
-    description: "Гар утас, компьютер дээр тохирсон, хурдан, энгийн интерфейс.",
-    icon: Smartphone,
-  },
-  {
-    title: "Явцын хяналт",
-    description:
-      "Хичээл бүрийн ахицаа хянаж, өөрийн хэмнэлээр, өөрийн цагт суралцана.",
-    icon: TrendingUp,
-  },
-];
+import {
+  formatMNT,
+  isPremiumActive,
+  PREMIUM_DURATION_MONTHS,
+  PREMIUM_PRICE_MNT,
+} from "@/lib/access";
 
 export default async function HomePage() {
   const profile = await getCurrentProfile();
-  const [allCourses, stats] = await Promise.all([
-    getPublishedCourses(undefined, profile?.id),
-    getPlatformStats(),
-  ]);
-  const featured = allCourses.slice(0, 3);
+  const courses = await getPublishedCourses(profile?.id);
+
+  const totalLessons = courses.reduce((sum, c) => sum + c.lessonCount, 0);
+  const freeLessons = courses.reduce((sum, c) => sum + c.freeLessonCount, 0);
+  const first = courses[0];
+  const firstAction = first
+    ? primaryCourseAction(first.slug, first.lessons, new Set(first.completedLessonIds), profile)
+    : { href: "/courses", label: "Сургалтууд үзэх" };
+  const hasPremium = profile?.role === "admin" || isPremiumActive(profile);
 
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-navy-950">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_38%,rgba(245,158,11,0.14),transparent_65%)]" />
-        <HeroCanvas />
-        <div className="relative z-10 mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
-          <div className="max-w-2xl">
-            <Reveal delay={0.05}>
-              <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-brand-200 ring-1 ring-inset ring-white/20 backdrop-blur">
-                Монголын анхны карго бизнесийн сургалтын платформ
+      <section className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1.05fr_1fr]">
+          <div>
+            <p className="inline-flex items-center gap-2 text-sm font-medium text-slate-600">
+              <span className="h-2 w-2 rounded-full bg-gold-400" />
+              Карго бизнесийн видео сургалт
+            </p>
+            <h1 className="mt-4 text-[2.1rem] font-semibold leading-[1.15] tracking-tight text-navy-900 sm:text-5xl">
+              Карго хэрхэн ажилладгийг бодит жишээн дээр сур
+            </h1>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
+              Захиалга авахаас эхлээд ачааг Эрээнээс Улаанбаатарт хүргэх,
+              замд гарсан асуудлыг шийдэх хүртэл
+              {totalLessons > 0 ? ` ${totalLessons} богино видео хичээлээр` : " богино видео хичээлээр"}{" "}
+              алхам алхмаар үзүүлнэ.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <LinkButton href={firstAction.href} size="lg">
+                <Play size={16} fill="currentColor" />
+                {firstAction.label}
+              </LinkButton>
+              <LinkButton href="#curriculum" size="lg" variant="outline">
+                Хөтөлбөр харах
+              </LinkButton>
+            </div>
+
+            <ul className="mt-7 flex flex-col gap-2 text-sm text-slate-600 sm:flex-row sm:gap-6">
+              <li className="flex items-center gap-2">
+                <Check size={16} className="text-emerald-600" />
+                Эхний хичээлүүдийг бүртгэлгүй үзнэ
+              </li>
+              <li className="flex items-center gap-2">
+                <Check size={16} className="text-emerald-600" />
+                Утас, компьютер дээр
+              </li>
+            </ul>
+          </div>
+
+          <Link
+            href={firstAction.href}
+            className="group relative block overflow-hidden rounded-xl bg-navy-900 shadow-[0_24px_60px_-24px_rgba(15,26,51,0.45)] ring-1 ring-navy-900/10"
+          >
+            <div className="relative aspect-video">
+              <Image
+                src={first?.cover_image ?? "/logo-banner.jpg"}
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 540px"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+              <span className="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-transparent to-transparent" />
+              <span className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-brand-600 shadow-lg transition-transform group-hover:scale-105">
+                <Play size={24} fill="currentColor" className="ml-1" />
               </span>
-            </Reveal>
-            <Reveal delay={0.15}>
-              <h1 className="mt-5 text-4xl font-bold leading-tight text-white sm:text-5xl">
-                Карго бизнесээ нээх, ажиллуулах, өсгөхийг{" "}
-                <span className="bg-gradient-to-r from-brand-400 to-brand-200 bg-clip-text text-transparent">
-                  практикаар
-                </span>{" "}
-                сур
-              </h1>
-            </Reveal>
-            <Reveal delay={0.25}>
-              <p className="mt-5 text-lg leading-relaxed text-slate-300">
-                Карго нээх, ажиллуулах, онлайн платформ ашиглах чиглэлээр
-                бэлтгэсэн хичээлүүд нь таны цаг хугацааг хэмнэж, танд
-                эргэлзээгүй ажиллах боломжийг олгоно.
-              </p>
-            </Reveal>
-            <Reveal delay={0.35}>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <LinkButton
-                  href="/courses"
-                  size="lg"
-                  data-tour="hero-cta"
-                  className="shadow-[0_4px_24px_rgba(217,119,6,0.45)]"
-                >
-                  Сургалт үзэх <ArrowRight size={18} />
-                </LinkButton>
-                <LinkButton
-                  href={profile ? "/dashboard" : "/register"}
-                  size="lg"
-                  variant="outline"
-                  className="bg-white/5 text-white border-white/30 hover:bg-white/10"
-                >
-                  {profile ? "Хяналтын самбар" : "Үнэгүй бүртгүүлэх"}
-                </LinkButton>
+            </div>
+            {first && (
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 sm:p-5">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-white/70">
+                    {first.freeLessonCount > 0 && !hasPremium ? "Үнэгүй · Курс 01" : "Курс 01"}
+                  </p>
+                  <p className="mt-0.5 truncate text-base font-semibold text-white">
+                    {first.lessons[0]?.title ?? first.title}
+                  </p>
+                </div>
               </div>
-            </Reveal>
+            )}
+          </Link>
+        </div>
+      </section>
+
+      {/* Facts */}
+      {courses.length > 0 && (
+        <section className="border-b border-slate-200">
+          <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-slate-200 md:grid-cols-4">
+            {[
+              { value: String(courses.length), label: "курс" },
+              { value: String(totalLessons), label: "видео хичээл" },
+              { value: String(freeLessons), label: "хичээл үнэгүй" },
+              { value: `${PREMIUM_DURATION_MONTHS} сар`, label: "бүх хичээлд хандах" },
+            ].map((fact) => (
+              <div key={fact.label} className="flex flex-col-reverse bg-white px-4 py-6 sm:px-6 md:py-8">
+                <dt className="mt-1 text-sm text-slate-500">{fact.label}</dt>
+                <dd className="text-3xl font-semibold tracking-tight text-navy-900">
+                  {fact.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      {/* Curriculum */}
+      <section id="curriculum" className="scroll-mt-20 bg-slate-50/70 py-16 md:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl font-semibold tracking-tight text-navy-900">Хөтөлбөр</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
+              Курсууд нэг нэгнийхээ үргэлжлэл. Дарааллаар нь үзвэл хамгийн
+              ойлгомжтой.
+            </p>
+          </div>
+
+          {courses.length === 0 ? (
+            <p className="mt-10 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center text-slate-500">
+              Хичээлүүд удахгүй нэмэгдэнэ.
+            </p>
+          ) : (
+            <div className="mt-10 space-y-5">
+              {courses.map((course, i) => (
+                <CourseRow key={course.id} course={course} index={i} profile={profile} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-16 md:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-3xl font-semibold tracking-tight text-navy-900">Хэрхэн эхлэх вэ</h2>
+          <ol className="mt-10 grid gap-8 md:grid-cols-3 md:gap-10">
+            {[
+              {
+                title: "Үнэгүй хичээлээ үз",
+                body: "Курс бүрийн эхний хичээлийг бүртгэл, төлбөргүйгээр шууд үзээд сургалт танд тохирох эсэхийг шалгаарай.",
+              },
+              {
+                title: "Бүртгүүлж явцаа хадгал",
+                body: "Үнэгүй бүртгүүлбэл аль хичээлийг үзсэнээ харж, дараа нь яг орхисон газраасаа үргэлжлүүлнэ.",
+              },
+              {
+                title: "Premium-аар бүгдийг нээ",
+                body: `${formatMNT(PREMIUM_PRICE_MNT)} нэг удаа төлөөд ${PREMIUM_DURATION_MONTHS} сарын турш бүх курсын бүх хичээлийг үзнэ.`,
+              },
+            ].map((step, i) => (
+              <li key={step.title} className="border-t-2 border-navy-900 pt-5">
+                <span className="text-sm font-medium tabular-nums text-slate-500">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="mt-2 text-lg font-semibold text-navy-900">{step.title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-slate-600">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="scroll-mt-20 border-t border-slate-200 bg-slate-50/70 py-16 md:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-3xl font-semibold tracking-tight text-navy-900">Үнэ</h2>
+          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-slate-600">
+            Сар бүрийн төлбөр, нууц нөхцөл байхгүй. Нэг удаа төлнө.
+          </p>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+              <h3 className="text-lg font-semibold text-navy-900">Үнэгүй</h3>
+              <p className="mt-4 text-4xl font-semibold tracking-tight text-navy-900">0₮</p>
+              <ul className="mt-6 space-y-3 text-[15px] text-slate-600">
+                {[
+                  freeLessons > 0
+                    ? `Курс бүрийн эхний хичээл, нийт ${freeLessons}`
+                    : "Курс бүрийн эхний хичээл",
+                  "Бүртгэлгүйгээр шууд үзнэ",
+                  "Бүртгүүлбэл явц хадгалагдана",
+                ].map((item) => (
+                  <li key={item} className="flex gap-3">
+                    <Check size={18} className="mt-0.5 shrink-0 text-slate-400" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <LinkButton href={firstAction.href} variant="outline" className="mt-8 w-full">
+                {firstAction.label}
+              </LinkButton>
+            </div>
+
+            <div className="relative rounded-xl border-2 border-brand-600 bg-white p-6 sm:p-8">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-lg font-semibold text-navy-900">Premium</h3>
+                <span className="rounded-full bg-gold-100 px-2.5 py-1 text-xs font-medium text-gold-700">
+                  Бүх хичээл
+                </span>
+              </div>
+              <p className="mt-4 flex items-baseline gap-2">
+                <span className="text-4xl font-semibold tracking-tight text-navy-900">
+                  {formatMNT(PREMIUM_PRICE_MNT)}
+                </span>
+                <span className="text-slate-500">/ {PREMIUM_DURATION_MONTHS} сар</span>
+              </p>
+              <ul className="mt-6 space-y-3 text-[15px] text-slate-600">
+                {[
+                  courses.length > 0
+                    ? `${courses.length} курсын бүх ${totalLessons} хичээл`
+                    : "Бүх курсын бүх хичээл",
+                  "Хичээл бүр дээр багшаас асуулт асуух",
+                  `${PREMIUM_DURATION_MONTHS} сарын турш хэдэн ч удаа үзнэ`,
+                  "Үзэж дуусгасан хичээл хугацааны дараа ч нээлттэй",
+                ].map((item) => (
+                  <li key={item} className="flex gap-3">
+                    <Check size={18} className="mt-0.5 shrink-0 text-brand-600" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <LinkButton href="/premium" className="mt-8 w-full">
+                {hasPremium ? "Миний эрх" : "Premium авах"}
+                <ArrowRight size={16} />
+              </LinkButton>
+            </div>
           </div>
         </div>
       </section>
 
-      <PlatformStatsBar stats={stats} />
-
-      {/* Tracks */}
-      <section
-        id="tracks"
-        data-tour="tracks-section"
-        className="mx-auto max-w-6xl px-4 py-20 sm:px-6"
-      >
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-navy-900">3 үндсэн чиглэл</h2>
-          <p className="mt-3 text-slate-500">
-            Карго бизнесийн аяллын шат бүрт зориулсан тусгайлсан сургалтын
-            гарц.
-          </p>
-        </Reveal>
-        <Stagger className="mt-12 grid gap-6 sm:grid-cols-3">
-          {tracks.map((t) => (
-            <StaggerItem key={t.key}>
-              <TiltCard max={5} className="h-full">
-                <Link
-                  href={`/courses?track=${t.key}`}
-                  className="group block h-full rounded-2xl border border-slate-200 bg-white p-6 transition-shadow duration-200 hover:border-brand-300 hover:shadow-xl hover:shadow-brand-100/60"
-                >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-100">
-                    <t.icon size={22} />
-                  </span>
-                  <h3 className="mt-4 text-lg font-semibold text-navy-900">
-                    {t.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-500">
-                    {t.description}
-                  </p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand-600">
-                    Курсууд харах
-                    <ArrowRight
-                      size={15}
-                      className="transition-transform group-hover:translate-x-0.5"
-                    />
-                  </span>
-                </Link>
-              </TiltCard>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </section>
-
-      {/* Advantages */}
-      <section id="advantages" className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-navy-900">
-              Бидний давуу тал
-            </h2>
-            <p className="mt-3 text-slate-500">
-              Cargo Hub-ыг өөр сургалтуудаас ялгаж буй онцлогууд.
-            </p>
-          </Reveal>
-          <Stagger className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" staggerGap={0.09}>
-            {advantages.map((a) => (
-              <StaggerItem key={a.title}>
-                <div className="h-full rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-navy-900/5">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy-900 text-brand-400">
-                    <a.icon size={20} />
-                  </span>
-                  <h3 className="mt-4 font-semibold text-navy-900">{a.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-500">
-                    {a.description}
-                  </p>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </div>
-      </section>
-
-      {/* Featured courses */}
-      {featured.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <Reveal className="flex items-end justify-between">
-            <h2 className="text-3xl font-bold text-navy-900">
-              Онцлох сургалтууд
-            </h2>
-            <Link
-              href="/courses"
-              className="hidden text-sm font-medium text-brand-600 sm:inline-flex items-center gap-1"
-            >
-              Бүгдийг үзэх <ArrowRight size={15} />
-            </Link>
-          </Reveal>
-          <Stagger className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" staggerGap={0.1}>
-            {featured.map((course) => (
-              <StaggerItem key={course.id}>
-                <CourseCard course={course} />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </section>
-      )}
-
       <Testimonials />
 
-      {/* CTA */}
-      <section className="relative overflow-hidden bg-navy-950">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.15),transparent_60%)]" />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
-          <Reveal>
-            <h2 className="text-3xl font-bold text-white">
-              {profile
-                ? "Сургалтаа үргэлжлүүлээрэй"
-                : "Өнөөдрөөс карго бизнесээ эхлүүлээрэй"}
+      {/* FAQ */}
+      <section id="faq" className="scroll-mt-20 py-16 md:py-20">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_2fr]">
+          <div>
+            <h2 className="text-3xl font-semibold tracking-tight text-navy-900">
+              Түгээмэл асуулт
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-slate-300">
-              {profile
-                ? "Таны эхэлсэн хичээлүүд хүлээж байна."
-                : "Үнэгүй бүртгүүлж, эхний хичээлээ шууд эхлүүлээрэй."}
+            <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
+              Хариултаа олоогүй бол хичээлийн доор асуултаа үлдээгээрэй.
             </p>
-            <div className="mt-7">
-              <LinkButton
-                href={profile ? "/dashboard" : "/register"}
-                size="lg"
-                data-tour="register-cta"
-                className="shadow-[0_4px_24px_rgba(217,119,6,0.45)]"
-              >
-                {profile ? "Хяналтын самбар руу" : "Үнэгүй бүртгүүлэх"}
-              </LinkButton>
-            </div>
-          </Reveal>
+          </div>
+          <Faq />
         </div>
       </section>
     </div>

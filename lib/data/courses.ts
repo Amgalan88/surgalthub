@@ -1,61 +1,56 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type { Course, CourseTrack, Lesson, LessonOutline } from "@/lib/types";
+import type { Course, Lesson, LessonOutline } from "@/lib/types";
 
-/** A course plus the summary numbers the catalog card needs. */
+/** A course plus its lesson outline and the summary numbers listings need. */
 export interface CourseWithMeta extends Course {
+  /** Every lesson in order, locked ones included (titles only, no content). */
+  lessons: LessonOutline[];
   lessonCount: number;
   freeLessonCount: number;
   hasPremiumLessons: boolean;
   /** Viewer-specific; both stay at their defaults when nobody is signed in. */
   enrolled: boolean;
   completedLessons: number;
+  completedLessonIds: string[];
 }
 
+/**
+ * Published courses in the order they were added, which is the order they are
+ * meant to be taken in.
+ */
 export async function getPublishedCourses(
-  track?: CourseTrack,
   userId?: string
 ): Promise<CourseWithMeta[]> {
   try {
     const supabase = await createClient();
-    let query = supabase
+    const { data, error } = await supabase
       .from("courses")
       .select("*")
       .eq("published", true)
-      .order("created_at", { ascending: false });
-
-    if (track) query = query.eq("track", track);
-
-    const { data, error } = await query;
+      .order("created_at", { ascending: true });
     if (error) throw error;
 
     const courses = data ?? [];
     if (courses.length === 0) return [];
 
     const courseIds = courses.map((c) => c.id);
-    // Counted from the outline view so locked lessons still show up in totals.
+    // The outline view lists locked lessons too, so totals stay honest.
     const { data: lessons } = await supabase
       .from("lesson_outline")
-      .select("id, course_id, is_free_preview")
-      .in("course_id", courseIds);
+      .select("*")
+      .in("course_id", courseIds)
+      .order("order_index", { ascending: true });
 
-    const counts = new Map<string, number>();
-    const freeCounts = new Map<string, number>();
-    const premium = new Set<string>();
+    const lessonsByCourse = new Map<string, LessonOutline[]>();
     for (const lesson of lessons ?? []) {
-      counts.set(lesson.course_id, (counts.get(lesson.course_id) ?? 0) + 1);
-      if (lesson.is_free_preview) {
-        freeCounts.set(
-          lesson.course_id,
-          (freeCounts.get(lesson.course_id) ?? 0) + 1
-        );
-      } else {
-        premium.add(lesson.course_id);
-      }
+      const list = lessonsByCourse.get(lesson.course_id) ?? [];
+      list.push(lesson);
+      lessonsByCourse.set(lesson.course_id, list);
     }
 
     const enrolledIds = new Set<string>();
-    const completedByCourse = new Map<string, number>();
+    let completedLessonIds = new Set<string>();
     if (userId) {
       const [{ data: enrollments }, { data: progress }] = await Promise.all([
         supabase
@@ -67,27 +62,26 @@ export async function getPublishedCourses(
       ]);
 
       for (const row of enrollments ?? []) enrolledIds.add(row.course_id);
-
-      const completedLessonIds = new Set(
-        (progress ?? []).map((p) => p.lesson_id)
-      );
-      for (const lesson of lessons ?? []) {
-        if (!completedLessonIds.has(lesson.id)) continue;
-        completedByCourse.set(
-          lesson.course_id,
-          (completedByCourse.get(lesson.course_id) ?? 0) + 1
-        );
-      }
+      completedLessonIds = new Set((progress ?? []).map((p) => p.lesson_id));
     }
 
-    return courses.map((course) => ({
-      ...course,
-      lessonCount: counts.get(course.id) ?? 0,
-      freeLessonCount: freeCounts.get(course.id) ?? 0,
-      hasPremiumLessons: premium.has(course.id),
-      enrolled: enrolledIds.has(course.id),
-      completedLessons: completedByCourse.get(course.id) ?? 0,
-    }));
+    return courses.map((course) => {
+      const courseLessons = lessonsByCourse.get(course.id) ?? [];
+      const completed = courseLessons
+        .filter((l) => completedLessonIds.has(l.id))
+        .map((l) => l.id);
+      const freeLessonCount = courseLessons.filter((l) => l.is_free_preview).length;
+      return {
+        ...course,
+        lessons: courseLessons,
+        lessonCount: courseLessons.length,
+        freeLessonCount,
+        hasPremiumLessons: freeLessonCount < courseLessons.length,
+        enrolled: enrolledIds.has(course.id),
+        completedLessons: completed.length,
+        completedLessonIds: completed,
+      };
+    });
   } catch (err) {
     console.error("getPublishedCourses failed:", err);
     return [];
@@ -169,3 +163,21 @@ export async function getLessonById(lessonId: string): Promise<Lesson | null> {
     return null;
   }
 }
+
+/** 1-based position of a course in the published curriculum, or null. */
+export const getCoursePosition = cache(async (courseId: string): Promise<number | null> => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("courses")
+      .select("id")
+      .eq("published", true)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    const index = (data ?? []).findIndex((c) => c.id === courseId);
+    return index === -1 ? null : index + 1;
+  } catch (err) {
+    console.error("getCoursePosition failed:", err);
+    return null;
+  }
+});

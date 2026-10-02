@@ -25,19 +25,17 @@ export default async function RegisterPage({
   if (profile) redirect(next);
 
   return (
-    <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden px-4 py-16">
-      {/* Decorative background */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_55%)]" />
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-slate-50/70 px-4 py-16">
 
-      <div className="relative w-full max-w-md fade-up">
-        <h1 className="text-center text-2xl font-bold text-navy-900">
+      <div className="w-full max-w-md">
+        <h1 className="text-center text-2xl font-semibold tracking-tight text-navy-900">
           Үнэгүй бүртгүүлэх
         </h1>
         <p className="mt-2 text-center text-sm text-slate-500">
           Хэдхэн секундэд бүртгүүлж, сургалтаа эхлүүлээрэй.
         </p>
 
-        <Card className="mt-8 shadow-md">
+        <Card className="mt-8">
           <CardBody className="p-6 sm:p-7">
             <AuthForm
               mode="register"
@@ -51,7 +49,7 @@ export default async function RegisterPage({
           Бүртгэлтэй юу?{" "}
           <Link
             href={next === "/dashboard" ? "/login" : `/login?next=${encodeURIComponent(next)}`}
-            className="font-medium text-brand-600 hover:text-brand-700">
+            className="font-medium text-brand-700 hover:text-brand-800">
             Нэвтрэх
           </Link>
         </p>
