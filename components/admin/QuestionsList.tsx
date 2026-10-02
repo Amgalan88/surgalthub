@@ -54,7 +54,7 @@ export function QuestionsList({
 }) {
   if (questions.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center text-slate-400">
+      <div className="rounded-xl border border-dashed border-slate-300 bg-white py-16 text-center text-slate-400">
         Одоогоор асуулт ирээгүй байна.
       </div>
     );
@@ -67,7 +67,7 @@ export function QuestionsList({
         return (
           <li
             key={q.id}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            className="rounded-xl border border-slate-200 bg-white p-5"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">

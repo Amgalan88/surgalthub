@@ -17,7 +17,7 @@ export default async function EditCoursePage({
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="text-2xl font-bold text-navy-900">Курс засах</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-navy-900">Курс засах</h1>
 
       <div className="mt-6 flex flex-wrap gap-3">
         <Link

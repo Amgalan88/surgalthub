@@ -18,7 +18,7 @@ export default async function NewLessonPage({
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="text-2xl font-bold text-navy-900">
+      <h1 className="text-2xl font-semibold tracking-tight text-navy-900">
         {course.title} — Хичээл нэмэх
       </h1>
 

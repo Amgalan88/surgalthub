@@ -3,12 +3,16 @@ import { CourseRow } from "@/components/course/CourseRow";
 import { PremiumStatusCard } from "@/components/premium/PremiumStatusCard";
 import { getCurrentProfile } from "@/lib/auth";
 import { getPublishedCourses } from "@/lib/data/courses";
+import { getMyPaymentState } from "@/lib/data/payments";
 
 export default async function DashboardPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login?next=/dashboard");
 
-  const courses = await getPublishedCourses(profile.id);
+  const [courses, payment] = await Promise.all([
+    getPublishedCourses(profile.id),
+    getMyPaymentState(profile.id),
+  ]);
   const firstName = profile.full_name?.trim().split(/\s+/)[0];
 
   return (
@@ -21,7 +25,11 @@ export default async function DashboardPage() {
           Курсуудаа дарааллаар нь үзээрэй. Явц тань автоматаар хадгалагдана.
         </p>
 
-        <PremiumStatusCard profile={profile} showLink className="mt-6" />
+        <PremiumStatusCard
+          profile={profile}
+          pendingSince={payment.pending?.created_at ?? null}
+          className="mt-6"
+        />
 
         {courses.length === 0 ? (
           <p className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center text-slate-500">

@@ -9,6 +9,8 @@ export interface AdminStats {
   totalEnrollments: number;
   completedEnrollments: number;
   completionRate: number;
+  activePremium: number;
+  unansweredQuestions: number;
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -20,6 +22,8 @@ export async function getAdminStats(): Promise<AdminStats> {
     { count: publishedCourses },
     { count: totalEnrollments },
     { count: completedEnrollments },
+    { count: activePremium },
+    { count: unansweredQuestions },
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("courses").select("*", { count: "exact", head: true }),
@@ -32,6 +36,14 @@ export async function getAdminStats(): Promise<AdminStats> {
       .from("enrollments")
       .select("*", { count: "exact", head: true })
       .not("completed_at", "is", null),
+    supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .gt("premium_until", new Date().toISOString()),
+    supabase
+      .from("lesson_questions")
+      .select("*", { count: "exact", head: true })
+      .is("answer", null),
   ]);
 
   return {
@@ -40,6 +52,8 @@ export async function getAdminStats(): Promise<AdminStats> {
     publishedCourses: publishedCourses ?? 0,
     totalEnrollments: totalEnrollments ?? 0,
     completedEnrollments: completedEnrollments ?? 0,
+    activePremium: activePremium ?? 0,
+    unansweredQuestions: unansweredQuestions ?? 0,
     completionRate:
       (totalEnrollments ?? 0) > 0
         ? Math.round(((completedEnrollments ?? 0) / (totalEnrollments ?? 1)) * 100)

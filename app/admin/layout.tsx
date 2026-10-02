@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AdminShell from "@/components/layout/AdminShell";
 import { getCurrentProfile } from "@/lib/auth";
+import { getPendingPaymentCount } from "@/lib/data/payments";
 
 export const metadata: Metadata = {
   title: { default: "Админ", template: "%s | Админ | Cargo Hub" },
@@ -17,5 +18,7 @@ export default async function AdminLayout({
   if (!profile) redirect("/login?next=/admin");
   if (profile.role !== "admin") redirect("/dashboard");
 
-  return <AdminShell>{children}</AdminShell>;
+  const pendingPayments = await getPendingPaymentCount();
+
+  return <AdminShell pendingPayments={pendingPayments}>{children}</AdminShell>;
 }

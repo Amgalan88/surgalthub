@@ -38,7 +38,7 @@ export function LessonHelp({
         initialValue={myFeedback}
       />
 
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+      <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/70 p-5">
         <h2 className="flex items-center gap-2 font-semibold text-navy-900">
           <MessageCircleQuestion size={19} className="text-brand-600" />
           Гацсан уу? Асуугаарай

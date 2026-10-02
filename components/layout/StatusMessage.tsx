@@ -31,7 +31,7 @@ export function StatusMessage({
     >
       <span
         className={cn(
-          "flex h-16 w-16 items-center justify-center rounded-2xl ring-1 ring-inset",
+          "flex h-16 w-16 items-center justify-center rounded-xl ring-1 ring-inset",
           tone === "red"
             ? "bg-red-50 text-red-600 ring-red-600/20"
             : "bg-brand-50 text-brand-600 ring-brand-600/20"
@@ -46,7 +46,7 @@ export function StatusMessage({
         </p>
       )}
 
-      <h1 className="mt-2 text-2xl font-bold text-navy-900 sm:text-3xl">
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-navy-900 sm:text-3xl">
         {title}
       </h1>
       <p className="mt-3 leading-relaxed text-slate-500">{description}</p>

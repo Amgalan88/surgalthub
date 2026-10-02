@@ -19,6 +19,7 @@ import { ensureEnrollment, getCompletedLessonIds } from "@/lib/data/progress";
 import { getLessonQuestions, getMyLessonFeedback } from "@/lib/data/engagement";
 import { LessonHelp } from "@/components/lesson/LessonHelp";
 import { getCurrentProfile } from "@/lib/auth";
+import { getMyPaymentState } from "@/lib/data/payments";
 import { markLessonComplete } from "@/lib/actions/learning";
 import { cloudinaryVideoPoster, isYoutubeUrl, toYoutubeEmbedUrl } from "@/lib/video";
 import { LessonVideo } from "@/components/lesson/LessonVideo";
@@ -94,6 +95,10 @@ export default async function LessonPage({
   const lockedCount = lessons.filter(
     (l) => !canAccessLesson(l, profile, completedIds.has(l.id))
   ).length;
+  const paymentPending =
+    profile && lockedCount > 0 && !hasPremium
+      ? Boolean((await getMyPaymentState(profile.id)).pending)
+      : false;
 
   // After "complete", carry on to the next lesson if it is open to this
   // learner; otherwise the course page, which explains what unlocks the rest.
@@ -335,7 +340,7 @@ export default async function LessonPage({
               compact
             />
           </div>
-          {lockedCount > 0 && !hasPremium && <PremiumOffer lessonCount={lockedCount} />}
+          {lockedCount > 0 && !hasPremium && <PremiumOffer lessonCount={lockedCount} pending={paymentPending} />}
         </aside>
       </div>
     </div>
