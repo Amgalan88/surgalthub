@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AdminShell from "@/components/layout/AdminShell";
+import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { getCurrentProfile } from "@/lib/auth";
 import { getPendingPaymentCount } from "@/lib/data/payments";
 
@@ -20,5 +21,10 @@ export default async function AdminLayout({
 
   const pendingPayments = await getPendingPaymentCount();
 
-  return <AdminShell pendingPayments={pendingPayments}>{children}</AdminShell>;
+  return (
+    <AdminShell pendingPayments={pendingPayments}>
+      <AutoRefresh />
+      {children}
+    </AdminShell>
+  );
 }

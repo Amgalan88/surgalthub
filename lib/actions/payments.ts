@@ -27,6 +27,12 @@ export async function submitPaymentRequest(
 
   const payerName = String(formData.get("payer_name") ?? "").trim().slice(0, 120) || null;
 
+  // The request references the learner's profiles row, which accounts made
+  // before the signup trigger existed may lack. Creating it is a no-op otherwise.
+  await supabase
+    .from("profiles")
+    .upsert({ id: user.id }, { onConflict: "id", ignoreDuplicates: true });
+
   let { error } = await supabase.from("payment_requests").insert({
     user_id: user.id,
     amount: PREMIUM_PRICE_MNT,
@@ -43,7 +49,10 @@ export async function submitPaymentRequest(
   // 23505: a request is already open — the learner pressed twice, nothing to do.
   if (error && error.code !== "23505") {
     console.error("submitPaymentRequest failed:", error);
-    return { error: "Илгээж чадсангүй. Дахин оролдоно уу." };
+    // The code tells the admin whether it is the table, a permission or the profile.
+    return {
+      error: `Илгээж чадсангүй. Дахин оролдоно уу. (алдааны код: ${error.code || "тодорхойгүй"})`,
+    };
   }
 
   refreshPaymentPages();

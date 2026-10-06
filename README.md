@@ -73,6 +73,9 @@
      хуудасны "Би төлбөрөө шилжүүлсэн" товч, админы Төлбөрүүд хуудас.
    - `supabase/migrations/0012_payment_request_details.sql` — шилжүүлсэн
      хүний нэр, татгалзсан шалтгаан, хүсэлт цуцлах.
+   - `supabase/migrations/0013_payment_requests_access.sql` — сайтад төлбөрийн
+     хүснэгтийг унших/бичих эрх олгоно (шинэ хүснэгтэд эрх автоматаар
+     өгдөггүй төсөлд **заавал**).
 
 5. [cloudinary.com](https://cloudinary.com) дээр үнэгүй акаунт үүсгэ (админ
    панелаас зураг/видео/аудио/PDF байршуулахад хэрэгтэй). Dashboard-ын нүүр
@@ -100,7 +103,7 @@
 ## Ажиллуулахын өмнөх шалгах жагсаалт
 
 1. Supabase SQL Editor дээр `0010_launch_hardening.sql`, `0011_payment_requests.sql`,
-   `0012_payment_request_details.sql`-г ажиллуулсан.
+   `0012_payment_request_details.sql`, `0013_payment_requests_access.sql`-г ажиллуулсан.
 2. Hosting (Vercel г.м.) дээр `.env.local`-ийн бүх утга + доорхыг тохируулсан:
 
    ```bash
@@ -129,9 +132,9 @@ Premium хуудсан дээр **"Би төлбөрөө шилжүүлсэн"**
 "Орж ирээгүй" дарна. Баталгаажуулахад Premium 6 сараар (үлдсэн хугацаан дээр
 нэмэгдэж) нээгдэнэ.
 
-Үүнийг ашиглахын тулд `supabase/migrations/0011_payment_requests.sql`, дараа нь
-`0012_payment_request_details.sql`-ийг Supabase → SQL Editor дээр нэг удаа
-ажиллуулна. Ажиллуулаагүй байхад сайт
+Үүнийг ашиглахын тулд `supabase/migrations/0011_payment_requests.sql`,
+`0012_payment_request_details.sql`, `0013_payment_requests_access.sql`-ийг
+дарааллаар нь Supabase → SQL Editor дээр нэг удаа ажиллуулна. Ажиллуулаагүй байхад сайт
 хуучин аргаараа (баримтаа админд илгээх) ажиллана.
 
 ## Видео хичээлүүдийг бөөнөөр оруулах

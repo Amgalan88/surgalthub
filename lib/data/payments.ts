@@ -9,6 +9,11 @@ function isMissingTable(error: { code?: string } | null) {
   return error?.code === "42P01" || error?.code === "PGRST205";
 }
 
+/** 42501: the table exists but the API role was never granted it (run 0013). */
+function isPermissionDenied(error: { code?: string } | null) {
+  return error?.code === "42501";
+}
+
 export interface MyPaymentState {
   /** False until migration 0011 is applied; the "I have paid" flow hides itself. */
   available: boolean;
@@ -49,6 +54,8 @@ export interface AdminPaymentRequest extends PaymentRequest {
 
 export async function getPaymentRequestsAdmin(): Promise<{
   available: boolean;
+  /** Set when the requests could not be read, so the page never shows a false "nothing to check". */
+  error: string | null;
   pending: AdminPaymentRequest[];
   reviewed: AdminPaymentRequest[];
 }> {
@@ -72,8 +79,14 @@ export async function getPaymentRequestsAdmin(): Promise<{
 
   const error = pendingRes.error ?? reviewedRes.error;
   if (error) {
-    if (!isMissingTable(error)) console.error("getPaymentRequestsAdmin failed:", error);
-    return { available: !isMissingTable(error), pending: [], reviewed: [] };
+    const setupNeeded = isMissingTable(error) || isPermissionDenied(error);
+    if (!setupNeeded) console.error("getPaymentRequestsAdmin failed:", error);
+    return {
+      available: !setupNeeded,
+      error: setupNeeded ? null : `${error.message} (${error.code})`,
+      pending: [],
+      reviewed: [],
+    };
   }
 
   type Row = PaymentRequest & {
@@ -91,7 +104,12 @@ export async function getPaymentRequestsAdmin(): Promise<{
         : false,
     }));
 
-  return { available: true, pending: shape(pendingRes.data), reviewed: shape(reviewedRes.data) };
+  return {
+    available: true,
+    error: null,
+    pending: shape(pendingRes.data),
+    reviewed: shape(reviewedRes.data),
+  };
 }
 
 /** Open requests waiting on the admin; 0 when the table is not there yet. */

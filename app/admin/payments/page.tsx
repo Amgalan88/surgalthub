@@ -6,11 +6,15 @@ import { formatMNT, PAYMENT_INFO } from "@/lib/access";
 
 export const metadata: Metadata = { title: "Төлбөрүүд" };
 
-const MIGRATION_URL =
-  "https://github.com/Amgalan88/surgalthub/blob/main/supabase/migrations/0011_payment_requests.sql";
+const MIGRATIONS_URL = "https://github.com/Amgalan88/surgalthub/blob/main/supabase/migrations";
+const SETUP_FILES = [
+  "0011_payment_requests.sql",
+  "0012_payment_request_details.sql",
+  "0013_payment_requests_access.sql",
+];
 
 export default async function AdminPaymentsPage() {
-  const { available, pending, reviewed } = await getPaymentRequestsAdmin();
+  const { available, error, pending, reviewed } = await getPaymentRequestsAdmin();
 
   return (
     <div className="max-w-4xl p-6 sm:p-8">
@@ -23,16 +27,38 @@ export default async function AdminPaymentsPage() {
       {!available ? (
         <div className="mt-8 rounded-xl border border-gold-300 bg-gold-100/60 p-6 text-sm text-navy-900">
           <p className="font-semibold">Нэг удаагийн тохиргоо хэрэгтэй</p>
+          <p className="mt-1 text-slate-700">
+            Төлбөрийн хүснэгт үүсээгүй эсвэл сайтад түүнийг унших эрх олгогдоогүй байна.
+          </p>
           <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-slate-700">
             <li>
-              <a href={MIGRATION_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-brand-700 underline">
-                Энэ SQL файлыг
-              </a>{" "}
-              нээгээд агуулгыг нь бүхэлд нь хуулна.
+              Доорх файлуудыг дарааллаар нь нээж, агуулгыг бүхэлд нь хуулна:
+              <ul className="mt-1 space-y-0.5">
+                {SETUP_FILES.map((file) => (
+                  <li key={file}>
+                    <a
+                      href={`${MIGRATIONS_URL}/${file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs font-medium text-brand-700 underline"
+                    >
+                      {file}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </li>
-            <li>Supabase → SQL Editor → New query хэсэгт буулгаад <b>Run</b> дарна.</li>
+            <li>
+              Тус бүрийг Supabase → SQL Editor → New query хэсэгт буулгаад <b>Run</b> дарна.
+              Аль хэдийн ажиллуулсан файлыг дахин ажиллуулахад аюулгүй.
+            </li>
             <li>Энэ хуудсыг дахин ачаална.</li>
           </ol>
+        </div>
+      ) : error ? (
+        <div className="mt-8 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-800">
+          <p className="font-semibold">Төлбөрийн хүсэлтүүдийг уншиж чадсангүй</p>
+          <p className="mt-1 font-mono text-xs">{error}</p>
         </div>
       ) : (
         <>
