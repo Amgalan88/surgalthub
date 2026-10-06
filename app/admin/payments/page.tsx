@@ -7,11 +7,8 @@ import { formatMNT, PAYMENT_INFO } from "@/lib/access";
 export const metadata: Metadata = { title: "Төлбөрүүд" };
 
 const MIGRATIONS_URL = "https://github.com/Amgalan88/surgalthub/blob/main/supabase/migrations";
-const SETUP_FILES = [
-  "0011_payment_requests.sql",
-  "0012_payment_request_details.sql",
-  "0013_payment_requests_access.sql",
-];
+// Self-contained: sets up everything whatever ran before.
+const SETUP_FILES = ["0013_payment_requests_access.sql"];
 
 export default async function AdminPaymentsPage() {
   const { available, error, pending, reviewed } = await getPaymentRequestsAdmin();
@@ -32,7 +29,7 @@ export default async function AdminPaymentsPage() {
           </p>
           <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-slate-700">
             <li>
-              Доорх файлуудыг дарааллаар нь нээж, агуулгыг бүхэлд нь хуулна:
+              Доорх файлыг нээж, агуулгыг бүхэлд нь хуулна:
               <ul className="mt-1 space-y-0.5">
                 {SETUP_FILES.map((file) => (
                   <li key={file}>
@@ -49,8 +46,8 @@ export default async function AdminPaymentsPage() {
               </ul>
             </li>
             <li>
-              Тус бүрийг Supabase → SQL Editor → New query хэсэгт буулгаад <b>Run</b> дарна.
-              Аль хэдийн ажиллуулсан файлыг дахин ажиллуулахад аюулгүй.
+              Supabase → SQL Editor → New query хэсэгт буулгаад <b>Run</b> дарна. Дахин
+              ажиллуулахад аюулгүй.
             </li>
             <li>Энэ хуудсыг дахин ачаална.</li>
           </ol>
