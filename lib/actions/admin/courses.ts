@@ -145,5 +145,6 @@ export async function toggleCoursePublished(id: string, next: boolean) {
   const supabase = await createClient();
   await supabase.from("courses").update({ published: next }).eq("id", id);
   revalidatePath("/admin/courses");
-  revalidatePath("/courses");
+  revalidatePath(`/admin/courses/${id}/lessons`);
+  revalidatePath("/", "layout");
 }

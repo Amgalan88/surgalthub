@@ -71,50 +71,8 @@ const adminCourseFormTour: Tour = {
   ],
 };
 
-const adminLessonsTour: Tour = {
-  id: "admin-lessons",
-  steps: [
-    {
-      target: sel("admin-add-lesson"),
-      title: "Хичээл нэмэх",
-      content: "Энд дарж курст шинэ хичээл нэмнэ үү.",
-      placement: "bottom",
-    },
-  ],
-};
 
-const adminLessonFormTour: Tour = {
-  id: "admin-lesson-form",
-  steps: [
-    {
-      target: sel("lesson-free-preview-field"),
-      title: "Үнэгүй үзэх",
-      content:
-        "Үүнийг идэвхжүүлбэл төлбөртэй курсын хувьд ч энэ хичээлийг бүх бүртгүүлсэн хэрэглэгч үзэх боломжтой болно. Эхний хичээл анхдагчаар үнэгүй байдаг.",
-      placement: "right",
-    },
-    {
-      target: sel("lesson-media-block"),
-      title: "Медиа нэмэх",
-      content:
-        "Зураг, видео, аудио, PDF слайдыг эндээс шууд байршуулж болно — автоматаар Cloudinary руу хадгалагдана.",
-      placement: "top",
-    },
-  ],
-};
 
-const adminUsersTour: Tour = {
-  id: "admin-users",
-  steps: [
-    {
-      target: sel("admin-users-table"),
-      title: "Хэрэглэгч хайх, удирдах",
-      content:
-        "Имэйл, утас, нэрээр хэрэглэгчээ хайж олоорой. Хэрэглэгч шилжүүлгээр төлбөрөө хийсний дараа энд 'Идэвхжүүлэх' дараад 6 сарын Premium эрх нээж өгнө. Мөн нууц үгээ мартсан хэрэглэгчид шинэ нууц үг үүсгэж өгч болно.",
-      placement: "top",
-    },
-  ],
-};
 
 const adminQuestionsTour: Tour = {
   id: "admin-questions",
@@ -136,16 +94,6 @@ const matchers: { test: RegExp; tour: Tour }[] = [
   { test: /^\/admin\/courses\/?$/, tour: adminCoursesTour },
   { test: /^\/admin\/courses\/new\/?$/, tour: adminCourseFormTour },
   { test: /^\/admin\/courses\/[^/]+\/edit\/?$/, tour: adminCourseFormTour },
-  {
-    test: /^\/admin\/courses\/[^/]+\/lessons\/new\/?$/,
-    tour: adminLessonFormTour,
-  },
-  {
-    test: /^\/admin\/courses\/[^/]+\/lessons\/[^/]+\/?$/,
-    tour: adminLessonFormTour,
-  },
-  { test: /^\/admin\/courses\/[^/]+\/lessons\/?$/, tour: adminLessonsTour },
-  { test: /^\/admin\/users\/?$/, tour: adminUsersTour },
   { test: /^\/admin\/questions\/?$/, tour: adminQuestionsTour },
 ];
 

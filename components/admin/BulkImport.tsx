@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, CircleAlert, FolderOpen, Loader2, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getCloudinaryUploadSignature } from "@/lib/actions/admin/cloudinary";
+import { uploadToCloudinary } from "@/lib/cloudinaryUpload";
 import {
   finishImportCourse,
   hideDemoCourses,
@@ -30,46 +30,6 @@ interface PlannedLesson {
 
 function formatMb(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
-
-/** Uploads straight from the browser to Cloudinary, reporting progress as it goes. */
-function uploadVideo(
-  file: File,
-  folder: string,
-  onProgress: (fraction: number) => void
-): Promise<{ url: string; duration: number }> {
-  return getCloudinaryUploadSignature(folder).then(
-    ({ cloudName, apiKey, timestamp, signature }) =>
-      new Promise((resolve, reject) => {
-        const body = new FormData();
-        body.append("file", file);
-        body.append("api_key", apiKey);
-        body.append("timestamp", String(timestamp));
-        body.append("signature", signature);
-        body.append("folder", folder);
-
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`);
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) onProgress(e.loaded / e.total);
-        };
-        xhr.onload = () => {
-          let data: { secure_url?: string; duration?: number; error?: { message?: string } } = {};
-          try {
-            data = JSON.parse(xhr.responseText);
-          } catch {
-            // Fall through to the generic error below.
-          }
-          if (xhr.status >= 200 && xhr.status < 300 && data.secure_url) {
-            resolve({ url: data.secure_url, duration: Number(data.duration) || 0 });
-          } else {
-            reject(new Error(data.error?.message ?? `Cloudinary алдаа (${xhr.status})`));
-          }
-        };
-        xhr.onerror = () => reject(new Error("Интернэт тасарсан байж магадгүй."));
-        xhr.send(body);
-      })
-  );
 }
 
 export function BulkImport() {
@@ -167,7 +127,7 @@ export function BulkImport() {
           }
 
           setStatus(lesson.key, { state: "uploading", progress: 0 });
-          const uploaded = await uploadVideo(lesson.file!, `cargohub/${course.slug}`, (p) =>
+          const uploaded = await uploadToCloudinary(lesson.file!, `cargohub/${course.slug}`, (p) =>
             setStatus(lesson.key, { state: "uploading", progress: p })
           );
           totalSeconds += uploaded.duration;

@@ -1,10 +1,8 @@
 "use server";
 
-import { randomInt } from "crypto";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { PREMIUM_DURATION_MONTHS } from "@/lib/access";
 import type { UserRole } from "@/lib/types";
 
@@ -17,47 +15,6 @@ export async function setUserRole(userId: string, role: UserRole) {
   const supabase = await createClient();
   await supabase.from("profiles").update({ role }).eq("id", userId);
   revalidatePath("/admin/users");
-}
-
-// Exclude visually ambiguous characters (0/O, 1/l/I) since admins relay
-// this out loud over the phone.
-const PASSWORD_CHARS = "23456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
-
-function generateRandomPassword(length = 10): string {
-  let out = "";
-  for (let i = 0; i < length; i++) {
-    out += PASSWORD_CHARS[randomInt(PASSWORD_CHARS.length)];
-  }
-  return out;
-}
-
-export interface GeneratePasswordResult {
-  password?: string;
-  error?: string;
-}
-
-export async function generateUserPassword(
-  userId: string
-): Promise<GeneratePasswordResult> {
-  try {
-    await requireAdmin();
-
-    const adminClient = createAdminClient();
-    const password = generateRandomPassword();
-    const { error } = await adminClient.auth.admin.updateUserById(userId, {
-      password,
-    });
-
-    if (error) {
-      return { error: error.message };
-    }
-
-    return { password };
-  } catch (err) {
-    return {
-      error: err instanceof Error ? err.message : "Тодорхойгүй алдаа гарлаа.",
-    };
-  }
 }
 
 /**

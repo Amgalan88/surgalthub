@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 import type { LessonFormState } from "@/lib/actions/admin/lessons";
 import type { Lesson } from "@/lib/types";
+import { isYoutubeUrl } from "@/lib/video";
 
 export function LessonForm({
   courseId,
@@ -36,20 +37,14 @@ export function LessonForm({
         <Input id="title" name="title" defaultValue={lesson?.title} required />
       </div>
 
-      <div>
-        <Label htmlFor="order_index">Эрэмбэ</Label>
-        <Input
-          id="order_index"
-          name="order_index"
-          type="number"
-          defaultValue={lesson?.order_index ?? nextOrderIndex ?? 0}
-        />
-      </div>
+      {/* Position is managed with the arrows on the lessons list. */}
+      <input
+        type="hidden"
+        name="order_index"
+        value={lesson?.order_index ?? nextOrderIndex ?? 0}
+      />
 
-      <label
-        className="flex items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm text-slate-700"
-        data-tour="lesson-free-preview-field"
-      >
+      <label className="flex items-start gap-2.5 rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
         <input
           type="checkbox"
           name="is_free_preview"
@@ -57,54 +52,67 @@ export function LessonForm({
           className="mt-0.5 h-4 w-4 accent-brand-600"
         />
         <span>
-          Үнэгүй үзэх боломжтой (preview)
+          Үнэгүй хичээл
           <span className="mt-0.5 block text-xs text-slate-500">
-            Төлбөртэй курсын хувьд ч гэсэн энэ хичээлийг бүх бүртгүүлсэн
-            хэрэглэгч үзэх боломжтой байна.
+            Бүртгэлгүй хүн ч үзнэ. Унтраавал зөвхөн Premium эрхтэй хүн үзнэ.
           </span>
         </span>
       </label>
 
-      <div className="rounded-xl border border-slate-200 p-4" data-tour="lesson-media-block">
-        <h3 className="text-sm font-semibold text-navy-900">Медиа</h3>
-        <p className="mt-0.5 text-xs text-slate-500">
-          Cloudinary руу шууд байршина. Видео нэмэхдээ YouTube холбоос эсвэл
-          файл аль нэгийг ашиглаж болно.
-        </p>
+      <div className="rounded-xl border border-slate-200 p-4">
+        <MediaUploader
+          fieldName="video_file_url"
+          label="Видео"
+          accept="video/*"
+          folder="lessons/videos"
+          initialUrl={lesson?.video_url && !isYoutubeUrl(lesson.video_url) ? lesson.video_url : null}
+        />
+        <details className="mt-3" open={Boolean(lesson?.video_url && isYoutubeUrl(lesson.video_url))}>
+          <summary className="cursor-pointer text-xs font-medium text-slate-500">
+            Эсвэл YouTube холбоос ашиглах
+          </summary>
+          <Input
+            name="video_url"
+            className="mt-2"
+            defaultValue={lesson?.video_url && isYoutubeUrl(lesson.video_url) ? lesson.video_url : ""}
+            placeholder="https://youtube.com/watch?v=..."
+          />
+        </details>
+      </div>
 
+      <div>
+        <Label htmlFor="content_md">Хичээлийн доор гарах текст (заавал биш)</Label>
+        <Textarea
+          id="content_md"
+          name="content_md"
+          rows={8}
+          defaultValue={lesson?.content_md}
+          placeholder={"Жишээ нь хичээлийн гол санаа, холбоос.\n\n## Гарчиг\n- Алхам 1\n- Алхам 2"}
+        />
+        <p className="mt-1 text-xs text-slate-500">
+          ## гарчиг, - жагсаалт, **тод** гэж бичиж болно.
+        </p>
+      </div>
+
+      <details className="rounded-xl border border-slate-200 p-4">
+        <summary className="cursor-pointer text-sm font-medium text-navy-900">
+          Нэмэлт материал (зураг, аудио, PDF слайд)
+        </summary>
         <div className="mt-4 space-y-4">
           <MediaUploader
             fieldName="cover_image_url"
-            label="Гарчгийн зураг"
+            label="Видеоны өмнө харагдах зураг"
             accept="image/*"
             folder="lessons/images"
             initialUrl={lesson?.cover_image_url}
           />
-
-          <div>
-            <Label htmlFor="video_url">Видео холбоос (YouTube)</Label>
-            <Input
-              id="video_url"
-              name="video_url"
-              defaultValue={lesson?.video_url ?? ""}
-              placeholder="https://youtube.com/watch?v=..."
-            />
-          </div>
-          <MediaUploader
-            fieldName="video_file_url"
-            label="Эсвэл видео файл байршуулах"
-            accept="video/*"
-            folder="lessons/videos"
-          />
-
           <MediaUploader
             fieldName="audio_url"
-            label="Аудио (дуу хоолболт)"
+            label="Аудио"
             accept="audio/*"
             folder="lessons/audio"
             initialUrl={lesson?.audio_url}
           />
-
           <MediaUploader
             fieldName="slides_url"
             label="Слайд (PDF)"
@@ -113,21 +121,7 @@ export function LessonForm({
             initialUrl={lesson?.slides_url}
           />
         </div>
-      </div>
-
-      <div>
-        <Label htmlFor="content_md">
-          Хичээлийн агуулга (Markdown дэмжинэ)
-        </Label>
-        <Textarea
-          id="content_md"
-          name="content_md"
-          rows={14}
-          defaultValue={lesson?.content_md}
-          placeholder={"## Гарчиг\n\n- Алхам 1\n- Алхам 2"}
-          className="font-mono text-xs"
-        />
-      </div>
+      </details>
 
       {state.error && (
         <p className="rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-700">

@@ -116,25 +116,68 @@ export async function getAllUsers(): Promise<Profile[]> {
 
 export interface UserWithEmail extends Profile {
   email: string | null;
+  lastSignInAt: string | null;
 }
 
-export async function getAllUsersWithEmail(): Promise<UserWithEmail[]> {
+/**
+ * Every user with the account details that live in auth.users. Read through
+ * the admin_user_directory() database function (migration 0014), falling back
+ * to the service-role key, and finally to profiles alone.
+ * `emailsAvailable` is false when neither route worked.
+ */
+export async function getAllUsersWithEmail(): Promise<{
+  users: UserWithEmail[];
+  emailsAvailable: boolean;
+}> {
   const profiles = await getAllUsers();
+  const supabase = await createClient();
+
+  const { data: directory, error } = await supabase.rpc("admin_user_directory");
+  if (!error && Array.isArray(directory)) {
+    const byId = new Map(directory.map((row) => [row.id, row]));
+    return {
+      emailsAvailable: true,
+      users: profiles.map((p) => {
+        const row = byId.get(p.id);
+        return {
+          ...p,
+          email: row?.email ?? null,
+          avatar: row?.avatar ?? null,
+          lastSignInAt: row?.last_sign_in_at ?? null,
+        };
+      }),
+    };
+  }
 
   try {
     const adminClient = createAdminClient();
-    const emailById = new Map<string, string | null>();
+    const byId = new Map<string, { email: string | null; avatar: string | null; lastSignInAt: string | null }>();
     const perPage = 1000;
     for (let page = 1; ; page++) {
-      const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage });
-      if (error) throw error;
-      for (const u of data.users) emailById.set(u.id, u.email ?? null);
+      const { data, error: listError } = await adminClient.auth.admin.listUsers({ page, perPage });
+      if (listError) throw listError;
+      for (const u of data.users) {
+        byId.set(u.id, {
+          email: u.email ?? null,
+          avatar: typeof u.user_metadata?.avatar === "string" ? u.user_metadata.avatar : null,
+          lastSignInAt: u.last_sign_in_at ?? null,
+        });
+      }
       if (data.users.length < perPage) break;
     }
-
-    return profiles.map((p) => ({ ...p, email: emailById.get(p.id) ?? null }));
-  } catch (err) {
-    console.error("getAllUsersWithEmail: falling back without email", err);
-    return profiles.map((p) => ({ ...p, email: null }));
+    return {
+      emailsAvailable: true,
+      users: profiles.map((p) => ({
+        ...p,
+        email: byId.get(p.id)?.email ?? null,
+        avatar: byId.get(p.id)?.avatar ?? null,
+        lastSignInAt: byId.get(p.id)?.lastSignInAt ?? null,
+      })),
+    };
+  } catch {
+    return {
+      emailsAvailable: false,
+      users: profiles.map((p) => ({ ...p, email: null, lastSignInAt: null })),
+    };
   }
 }

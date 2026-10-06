@@ -100,3 +100,136 @@ export async function deleteLesson(courseId: string, lessonId: string) {
   revalidatePath(`/admin/courses/${courseId}/lessons`);
   revalidatePath("/courses");
 }
+
+// ---------------------------------------------------------------------------
+// One-click edits for the lessons list. Each returns an error message instead
+// of throwing, so the row can show it in place.
+// ---------------------------------------------------------------------------
+
+export interface QuickEditResult {
+  error?: string;
+}
+
+function refreshCourse(courseId: string) {
+  revalidatePath(`/admin/courses/${courseId}/lessons`);
+  revalidatePath("/", "layout");
+}
+
+function isMediaUrl(url: string) {
+  return /^https:\/\//.test(url);
+}
+
+export async function renameLesson(
+  courseId: string,
+  lessonId: string,
+  title: string
+): Promise<QuickEditResult> {
+  await requireAdmin();
+  const clean = title.trim().slice(0, 200);
+  if (!clean) return { error: "Гарчиг хоосон байж болохгүй." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("lessons").update({ title: clean }).eq("id", lessonId);
+  if (error) return { error: error.message };
+  refreshCourse(courseId);
+  return {};
+}
+
+export async function setLessonFree(
+  courseId: string,
+  lessonId: string,
+  free: boolean
+): Promise<QuickEditResult> {
+  await requireAdmin();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("lessons")
+    .update({ is_free_preview: free })
+    .eq("id", lessonId);
+  if (error) return { error: error.message };
+  refreshCourse(courseId);
+  return {};
+}
+
+export async function setLessonVideo(
+  courseId: string,
+  lessonId: string,
+  videoUrl: string
+): Promise<QuickEditResult> {
+  await requireAdmin();
+  if (!isMediaUrl(videoUrl)) return { error: "Видеоны хаяг буруу байна." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("lessons")
+    .update({ video_url: videoUrl })
+    .eq("id", lessonId);
+  if (error) return { error: error.message };
+  refreshCourse(courseId);
+  return {};
+}
+
+/**
+ * Swaps a lesson with its neighbour, then renumbers the whole course 0..n-1
+ * so gaps or duplicate positions left by older edits disappear too.
+ */
+export async function moveLesson(
+  courseId: string,
+  lessonId: string,
+  direction: "up" | "down"
+): Promise<QuickEditResult> {
+  await requireAdmin();
+  const supabase = await createClient();
+  const { data: lessons, error } = await supabase
+    .from("lessons")
+    .select("id")
+    .eq("course_id", courseId)
+    .order("order_index", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (error) return { error: error.message };
+
+  const ids = (lessons ?? []).map((l) => l.id);
+  const from = ids.indexOf(lessonId);
+  const to = direction === "up" ? from - 1 : from + 1;
+  if (from === -1 || to < 0 || to >= ids.length) return {};
+  [ids[from], ids[to]] = [ids[to], ids[from]];
+
+  const results = await Promise.all(
+    ids.map((id, index) => supabase.from("lessons").update({ order_index: index }).eq("id", id))
+  );
+  const failed = results.find((r) => r.error);
+  if (failed?.error) return { error: failed.error.message };
+  refreshCourse(courseId);
+  return {};
+}
+
+/** Adds a lesson at the end of the course from just a title and, optionally, its video. */
+export async function quickAddLesson(
+  courseId: string,
+  title: string,
+  videoUrl: string | null
+): Promise<QuickEditResult> {
+  await requireAdmin();
+  const clean = title.trim().slice(0, 200);
+  if (!clean) return { error: "Гарчгаа бичнэ үү." };
+  if (videoUrl && !isMediaUrl(videoUrl)) return { error: "Видеоны хаяг буруу байна." };
+
+  const supabase = await createClient();
+  const { data: last } = await supabase
+    .from("lessons")
+    .select("order_index")
+    .eq("course_id", courseId)
+    .order("order_index", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("lessons").insert({
+    course_id: courseId,
+    title: clean,
+    content_md: "",
+    order_index: (last?.order_index ?? -1) + 1,
+    is_free_preview: false,
+    video_url: videoUrl,
+  });
+  if (error) return { error: error.message };
+  refreshCourse(courseId);
+  return {};
+}

@@ -282,6 +282,15 @@ export interface Database {
           courses: number;
         }[];
       };
+      admin_user_directory: {
+        Args: Record<string, never>;
+        Returns: {
+          id: string;
+          email: string | null;
+          avatar: string | null;
+          last_sign_in_at: string | null;
+        }[];
+      };
       approve_payment_request: {
         Args: { request_id: string; extend_months: number };
         Returns: boolean;

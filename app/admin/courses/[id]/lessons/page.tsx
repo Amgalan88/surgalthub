@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
+import { ChevronLeft, ExternalLink, Eye, EyeOff, Settings } from "lucide-react";
+import { LessonManager } from "@/components/admin/LessonManager";
 import { getCourseByIdAdmin } from "@/lib/data/admin";
 import { getLessonsForCourse } from "@/lib/data/courses";
-import { deleteLesson } from "@/lib/actions/admin/lessons";
+import { toggleCoursePublished } from "@/lib/actions/admin/courses";
 
 export default async function AdminLessonsPage({
   params,
@@ -18,62 +16,78 @@ export default async function AdminLessonsPage({
   if (!course) notFound();
 
   const lessons = await getLessonsForCourse(id);
+  const missingVideo = lessons.filter((l) => !l.video_url).length;
+  const freeCount = lessons.filter((l) => l.is_free_preview).length;
+  const togglePublished = toggleCoursePublished.bind(null, id, !course.published);
 
   return (
-    <div className="p-6 sm:p-8">
-      <Link href={`/admin/courses/${id}/edit`} className="text-sm text-slate-500">
-        ← {course.title}
+    <div className="max-w-5xl p-6 sm:p-8">
+      <Link
+        href="/admin/courses"
+        className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-navy-900"
+      >
+        <ChevronLeft size={15} /> Бүх курс
       </Link>
 
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-navy-900">Хичээлүүд</h1>
-        <Link
-          href={`/admin/courses/${id}/lessons/new`}
-          data-tour="admin-add-lesson"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          <Plus size={16} /> Хичээл нэмэх
-        </Link>
+      <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight text-navy-900">{course.title}</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {lessons.length} хичээл · {freeCount} нь үнэгүй
+            {missingVideo > 0 && <span className="text-red-600"> · {missingVideo} нь видеогүй</span>}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <form action={togglePublished}>
+            <button
+              type="submit"
+              className={
+                "inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium " +
+                (course.published
+                  ? "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20 hover:bg-emerald-100"
+                  : "bg-navy-900 text-white hover:bg-navy-800")
+              }
+              title={course.published ? "Дарвал сайтаас нуугдана" : "Дарвал сайт дээр гарна"}
+            >
+              {course.published ? <Eye size={15} /> : <EyeOff size={15} />}
+              {course.published ? "Сайт дээр харагдаж байна" : "Нийтлэх"}
+            </button>
+          </form>
+          {course.published && (
+            <Link
+              href={`/courses/${course.slug}`}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <ExternalLink size={15} /> Үзэх
+            </Link>
+          )}
+          <Link
+            href={`/admin/courses/${id}/edit`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <Settings size={15} /> Курсын мэдээлэл
+          </Link>
+        </div>
       </div>
 
-      <Card className="mt-6 overflow-hidden">
-        <ul className="divide-y divide-slate-100">
-          {lessons.map((lesson, i) => {
-            const removeAction = deleteLesson.bind(null, id, lesson.id);
-            return (
-              <li key={lesson.id} className="flex items-center gap-3 px-5 py-3.5">
-                <span className="text-sm text-slate-400">{i + 1}.</span>
-                <span className="min-w-0 flex-1 text-sm font-medium text-navy-900">
-                  {lesson.title}
-                </span>
-                {lesson.is_free_preview && <Badge tone="green">Үнэгүй</Badge>}
-                {!lesson.video_url && <Badge tone="red">Видео алга</Badge>}
-                <Link
-                  href={`/admin/courses/${id}/lessons/${lesson.id}`}
-                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-                  title="Засах"
-                >
-                  <Pencil size={16} />
-                </Link>
-                <form action={removeAction}>
-                  <ConfirmSubmitButton
-                    confirmMessage={`"${lesson.title}" хичээлийг устгах уу?`}
-                    className="rounded-lg p-2 text-red-500 hover:bg-red-50"
-                    title="Устгах"
-                  >
-                    <Trash2 size={16} />
-                  </ConfirmSubmitButton>
-                </form>
-              </li>
-            );
-          })}
-          {lessons.length === 0 && (
-            <li className="px-5 py-12 text-center text-slate-400">
-              Хичээл алга байна.
-            </li>
-          )}
-        </ul>
-      </Card>
+      <p className="mt-6 text-sm text-slate-500">
+        Нэр дээр дарж засна. Сумаар дараалал солино. Үнэгүй/Premium-ийг товчоор шууд сэлгэнэ.
+        Бүх өөрчлөлт шууд хадгалагдана.
+      </p>
+
+      <div className="mt-3">
+        <LessonManager
+          courseId={id}
+          courseSlug={course.slug}
+          lessons={lessons.map(({ id, title, is_free_preview, video_url }) => ({
+            id,
+            title,
+            is_free_preview,
+            video_url,
+          }))}
+        />
+      </div>
     </div>
   );
 }

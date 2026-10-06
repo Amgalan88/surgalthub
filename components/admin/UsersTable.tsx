@@ -1,139 +1,71 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { Search, KeyRound, Copy, Check, X, Crown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { MoreHorizontal, Search } from "lucide-react";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
-import {
-  generateUserPassword,
-  activatePremiumAccess,
-  revokePremiumAccess,
-} from "@/lib/actions/admin/users";
+import { Avatar } from "@/components/ui/Avatar";
 import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
+import { activatePremiumAccess, revokePremiumAccess } from "@/lib/actions/admin/users";
 import { isPremiumActive, PREMIUM_DURATION_MONTHS } from "@/lib/access";
 import type { UserWithEmail } from "@/lib/data/admin";
 
-function GeneratePasswordCell({ userId }: { userId: string }) {
-  const [password, setPassword] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [pending, startTransition] = useTransition();
-
-  function handleGenerate() {
-    setError(null);
-    startTransition(async () => {
-      const result = await generateUserPassword(userId);
-      if (result.error) {
-        setError(result.error);
-      } else {
-        setPassword(result.password ?? null);
-        setCopied(false);
-      }
-    });
-  }
-
-  if (password) {
-    return (
-      <div className="flex items-center justify-end gap-1.5">
-        <code className="rounded bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
-          {password}
-        </code>
-        <button
-          type="button"
-          title="Хуулах"
-          onClick={() => {
-            navigator.clipboard.writeText(password);
-            setCopied(true);
-          }}
-          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
-        >
-          {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-        </button>
-        <button
-          type="button"
-          title="Хаах"
-          onClick={() => setPassword(null)}
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
-        >
-          <X size={14} />
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-end gap-1">
-      <button
-        type="button"
-        onClick={handleGenerate}
-        disabled={pending}
-        className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
-        <KeyRound size={13} />
-        {pending ? "Үүсгэж байна..." : "Нууц үг үүсгэх"}
-      </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
-    </div>
-  );
+/** YYYY.MM.DD, built by hand: locale formatting differs between server and browser. */
+function formatDate(value: string | null) {
+  if (!value) return "—";
+  const d = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;
 }
 
-function PremiumCell({
-  userId,
-  premiumUntil,
-  active,
-  isAdmin,
-}: {
-  userId: string;
-  premiumUntil: string | null;
-  active: boolean;
-  isAdmin: boolean;
-}) {
-  const activateAction = activatePremiumAccess.bind(null, userId);
-  const revokeAction = revokePremiumAccess.bind(null, userId);
-
-  if (isAdmin) {
+function PlanBadge({ user }: { user: UserWithEmail }) {
+  if (user.role === "admin") {
+    return <span className="rounded-full bg-navy-900 px-2.5 py-1 text-xs font-medium text-white">Админ</span>;
+  }
+  if (isPremiumActive(user)) {
     return (
-      <div className="flex justify-end">
-        <Badge tone="brand">Хугацаагүй (админ)</Badge>
-      </div>
+      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+        Premium · {formatDate(user.premium_until)} хүртэл
+      </span>
     );
   }
+  return <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Үнэгүй</span>;
+}
+
+/** Rarely needed manual overrides, kept out of the way behind "⋯". */
+function RowMenu({ user }: { user: UserWithEmail }) {
+  if (user.role === "admin") return null;
+  const active = isPremiumActive(user);
 
   return (
-    <div className="flex flex-col items-end gap-1.5">
-      {active && (
-        <Badge tone="green">
-          {new Date(premiumUntil!).toLocaleDateString("mn-MN")} хүртэл
-        </Badge>
-      )}
-      <div className="flex items-center gap-2">
-        <form action={activateAction}>
-          <ConfirmSubmitButton
-            confirmMessage={
-              active
-                ? `Premium эрхийг одоогийн дуусах хугацаан дээр нэмж ${PREMIUM_DURATION_MONTHS} сараар сунгах уу?`
-                : `Төлбөр баталгаажсан уу? ${PREMIUM_DURATION_MONTHS} сарын Premium эрх идэвхжүүлэх үү?`
-            }
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            <Crown size={13} />
-            {active
-              ? `Сунгах (+${PREMIUM_DURATION_MONTHS} сар)`
-              : `Идэвхжүүлэх (${PREMIUM_DURATION_MONTHS} сар)`}
-          </ConfirmSubmitButton>
-        </form>
-        {active && (
-          <form action={revokeAction}>
+    <details className="relative">
+      <summary
+        aria-label="Бусад үйлдэл"
+        className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 [&::-webkit-details-marker]:hidden"
+      >
+        <MoreHorizontal size={18} />
+      </summary>
+      <div className="absolute right-0 z-20 mt-1 w-56 rounded-lg border border-slate-200 bg-white p-1 text-sm shadow-lg">
+        {active ? (
+          <form action={revokePremiumAccess.bind(null, user.id)}>
             <ConfirmSubmitButton
-              confirmMessage="Энэ хэрэглэгчийн Premium эрхийг цуцлах уу? Үзээгүй Premium хичээлүүд нь шууд хаагдана."
-              className="whitespace-nowrap rounded-lg px-2 py-1.5 text-xs font-medium text-slate-400 hover:bg-red-50 hover:text-red-600"
+              confirmMessage={`${user.full_name ?? "Энэ хэрэглэгч"}-ийн Premium эрхийг цуцлах уу? Үзээгүй Premium хичээлүүд нь хаагдана.`}
+              className="w-full cursor-pointer rounded-md px-3 py-2 text-left text-red-600 hover:bg-red-50"
             >
-              Цуцлах
+              Premium цуцлах
+            </ConfirmSubmitButton>
+          </form>
+        ) : (
+          <form action={activatePremiumAccess.bind(null, user.id)}>
+            <ConfirmSubmitButton
+              confirmMessage={`Төлбөрийг шалгасан уу? ${user.full_name ?? "Энэ хэрэглэгч"}-д ${PREMIUM_DURATION_MONTHS} сарын Premium гараар нээх үү?`}
+              className="w-full cursor-pointer rounded-md px-3 py-2 text-left text-navy-900 hover:bg-slate-50"
+            >
+              Premium гараар нээх ({PREMIUM_DURATION_MONTHS} сар)
             </ConfirmSubmitButton>
           </form>
         )}
       </div>
-    </div>
+    </details>
   );
 }
 
@@ -144,14 +76,12 @@ export function UsersTable({ users }: { users: UserWithEmail[] }) {
     const q = query.trim().toLowerCase();
     if (!q) return users;
     return users.filter((u) =>
-      [u.full_name, u.email, u.phone].some((field) =>
-        field?.toLowerCase().includes(q)
-      )
+      [u.full_name, u.email, u.phone].some((field) => field?.toLowerCase().includes(q))
     );
   }, [users, query]);
 
   return (
-    <div data-tour="admin-users-table">
+    <div>
       <div className="relative max-w-sm">
         <Search
           size={16}
@@ -162,7 +92,7 @@ export function UsersTable({ users }: { users: UserWithEmail[] }) {
           aria-label="Хэрэглэгч хайх"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Имэйл, утас, нэрээр хайх..."
+          placeholder="Нэр, имэйл, утсаар хайх..."
           className="pl-9"
         />
       </div>
@@ -171,37 +101,34 @@ export function UsersTable({ users }: { users: UserWithEmail[] }) {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-200 text-xs text-slate-500">
             <tr>
-              <th className="px-5 py-3 font-medium">Нэр</th>
-              <th className="px-5 py-3 font-medium">Имэйл</th>
+              <th className="px-5 py-3 font-medium">Хэрэглэгч</th>
               <th className="px-5 py-3 font-medium">Утас</th>
+              <th className="px-5 py-3 font-medium">Бүртгүүлсэн</th>
+              <th className="px-5 py-3 font-medium">Сүүлд орсон</th>
               <th className="px-5 py-3 font-medium">Эрх</th>
-              <th className="px-5 py-3 font-medium text-right">Premium</th>
-              <th className="px-5 py-3 font-medium text-right">Нууц үг</th>
+              <th className="w-12 px-3 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filtered.map((u) => (
               <tr key={u.id}>
-                <td className="px-5 py-3.5 font-medium text-navy-900">
-                  {u.full_name ?? "—"}
+                <td className="px-5 py-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar profile={u} />
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-navy-900">{u.full_name ?? "Нэргүй"}</p>
+                      <p className="truncate text-xs text-slate-500">{u.email ?? "—"}</p>
+                    </div>
+                  </div>
                 </td>
-                <td className="px-5 py-3.5 text-slate-500">{u.email ?? "—"}</td>
-                <td className="px-5 py-3.5 text-slate-500">{u.phone ?? "—"}</td>
-                <td className="px-5 py-3.5">
-                  <Badge tone={u.role === "admin" ? "brand" : "slate"}>
-                    {u.role === "admin" ? "Админ" : "Хэрэглэгч"}
-                  </Badge>
+                <td className="whitespace-nowrap px-5 py-3 font-mono text-slate-600">{u.phone ?? "—"}</td>
+                <td className="whitespace-nowrap px-5 py-3 text-slate-500">{formatDate(u.created_at)}</td>
+                <td className="whitespace-nowrap px-5 py-3 text-slate-500">{formatDate(u.lastSignInAt)}</td>
+                <td className="whitespace-nowrap px-5 py-3">
+                  <PlanBadge user={u} />
                 </td>
-                <td className="px-5 py-3.5">
-                  <PremiumCell
-                    userId={u.id}
-                    premiumUntil={u.premium_until}
-                    active={isPremiumActive(u)}
-                    isAdmin={u.role === "admin"}
-                  />
-                </td>
-                <td className="px-5 py-3.5">
-                  <GeneratePasswordCell userId={u.id} />
+                <td className="px-3 py-3">
+                  <RowMenu user={u} />
                 </td>
               </tr>
             ))}
