@@ -19,6 +19,14 @@ export async function reportPaymentSent(): Promise<ReportPaymentState> {
   if (!profile) return { error: "Эхлээд нэвтэрнэ үү." };
 
   const supabase = await createClient();
+
+  // getCurrentProfile() stands in a placeholder when the profiles row is
+  // missing (accounts created before the signup trigger existed), but the
+  // request references that row. Creating it is a no-op when it exists.
+  await supabase
+    .from("profiles")
+    .upsert({ id: profile.id }, { onConflict: "id", ignoreDuplicates: true });
+
   const { error } = await supabase
     .from("payment_requests")
     .insert({ user_id: profile.id, amount: PREMIUM_PRICE_MNT });
@@ -27,7 +35,10 @@ export async function reportPaymentSent(): Promise<ReportPaymentState> {
   // this learner in the queue, which is what they wanted.
   if (error && error.code !== "23505") {
     console.error("reportPaymentSent failed:", error);
-    return { error: "Мэдэгдэл илгээж чадсангүй. Дахин оролдоно уу." };
+    // The code tells support which of table / permission / profile is wrong.
+    return {
+      error: `Мэдэгдэл илгээж чадсангүй. Дахин оролдоно уу. (алдааны код: ${error.code || "тодорхойгүй"})`,
+    };
   }
 
   revalidatePath("/", "layout");
