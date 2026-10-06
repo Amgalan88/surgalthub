@@ -27,11 +27,18 @@ export async function submitPaymentRequest(
 
   const payerName = String(formData.get("payer_name") ?? "").trim().slice(0, 120) || null;
 
-  const { error } = await supabase.from("payment_requests").insert({
+  let { error } = await supabase.from("payment_requests").insert({
     user_id: user.id,
     amount: PREMIUM_PRICE_MNT,
     payer_name: payerName,
   });
+  // PGRST204: no payer_name column yet (migration 0012 not run). The request
+  // itself matters more than the optional name, so file it without.
+  if (error?.code === "PGRST204") {
+    ({ error } = await supabase
+      .from("payment_requests")
+      .insert({ user_id: user.id, amount: PREMIUM_PRICE_MNT }));
+  }
 
   // 23505: a request is already open — the learner pressed twice, nothing to do.
   if (error && error.code !== "23505") {

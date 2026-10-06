@@ -274,10 +274,6 @@ export interface Database {
       };
     };
     Functions: {
-      approve_payment_request: {
-        Args: { request_id: string; months: number };
-        Returns: string;
-      };
       platform_stats: {
         Args: Record<string, never>;
         Returns: {
@@ -285,6 +281,10 @@ export interface Database {
           lessons_completed: number;
           courses: number;
         }[];
+      };
+      approve_payment_request: {
+        Args: { request_id: string; extend_months: number };
+        Returns: boolean;
       };
     };
   };

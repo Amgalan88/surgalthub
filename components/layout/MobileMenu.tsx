@@ -10,9 +10,11 @@ import { signOut } from "@/lib/actions/auth";
 export default function MobileMenu({
   profile,
   navLinks,
+  pendingPayments = 0,
 }: {
   profile: Profile | null;
   navLinks: { href: string; label: string }[];
+  pendingPayments?: number;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -84,6 +86,11 @@ export default function MobileMenu({
                     className="rounded-lg border border-slate-300 px-3 py-2.5 text-center text-sm font-medium text-navy-900"
                   >
                     Админ
+                    {pendingPayments > 0 && (
+                      <span className="ml-2 rounded-full bg-gold-400 px-1.5 py-0.5 text-xs font-semibold text-navy-950">
+                        {pendingPayments} төлбөр
+                      </span>
+                    )}
                   </Link>
                 )}
                 <Link
