@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Check, Lock, Play } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
+import { StickyCta } from "@/components/ui/StickyCta";
 import { CourseRow } from "@/components/course/CourseRow";
 import { courseNumber, nextInCurriculum } from "@/components/course/courseLinks";
 import { Faq } from "@/components/marketing/Faq";
@@ -261,6 +262,11 @@ export default async function HomePage() {
           <Faq />
         </div>
       </section>
+      <StickyCta
+        href={firstAction.href}
+        label={firstAction.label}
+        icon={firstAction.locked ? <Lock size={16} /> : <Play size={16} fill="currentColor" />}
+      />
     </div>
   );
 }

@@ -15,7 +15,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   );
 
   return (
-    <form action={formAction} className="max-w-md space-y-4">
+    <form action={formAction} className="space-y-4">
       <div>
         <Label htmlFor="full_name">Бүтэн нэр</Label>
         <Input

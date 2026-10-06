@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Check, ChevronRight, Lock, Play } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
+import { StickyCta } from "@/components/ui/StickyCta";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LessonList } from "@/components/course/LessonList";
 import { courseNumber, primaryCourseAction } from "@/components/course/courseLinks";
@@ -293,6 +294,13 @@ export default async function CourseDetailPage({
           </aside>
         </div>
       </div>
+      {total > 0 && (
+        <StickyCta
+          href={action.href}
+          label={action.label}
+          icon={action.locked ? <Lock size={16} /> : <Play size={16} fill="currentColor" />}
+        />
+      )}
     </div>
   );
 }

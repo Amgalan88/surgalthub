@@ -28,6 +28,9 @@ export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
     .eq("id", user.id)
     .single();
 
+  const avatar =
+    typeof user.user_metadata?.avatar === "string" ? user.user_metadata.avatar : null;
+
   if (!profile) {
     return {
       id: user.id,
@@ -36,8 +39,9 @@ export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
       phone: null,
       premium_until: null,
       created_at: user.created_at ?? new Date().toISOString(),
+      avatar,
     };
   }
 
-  return profile;
+  return { ...profile, avatar };
 });

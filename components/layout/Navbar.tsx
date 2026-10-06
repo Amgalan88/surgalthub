@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/types";
+import { Avatar } from "@/components/ui/Avatar";
 import { signOut } from "@/lib/actions/auth";
 import { LinkButton } from "@/components/ui/Button";
 import { LogoWordmark } from "./Logo";
@@ -60,12 +61,13 @@ export default function Navbar({
               <LinkButton href="/dashboard" size="sm" variant="secondary">
                 Миний сургалт
               </LinkButton>
-              <span
-                title={profile.full_name ?? "Хэрэглэгч"}
-                className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-200"
+              <Link
+                href="/dashboard/profile"
+                title="Профайл"
+                className="ml-1 rounded-full transition-transform hover:scale-105"
               >
-                {(profile.full_name?.trim()?.[0] ?? "Х").toUpperCase()}
-              </span>
+                <Avatar profile={profile} />
+              </Link>
               <form action={signOut}>
                 <button
                   type="submit"

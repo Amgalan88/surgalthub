@@ -105,3 +105,10 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* Phones: leave room under the footer for the pinned action bar (StickyCta). */
+@media (max-width: 767px) {
+  body:has([data-sticky-cta]) footer {
+    padding-bottom: 6.5rem;
+  }
+}

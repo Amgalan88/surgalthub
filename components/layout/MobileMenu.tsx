@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import type { Profile } from "@/lib/types";
+import { Avatar } from "@/components/ui/Avatar";
 import { signOut } from "@/lib/actions/auth";
 
 export default function MobileMenu({
@@ -38,12 +39,9 @@ export default function MobileMenu({
   return (
     <div className="flex items-center gap-2 md:hidden">
       {profile && (
-        <span
-          aria-label={`Нэвтэрсэн: ${profile.full_name ?? "Хэрэглэгч"}`}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-200"
-        >
-          {(profile.full_name?.trim()?.[0] ?? "Х").toUpperCase()}
-        </span>
+        <Link href="/dashboard/profile" aria-label="Профайл">
+          <Avatar profile={profile} />
+        </Link>
       )}
       <button
         type="button"

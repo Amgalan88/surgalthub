@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { isAvatarKey } from "@/lib/avatars";
 
 export interface ProfileFormState {
   error?: string;
@@ -43,4 +44,19 @@ export async function updateProfile(
 
   revalidatePath("/dashboard/profile");
   return { success: true };
+}
+
+/** Saves the learner's animal avatar in their auth metadata (no table change needed). */
+export async function updateAvatar(avatar: string): Promise<{ error?: string }> {
+  if (!isAvatarKey(avatar)) return { error: "Ийм аватар алга." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ data: { avatar } });
+  if (error) {
+    console.error("updateAvatar failed:", error);
+    return { error: "Хадгалж чадсангүй. Дахин оролдоно уу." };
+  }
+
+  revalidatePath("/", "layout");
+  return {};
 }

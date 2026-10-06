@@ -290,7 +290,10 @@ export interface Database {
   };
 }
 
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"] & {
+  /** Chosen animal avatar key; lives in the auth user's metadata, not this table. */
+  avatar?: string | null;
+};
 export type Course = Database["public"]["Tables"]["courses"]["Row"];
 export type Lesson = Database["public"]["Tables"]["lessons"]["Row"];
 export type Enrollment = Database["public"]["Tables"]["enrollments"]["Row"];
