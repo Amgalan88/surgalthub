@@ -1,4 +1,5 @@
 export type UserRole = "user" | "admin";
+export type PaymentRequestStatus = "pending" | "approved" | "rejected";
 export type CourseTrack = "opening" | "operating" | "platform";
 
 type Table<Row, Insert, Update> = {
@@ -203,6 +204,35 @@ export interface Database {
           created_at?: string;
         }
       >;
+      payment_requests: Table<
+        {
+          id: string;
+          user_id: string;
+          amount: number;
+          status: PaymentRequestStatus;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          created_at: string;
+        },
+        {
+          id?: string;
+          user_id: string;
+          amount: number;
+          status?: PaymentRequestStatus;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          created_at?: string;
+        },
+        {
+          id?: string;
+          user_id?: string;
+          amount?: number;
+          status?: PaymentRequestStatus;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          created_at?: string;
+        }
+      >;
       lesson_progress: Table<
         {
           id: string;
@@ -246,6 +276,10 @@ export interface Database {
           courses: number;
         }[];
       };
+      approve_payment_request: {
+        Args: { request_id: string; extend_months: number };
+        Returns: boolean;
+      };
     };
   };
 }
@@ -262,6 +296,8 @@ export type LessonQuestion =
   Database["public"]["Tables"]["lesson_questions"]["Row"];
 export type LessonFeedback =
   Database["public"]["Tables"]["lesson_feedback"]["Row"];
+export type PaymentRequest =
+  Database["public"]["Tables"]["payment_requests"]["Row"];
 
 export const TRACK_LABELS: Record<CourseTrack, string> = {
   opening: "Карго нээх",

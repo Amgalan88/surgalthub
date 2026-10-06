@@ -100,3 +100,39 @@ export async function revokePremiumAccess(userId: string) {
 
   revalidatePath("/admin/users");
 }
+
+/**
+ * Approves a learner's "I've paid" request and grants Premium in one database
+ * transaction, so a double click or two admins at once never extend it twice.
+ */
+export async function approvePaymentRequest(requestId: string) {
+  await requireAdmin();
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("approve_payment_request", {
+    request_id: requestId,
+    extend_months: PREMIUM_DURATION_MONTHS,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/", "layout");
+}
+
+/** The transfer never arrived; the learner sees this and can try again. */
+export async function rejectPaymentRequest(requestId: string) {
+  const admin = await requireAdmin();
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("payment_requests")
+    .update({
+      status: "rejected",
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: admin.id,
+    })
+    .eq("id", requestId)
+    .eq("status", "pending");
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/", "layout");
+}

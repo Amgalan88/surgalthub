@@ -1,4 +1,4 @@
-import { Landmark, Send, Unlock } from "lucide-react";
+import { BellRing, Landmark, Unlock } from "lucide-react";
 import {
   formatMNT,
   PAYMENT_INFO,
@@ -8,6 +8,8 @@ import {
 import { hasSupportContact } from "@/lib/support";
 import { SupportLinks } from "@/components/SupportLinks";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { PaymentSentButton } from "@/components/premium/PaymentSentButton";
+import type { PaymentRequest } from "@/lib/types";
 
 const steps = [
   {
@@ -16,9 +18,9 @@ const steps = [
     body: `${PAYMENT_INFO.bank} — ${PAYMENT_INFO.account} (${PAYMENT_INFO.accountHolder}) дансанд ${formatMNT(PREMIUM_PRICE_MNT)} шилжүүлнэ. Гүйлгээний утга дээр өөрийн нэрээ бичээрэй.`,
   },
   {
-    icon: Send,
-    title: "Баримтаа админд илгээх",
-    body: "Гүйлгээний баримтаа бүртгүүлсэн нэр, утас, имэйлийнхээ хамт админд илгээнэ.",
+    icon: BellRing,
+    title: "“Төлбөр шилжүүлсэн” товч дарах",
+    body: "Шилжүүлгээ хийсний дараа дээрх товчийг дарахад админд мэдэгдэл очно.",
   },
   {
     icon: Unlock,
@@ -27,7 +29,13 @@ const steps = [
   },
 ];
 
-export function PaymentInstructions() {
+export function PaymentInstructions({
+  signedIn,
+  latestRequest,
+}: {
+  signedIn: boolean;
+  latestRequest: PaymentRequest | null;
+}) {
   return (
     <div>
       <div className="rounded-xl border border-slate-200 bg-white p-6">
@@ -78,6 +86,8 @@ export function PaymentInstructions() {
             </div>
           </dl>
         </div>
+
+        <PaymentSentButton signedIn={signedIn} latestRequest={latestRequest} />
       </div>
 
       <ol className="mt-6 grid gap-4 sm:grid-cols-3" data-tour="premium-steps">
@@ -107,9 +117,10 @@ export function PaymentInstructions() {
 
       {hasSupportContact() && (
         <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
-          <p className="font-semibold text-navy-900">Баримтаа илгээх</p>
+          <p className="font-semibold text-navy-900">Тусламж хэрэгтэй юу?</p>
           <p className="mt-1 text-sm text-slate-500">
-            Гүйлгээний баримтын зургаа доорх сувгийн аль нэгээр илгээгээрэй.
+            Төлбөр удаан баталгаажихгүй байвал гүйлгээний баримтын зургаа доорх
+            сувгийн аль нэгээр илгээгээрэй.
           </p>
           <SupportLinks className="mt-4" />
         </div>

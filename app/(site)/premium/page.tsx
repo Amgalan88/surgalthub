@@ -4,6 +4,7 @@ import { Faq, FAQ_ITEMS } from "@/components/marketing/Faq";
 import { PremiumStatusCard } from "@/components/premium/PremiumStatusCard";
 import { PaymentInstructions } from "@/components/premium/PaymentInstructions";
 import { getCurrentProfile } from "@/lib/auth";
+import { getMyLatestPaymentRequest } from "@/lib/data/payments";
 import { formatMNT, PREMIUM_DURATION_MONTHS, PREMIUM_PRICE_MNT } from "@/lib/access";
 
 export const metadata: Metadata = {
@@ -14,6 +15,10 @@ export const metadata: Metadata = {
 
 export default async function PremiumPage() {
   const profile = await getCurrentProfile();
+  const latestRequest =
+    profile && profile.role !== "admin"
+      ? await getMyLatestPaymentRequest(profile.id)
+      : null;
 
   return (
     <div>
@@ -51,7 +56,9 @@ export default async function PremiumPage() {
         )}
 
         {/* Admins already have unlimited access, so payment steps are noise. */}
-        {profile?.role !== "admin" && <PaymentInstructions />}
+        {profile?.role !== "admin" && (
+          <PaymentInstructions signedIn={!!profile} latestRequest={latestRequest} />
+        )}
 
         <div className="mt-12">
           <h2 className="text-xl font-semibold text-navy-900">Түгээмэл асуулт</h2>

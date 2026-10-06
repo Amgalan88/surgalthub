@@ -69,6 +69,9 @@
    - `supabase/migrations/0010_launch_hardening.sql` — **заавал**: хэрэглэгч
      өөрийгөө админ/Premium болгох, төлбөргүйгээр Premium хичээл нээх
      цоорхойг хаана; нүүр хуудасны статистик, индексүүд.
+   - `supabase/migrations/0011_payment_requests.sql` — **заавал**: Premium
+     хуудасны "Төлбөр шилжүүлсэн" товч. Хэрэглэгч дарахад админ панелийн бүх
+     хуудасны дээр мэдэгдэл гарч, админ "Батлах" дарахад Premium эрх нээгдэнэ.
 
 5. [cloudinary.com](https://cloudinary.com) дээр үнэгүй акаунт үүсгэ (админ
    панелаас зураг/видео/аудио/PDF байршуулахад хэрэгтэй). Dashboard-ын нүүр
@@ -95,7 +98,8 @@
 
 ## Ажиллуулахын өмнөх шалгах жагсаалт
 
-1. Supabase SQL Editor дээр `0010_launch_hardening.sql`-г ажиллуулсан.
+1. Supabase SQL Editor дээр `0010_launch_hardening.sql`, `0011_payment_requests.sql`-г
+   ажиллуулсан.
 2. Hosting (Vercel г.м.) дээр `.env.local`-ийн бүх утга + доорхыг тохируулсан:
 
    ```bash
