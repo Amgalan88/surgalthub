@@ -96,6 +96,10 @@ begin
     raise exception 'PROMO_LOGIN';
   end if;
 
+  -- The claim below references the caller's profiles row, which accounts made
+  -- without the signup trigger may lack; create it first.
+  insert into public.profiles (id) values (me) on conflict (id) do nothing;
+
   update public.promo_codes
      set redeemed_by = me, redeemed_at = now()
    where code = clean
@@ -112,9 +116,6 @@ begin
     end if;
     raise exception 'PROMO_INVALID';
   end if;
-
-  -- Accounts made before the signup trigger existed may lack a profiles row.
-  insert into public.profiles (id) values (me) on conflict (id) do nothing;
 
   perform set_config('cargohub.promo_grant', 'on', true);
   update public.profiles
