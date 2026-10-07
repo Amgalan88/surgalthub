@@ -1,5 +1,11 @@
 export type UserRole = "user" | "admin";
+/**
+ * Legacy column: courses.track must hold one of these in the database, but the
+ * site no longer groups courses by it (they follow curriculum order). New
+ * courses get DEFAULT_COURSE_TRACK and the value is never shown.
+ */
 export type CourseTrack = "opening" | "operating" | "platform";
+export const DEFAULT_COURSE_TRACK: CourseTrack = "opening";
 export type PaymentStatus = "pending" | "approved" | "rejected";
 
 type Table<Row, Insert, Update> = {
@@ -316,9 +322,3 @@ export type PaymentRequest =
   Database["public"]["Tables"]["payment_requests"]["Row"];
 export type LessonFeedback =
   Database["public"]["Tables"]["lesson_feedback"]["Row"];
-
-export const TRACK_LABELS: Record<CourseTrack, string> = {
-  opening: "Карго нээх",
-  operating: "Карго ажиллуулах",
-  platform: "Карго вэбсайт ашиглах",
-};

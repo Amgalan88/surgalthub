@@ -185,14 +185,14 @@ async function main() {
       slug: course.slug,
       title: course.title,
       description: course.description,
-      track: course.track,
       outcomes: course.outcomes,
       price: 0,
       published: args.publish ? true : (existing?.published ?? false),
     };
     const { data: saved, error: saveError } = existing
       ? await supabase.from("courses").update(courseFields).eq("id", existing.id).select("id").single()
-      : await supabase.from("courses").insert(courseFields).select("id").single();
+      : // courses.track is a legacy required column the site no longer uses.
+        await supabase.from("courses").insert({ ...courseFields, track: "opening" }).select("id").single();
     if (saveError) throw saveError;
     const courseId = saved.id;
 

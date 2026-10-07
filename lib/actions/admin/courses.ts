@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import type { CourseTrack } from "@/lib/types";
+import { DEFAULT_COURSE_TRACK } from "@/lib/types";
 
 export interface CourseFormState {
   error?: string;
@@ -34,14 +34,13 @@ export async function createCourse(
 
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const track = String(formData.get("track") ?? "") as CourseTrack;
   const published = formData.get("published") === "on";
   const durationLabel = String(formData.get("duration_label") ?? "").trim() || null;
   const outcomes = parseOutcomes(String(formData.get("outcomes") ?? ""));
   const coverImage = String(formData.get("cover_image") ?? "").trim() || null;
 
-  if (!title || !description || !track) {
-    return { error: "Бүх талбарыг бөглөнө үү." };
+  if (!title || !description) {
+    return { error: "Нэр, тайлбараа бөглөнө үү." };
   }
 
   const slugInput = String(formData.get("slug") ?? "").trim();
@@ -54,7 +53,7 @@ export async function createCourse(
     .insert({
       title,
       description,
-      track,
+      track: DEFAULT_COURSE_TRACK,
       published,
       slug,
       duration_label: durationLabel,
@@ -88,14 +87,13 @@ export async function updateCourse(
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const track = String(formData.get("track") ?? "") as CourseTrack;
   const published = formData.get("published") === "on";
   const durationLabel = String(formData.get("duration_label") ?? "").trim() || null;
   const outcomes = parseOutcomes(String(formData.get("outcomes") ?? ""));
   const coverImage = String(formData.get("cover_image") ?? "").trim() || null;
 
-  if (!id || !title || !description || !track) {
-    return { error: "Бүх талбарыг бөглөнө үү." };
+  if (!id || !title || !description) {
+    return { error: "Нэр, тайлбараа бөглөнө үү." };
   }
 
   const slugInput = String(formData.get("slug") ?? "").trim();
@@ -107,7 +105,6 @@ export async function updateCourse(
     .update({
       title,
       description,
-      track,
       published,
       slug,
       duration_label: durationLabel,

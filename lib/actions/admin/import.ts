@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
+import { DEFAULT_COURSE_TRACK } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import {
   formatVideoDuration,
@@ -31,7 +32,6 @@ export async function prepareImportCourse(
     slug: plan.slug,
     title: plan.title,
     description: plan.description,
-    track: plan.track,
     outcomes: plan.outcomes,
   };
   const { data: existing, error: findError } = await supabase
@@ -45,7 +45,7 @@ export async function prepareImportCourse(
     ? await supabase.from("courses").update(fields).eq("id", existing.id).select("id").single()
     : await supabase
         .from("courses")
-        .insert({ ...fields, published: false, price: 0 })
+        .insert({ ...fields, track: DEFAULT_COURSE_TRACK, published: false, price: 0 })
         .select("id")
         .single();
   if (error) throw new Error(error.message);

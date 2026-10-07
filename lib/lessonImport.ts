@@ -1,5 +1,4 @@
 import manifest from "@/scripts/hicheel.json";
-import type { CourseTrack } from "@/lib/types";
 
 export interface ImportLesson {
   title: string;
@@ -12,7 +11,6 @@ export interface ImportLesson {
 export interface ImportCourse {
   slug: string;
   title: string;
-  track: CourseTrack;
   description: string;
   outcomes: string[];
   freeLessons: number;

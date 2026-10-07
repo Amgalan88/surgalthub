@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Label, Input, Textarea, Select } from "@/components/ui/Input";
+import { Label, Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 import type { CourseFormState } from "@/lib/actions/admin/courses";
@@ -40,16 +40,6 @@ export function CourseForm({
       <div>
         <Label htmlFor="slug">Слаг (URL, хоосон бол автоматаар үүснэ)</Label>
         <Input id="slug" name="slug" defaultValue={course?.slug} placeholder="karg-butrguuleh" />
-      </div>
-
-      <div>
-        <Label htmlFor="track">Чиглэл</Label>
-        <Select id="track" name="track" defaultValue={course?.track} required>
-          <option value="">Сонгоно уу</option>
-          <option value="opening">Карго нээх</option>
-          <option value="operating">Карго ажиллуулах</option>
-          <option value="platform">Карго вэбсайт ашиглах</option>
-        </Select>
       </div>
 
       <div>
