@@ -3,9 +3,8 @@
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import {
-  ArrowDown,
-  ArrowUp,
   CircleAlert,
+  GripVertical,
   ExternalLink,
   Loader2,
   MoreHorizontal,
@@ -18,8 +17,8 @@ import { cn } from "@/lib/utils";
 import { uploadToCloudinary } from "@/lib/cloudinaryUpload";
 import {
   deleteLesson,
-  moveLesson,
   quickAddLesson,
+  reorderLessons,
   renameLesson,
   setLessonFree,
   setLessonVideo,
@@ -130,13 +129,30 @@ function LessonRow({
   count,
   courseId,
   courseSlug,
+  onMoveTo,
+  dragging,
+  dropTarget,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
 }: {
   lesson: ManagedLesson;
   index: number;
   count: number;
   courseId: string;
   courseSlug: string;
+  /** Moves this lesson to a 0-based position. */
+  onMoveTo: (to: number) => void;
+  dragging: boolean;
+  dropTarget: boolean;
+  onDragStart: () => void;
+  onDragOver: () => void;
+  onDrop: () => void;
+  onDragEnd: () => void;
 }) {
+  // Only the grip starts a drag, so selecting text in the row still works.
+  const [draggable, setDraggable] = useState(false);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(lesson.title);
   const [error, setError] = useState<string | null>(null);
@@ -157,29 +173,53 @@ function LessonRow({
   }
 
   return (
-    <li className={cn("px-4 py-3 sm:px-5", pending && "opacity-60")}>
+    <li
+      draggable={draggable}
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = "move";
+        onDragStart();
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        onDragOver();
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop();
+      }}
+      onDragEnd={() => {
+        setDraggable(false);
+        onDragEnd();
+      }}
+      className={cn(
+        "border-t-2 border-transparent bg-white px-4 py-3 sm:px-5",
+        pending && "opacity-60",
+        dragging && "opacity-40",
+        dropTarget && "border-t-brand-600 bg-brand-50/40"
+      )}
+    >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <div className="flex flex-col">
-          <button
-            type="button"
-            aria-label="Дээш"
-            disabled={index === 0 || pending}
-            onClick={() => run(() => moveLesson(courseId, lesson.id, "up"))}
-            className="cursor-pointer rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-navy-900 disabled:invisible"
-          >
-            <ArrowUp size={14} />
-          </button>
-          <button
-            type="button"
-            aria-label="Доош"
-            disabled={index === count - 1 || pending}
-            onClick={() => run(() => moveLesson(courseId, lesson.id, "down"))}
-            className="cursor-pointer rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-navy-900 disabled:invisible"
-          >
-            <ArrowDown size={14} />
-          </button>
-        </div>
-        <span className="w-6 text-right text-sm tabular-nums text-slate-400">{index + 1}</span>
+        <span
+          title="Чирж байрыг нь солих"
+          onMouseDown={() => setDraggable(true)}
+          onMouseUp={() => setDraggable(false)}
+          className="hidden cursor-grab text-slate-300 hover:text-slate-500 active:cursor-grabbing sm:block"
+        >
+          <GripVertical size={18} />
+        </span>
+        <select
+          aria-label="Байрлал"
+          title="Байрлал солих"
+          value={index}
+          onChange={(e) => onMoveTo(Number(e.target.value))}
+          className="h-8 w-14 cursor-pointer rounded-md border border-slate-300 bg-white px-1.5 text-center text-sm tabular-nums text-navy-900 hover:border-slate-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
+        >
+          {Array.from({ length: count }, (_, i) => (
+            <option key={i} value={i}>
+              {i + 1}
+            </option>
+          ))}
+        </select>
 
         <div className="min-w-0 flex-1 basis-48">
           {editing ? (
@@ -299,7 +339,7 @@ function QuickAdd({ courseId, courseSlug }: { courseId: string; courseSlug: stri
   }
 
   return (
-    <div className="border-t border-slate-200 bg-slate-50/70 px-4 py-4 sm:px-5">
+    <div className="rounded-b-xl border-t border-slate-200 bg-slate-50/70 px-4 py-4 sm:px-5">
       <p className="text-sm font-medium text-navy-900">Шинэ хичээл нэмэх</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <input
@@ -345,22 +385,87 @@ export function LessonManager({
   courseSlug: string;
   lessons: ManagedLesson[];
 }) {
+  // The order is shown at once and saved in the background; fresh server data
+  // (after any edit) replaces it.
+  const [items, setItems] = useState(lessons);
+  const [serverLessons, setServerLessons] = useState(lessons);
+  if (lessons !== serverLessons) {
+    setServerLessons(lessons);
+    setItems(lessons);
+  }
+
+  const [dragFrom, setDragFrom] = useState<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
+  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [saving, startTransition] = useTransition();
+
+  function moveTo(from: number, to: number) {
+    if (from === to || to < 0 || to >= items.length) return;
+    const previous = items;
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setItems(next);
+    setError(null);
+    startTransition(async () => {
+      const result = await reorderLessons(courseId, next.map((l) => l.id));
+      if (result.error) {
+        setItems(previous);
+        setError(result.error);
+        setStatus("error");
+      } else {
+        setStatus("saved");
+      }
+    });
+  }
+
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      {lessons.length === 0 ? (
+    <div className="rounded-xl border border-slate-200 bg-white">
+      <div className="flex min-h-10 items-center justify-between gap-3 border-b border-slate-100 px-4 py-2 text-xs sm:px-5">
+        <span className="text-slate-500">
+          <span className="hidden sm:inline">⠿ дээр барьж чирэх эсвэл </span>дугаар дээр дарж байрыг солино
+        </span>
+        <span aria-live="polite">
+          {saving ? (
+            <span className="text-slate-500">Хадгалж байна...</span>
+          ) : status === "saved" ? (
+            <span className="text-emerald-700">Дараалал хадгалагдлаа</span>
+          ) : null}
+        </span>
+      </div>
+      {error && (
+        <p className="border-b border-red-100 bg-red-50 px-4 py-2.5 text-sm text-red-700 sm:px-5">{error}</p>
+      )}
+
+      {items.length === 0 ? (
         <p className="px-5 py-10 text-center text-sm text-slate-500">
           Хичээл алга. Доороос эхний хичээлээ нэмээрэй.
         </p>
       ) : (
-        <ol className="divide-y divide-slate-100">
-          {lessons.map((lesson, i) => (
+        <ol className="divide-y divide-slate-100" onDragLeave={() => setDragOver(null)}>
+          {items.map((lesson, i) => (
             <LessonRow
               key={lesson.id}
               lesson={lesson}
               index={i}
-              count={lessons.length}
+              count={items.length}
               courseId={courseId}
               courseSlug={courseSlug}
+              onMoveTo={(to) => moveTo(i, to)}
+              dragging={dragFrom === i}
+              dropTarget={dragOver === i && dragFrom !== null && dragFrom !== i}
+              onDragStart={() => setDragFrom(i)}
+              onDragOver={() => setDragOver(i)}
+              onDrop={() => {
+                if (dragFrom !== null) moveTo(dragFrom, i);
+                setDragFrom(null);
+                setDragOver(null);
+              }}
+              onDragEnd={() => {
+                setDragFrom(null);
+                setDragOver(null);
+              }}
             />
           ))}
         </ol>

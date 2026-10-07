@@ -72,8 +72,7 @@ export default async function AdminLessonsPage({
       </div>
 
       <p className="mt-6 text-sm text-slate-500">
-        Нэр дээр дарж засна. Сумаар дараалал солино. Үнэгүй/Premium-ийг товчоор шууд сэлгэнэ.
-        Бүх өөрчлөлт шууд хадгалагдана.
+        Нэр дээр дарж засна. Үнэгүй/Premium-ийг товчоор сэлгэнэ. Бүх өөрчлөлт шууд хадгалагдана.
       </p>
 
       <div className="mt-3">

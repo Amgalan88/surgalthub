@@ -115,6 +115,8 @@ function refreshCourse(courseId: string) {
   revalidatePath("/", "layout");
 }
 
+const NOT_SAVED = "Хадгалагдсангүй: өгөгдлийн сан өөрчлөлтийг зөвшөөрсөнгүй.";
+
 function isMediaUrl(url: string) {
   return /^https:\/\//.test(url);
 }
@@ -128,8 +130,13 @@ export async function renameLesson(
   const clean = title.trim().slice(0, 200);
   if (!clean) return { error: "Гарчиг хоосон байж болохгүй." };
   const supabase = await createClient();
-  const { error } = await supabase.from("lessons").update({ title: clean }).eq("id", lessonId);
+  const { data, error } = await supabase
+    .from("lessons")
+    .update({ title: clean })
+    .eq("id", lessonId)
+    .select("id");
   if (error) return { error: error.message };
+  if (!data?.length) return { error: NOT_SAVED };
   refreshCourse(courseId);
   return {};
 }
@@ -141,11 +148,13 @@ export async function setLessonFree(
 ): Promise<QuickEditResult> {
   await requireAdmin();
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("lessons")
     .update({ is_free_preview: free })
-    .eq("id", lessonId);
+    .eq("id", lessonId)
+    .select("id");
   if (error) return { error: error.message };
+  if (!data?.length) return { error: NOT_SAVED };
   refreshCourse(courseId);
   return {};
 }
@@ -158,45 +167,52 @@ export async function setLessonVideo(
   await requireAdmin();
   if (!isMediaUrl(videoUrl)) return { error: "Видеоны хаяг буруу байна." };
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("lessons")
     .update({ video_url: videoUrl })
-    .eq("id", lessonId);
+    .eq("id", lessonId)
+    .select("id");
   if (error) return { error: error.message };
+  if (!data?.length) return { error: NOT_SAVED };
   refreshCourse(courseId);
   return {};
 }
 
 /**
- * Swaps a lesson with its neighbour, then renumbers the whole course 0..n-1
- * so gaps or duplicate positions left by older edits disappear too.
+ * Saves a new lesson order: `orderedIds` is every lesson of the course, top
+ * to bottom. Positions are written as 0..n-1, which also clears gaps or
+ * duplicates left by older edits.
  */
-export async function moveLesson(
+export async function reorderLessons(
   courseId: string,
-  lessonId: string,
-  direction: "up" | "down"
+  orderedIds: string[]
 ): Promise<QuickEditResult> {
   await requireAdmin();
   const supabase = await createClient();
-  const { data: lessons, error } = await supabase
+
+  const { data: current, error } = await supabase
     .from("lessons")
     .select("id")
-    .eq("course_id", courseId)
-    .order("order_index", { ascending: true })
-    .order("created_at", { ascending: true });
+    .eq("course_id", courseId);
   if (error) return { error: error.message };
 
-  const ids = (lessons ?? []).map((l) => l.id);
-  const from = ids.indexOf(lessonId);
-  const to = direction === "up" ? from - 1 : from + 1;
-  if (from === -1 || to < 0 || to >= ids.length) return {};
-  [ids[from], ids[to]] = [ids[to], ids[from]];
+  const known = new Set((current ?? []).map((l) => l.id));
+  if (orderedIds.length !== known.size || orderedIds.some((id) => !known.has(id))) {
+    return { error: "Хичээлийн жагсаалт хуучирсан байна. Хуудсаа дахин ачаална уу." };
+  }
 
   const results = await Promise.all(
-    ids.map((id, index) => supabase.from("lessons").update({ order_index: index }).eq("id", id))
+    orderedIds.map((id, index) =>
+      supabase.from("lessons").update({ order_index: index }).eq("id", id).select("id")
+    )
   );
   const failed = results.find((r) => r.error);
   if (failed?.error) return { error: failed.error.message };
+  // RLS turns a forbidden update into "0 rows changed" rather than an error.
+  if (results.some((r) => !r.data?.length)) {
+    return { error: NOT_SAVED };
+  }
+
   refreshCourse(courseId);
   return {};
 }
