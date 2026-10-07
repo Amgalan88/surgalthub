@@ -11,6 +11,7 @@ import {
   MessageCircleQuestion,
   ExternalLink,
   Menu,
+  Ticket,
   Upload,
   X,
 } from "lucide-react";
@@ -21,6 +22,7 @@ import { Logo } from "./Logo";
 const links = [
   { href: "/admin", label: "Хяналтын самбар", icon: LayoutDashboard, exact: true },
   { href: "/admin/payments", label: "Төлбөрүүд", icon: Banknote, exact: false },
+  { href: "/admin/promo", label: "Промо код", icon: Ticket, exact: false },
   { href: "/admin/courses", label: "Сургалтууд", icon: BookOpen, exact: false },
   { href: "/admin/import", label: "Хичээл оруулах", icon: Upload, exact: false },
   { href: "/admin/users", label: "Хэрэглэгчид", icon: Users, exact: false },

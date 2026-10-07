@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import { Faq, FAQ_ITEMS } from "@/components/marketing/Faq";
 import { PaymentFlow } from "@/components/premium/PaymentFlow";
+import { PromoForm } from "@/components/premium/PromoForm";
 import { getCurrentProfile } from "@/lib/auth";
 import { getMyPaymentState } from "@/lib/data/payments";
 import { formatMNT, PREMIUM_DURATION_MONTHS, PREMIUM_PRICE_MNT } from "@/lib/access";
@@ -39,7 +40,10 @@ export default async function PremiumPage() {
         </p>
 
         <div className="mt-10 grid items-start gap-6 lg:grid-cols-[1fr_300px]">
-          <PaymentFlow profile={profile} payment={payment} />
+          <div className="space-y-6">
+            {profile?.role !== "admin" && <PromoForm signedIn={Boolean(profile)} />}
+            <PaymentFlow profile={profile} payment={payment} />
+          </div>
 
           <aside className="rounded-xl border border-slate-200 bg-white p-6 lg:sticky lg:top-24">
             <p className="text-sm font-medium text-slate-500">Нэг удаагийн төлбөр</p>

@@ -133,6 +133,12 @@ export function NextStep({ step }: { step: NextStepState }) {
         >
           Premium авах <ArrowRight size={16} />
         </Link>
+        <Link
+          href="/premium#promo"
+          className="ml-4 text-sm font-medium text-brand-700 underline-offset-2 hover:underline"
+        >
+          Промо код байгаа юу?
+        </Link>
       </div>
     );
   }

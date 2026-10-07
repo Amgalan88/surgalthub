@@ -65,3 +65,39 @@ export async function cancelPaymentRequest(requestId: string) {
   await supabase.from("payment_requests").delete().eq("id", requestId);
   refreshPaymentPages();
 }
+
+export interface PromoFormState {
+  error?: string;
+  /** ISO date Premium now runs until, after a successful redeem. */
+  until?: string;
+}
+
+const PROMO_ERRORS: Record<string, string> = {
+  PROMO_LOGIN: "Эхлээд нэвтэрнэ үү.",
+  PROMO_INVALID: "Ийм промо код алга. Үсэг, тоогоо шалгаад дахин оруулна уу.",
+  PROMO_USED: "Энэ промо код аль хэдийн ашиглагдсан байна.",
+};
+
+/** Redeems a promo code for the signed-in learner: Premium starts at once. */
+export async function redeemPromoCode(
+  _prev: PromoFormState,
+  formData: FormData
+): Promise<PromoFormState> {
+  const code = String(formData.get("code") ?? "").trim();
+  if (!code) return { error: "Промо кодоо оруулна уу." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("redeem_promo_code", { input_code: code });
+  if (error) {
+    const known = Object.keys(PROMO_ERRORS).find((key) => error.message?.includes(key));
+    if (!known) console.error("redeemPromoCode failed:", error);
+    return {
+      error: known
+        ? PROMO_ERRORS[known]
+        : `Промо код идэвхжүүлж чадсангүй. (алдааны код: ${error.code || "тодорхойгүй"})`,
+    };
+  }
+
+  refreshPaymentPages();
+  return { until: data ?? undefined };
+}

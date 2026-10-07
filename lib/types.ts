@@ -245,6 +245,38 @@ export interface Database {
           created_at?: string;
         }
       >;
+      promo_codes: Table<
+        {
+          code: string;
+          note: string | null;
+          months: number;
+          created_by: string | null;
+          created_at: string;
+          redeemed_by: string | null;
+          redeemed_at: string | null;
+          revoked_at: string | null;
+        },
+        {
+          code: string;
+          note?: string | null;
+          months?: number;
+          created_by?: string | null;
+          created_at?: string;
+          redeemed_by?: string | null;
+          redeemed_at?: string | null;
+          revoked_at?: string | null;
+        },
+        {
+          code?: string;
+          note?: string | null;
+          months?: number;
+          created_by?: string | null;
+          created_at?: string;
+          redeemed_by?: string | null;
+          redeemed_at?: string | null;
+          revoked_at?: string | null;
+        }
+      >;
       lesson_progress: Table<
         {
           id: string;
@@ -297,6 +329,10 @@ export interface Database {
           last_sign_in_at: string | null;
         }[];
       };
+      redeem_promo_code: {
+        Args: { input_code: string };
+        Returns: string;
+      };
       approve_payment_request: {
         Args: { request_id: string; extend_months: number };
         Returns: boolean;
@@ -320,5 +356,6 @@ export type LessonQuestion =
   Database["public"]["Tables"]["lesson_questions"]["Row"];
 export type PaymentRequest =
   Database["public"]["Tables"]["payment_requests"]["Row"];
+export type PromoCode = Database["public"]["Tables"]["promo_codes"]["Row"];
 export type LessonFeedback =
   Database["public"]["Tables"]["lesson_feedback"]["Row"];
